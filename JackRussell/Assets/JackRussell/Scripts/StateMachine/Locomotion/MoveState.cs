@@ -1,0 +1,90 @@
+using JackRussell;
+using UnityEngine;
+
+namespace JackRussell.States.Locomotion
+{
+    /// <summary>
+    /// Move state: handles normal ground movement and transitions to sprint/dash/jump.
+    /// Lightweight and focused on locomotion physics only.
+    /// </summary>
+    public class MoveState : PlayerStateBase
+    {
+        private const float k_InputDeadzone = 0.001f;
+
+        public MoveState(Player player, StateMachine stateMachine) : base(player, stateMachine) { }
+
+        public override string Name => nameof(MoveState);
+
+        public override void Enter()
+        {
+            // could set animator flags specific to moving
+        }
+
+        public override void Exit()
+        {
+            // clear animator flags if set
+        }
+
+        public override void LogicUpdate()
+        {
+            // Jump transition
+            if (_player.ConsumeJumpRequest() && _player.IsGrounded)
+            {
+                ChangeState(new JumpState(_player, _stateMachine));
+                return;
+            }
+
+            // Dash/Boost transition: use attack input (dash if not sprinting, boost if sprinting)
+            if (_player.ConsumeAttackRequest())
+            {
+                if (_player.SprintRequested)
+                    ChangeState(new BoostState(_player, _stateMachine));
+                else
+                    ChangeState(new DashState(_player, _stateMachine));
+
+                return;
+            }
+
+            // If no input, go to Idle
+            if (_player.MoveDirection.sqrMagnitude < k_InputDeadzone)
+            {
+                ChangeState(new IdleState(_player, _stateMachine));
+                return;
+            }
+
+            // Sprint transition handled implicitly by SprintRequested flag in physics (or use a SprintState if preferred)
+            if (_player.SprintRequested)
+            {
+                ChangeState(new SprintState(_player, _stateMachine));
+                return;
+            }
+        }
+
+        public override void PhysicsUpdate()
+        {
+            // If an exclusive movement override is active, let it control velocity
+            if (_player.HasMovementOverride() && _player.IsOverrideExclusive())
+            {
+                _player.SetVelocityImmediate(_player.GetOverrideVelocity());
+                return;
+            }
+
+            // Ground movement acceleration
+            Vector3 desired = _player.MoveDirection;
+            float targetSpeed = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
+            Vector3 desiredVel = desired * targetSpeed;
+
+            Vector3 horizontalVel = new Vector3(_player.Rigidbody.velocity.x, 0f, _player.Rigidbody.velocity.z);
+            Vector3 velocityDiff = desiredVel - horizontalVel;
+
+            _player.AddGroundForce(velocityDiff * _player.AccelGround);
+
+            // clamp to appropriate top speed
+            float clampTo = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
+            _player.ClampHorizontalSpeed(clampTo);
+
+            // Rotate player toward move direction (grounded)
+            _player.RotateTowardsDirection(desired, Time.fixedDeltaTime, isAir: false);
+        }
+    }
+}
