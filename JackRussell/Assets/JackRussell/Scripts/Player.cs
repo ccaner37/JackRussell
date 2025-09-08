@@ -41,6 +41,9 @@ namespace JackRussell
         [SerializeField] private float _boostDuration = 0.6f;
         [SerializeField] private float _dashCooldown = 0.5f;
 
+        [Header("Effects")]
+        [SerializeField] private ParticleSystem _shockwaveParticle;
+
         // Input system
         private InputSystem_Actions _actions;
 
@@ -410,6 +413,11 @@ namespace JackRussell
         public void ForceEnterLocomotionState(IState state)
         {
             _locomotionSM.ForceSetState(state);
+        }
+
+        public void OnSprintEnter()
+        {
+            _shockwaveParticle.Play();
         }
     }
 }

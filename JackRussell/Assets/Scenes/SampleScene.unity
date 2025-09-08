@@ -1082,6 +1082,89 @@ Animator:
   m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 060e31c1d55d38947a72b4399ff90950, type: 3}
   m_PrefabInstance: {fileID: 981481915}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1319198363
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2079142863}
+    m_Modifications:
+    - target: {fileID: 4990056334866131192, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4990056334866131192, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4990056334866131192, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4990056334866131192, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4990056334866131192, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4990056334866131192, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4990056334866131192, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071066
+      objectReference: {fileID: 0}
+    - target: {fileID: 4990056334866131192, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.70710707
+      objectReference: {fileID: 0}
+    - target: {fileID: 4990056334866131192, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4990056334866131192, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4990056334866131192, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 4990056334866131192, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4990056334866131192, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488793821149183516, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_Name
+      value: Particle Shockwave 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6885001080450070240, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+      propertyPath: m_RenderAlignment
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+--- !u!4 &1319198364 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4990056334866131192, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+  m_PrefabInstance: {fileID: 1319198363}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &1319198365 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 8936765839561363692, guid: dbf3f6d46cd12584e9b77d878e982179, type: 3}
+  m_PrefabInstance: {fileID: 1319198363}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1517351468 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -7425819688428444181, guid: 060e31c1d55d38947a72b4399ff90950, type: 3}
@@ -6073,6 +6156,7 @@ MonoBehaviour:
   _dashDuration: 0.18
   _boostDuration: 0.6
   _dashCooldown: 0.5
+  _shockwaveParticle: {fileID: 1319198365}
   _modelRoot: {fileID: 0}
   _turnSpeed: 720
   _airTurnMultiplier: 0.35
@@ -6096,6 +6180,7 @@ Transform:
   - {fileID: 542583219}
   - {fileID: 2144252446}
   - {fileID: 1561997378}
+  - {fileID: 1319198364}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2079142864

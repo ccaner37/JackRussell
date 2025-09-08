@@ -12,6 +12,7 @@ namespace JackRussell.States.Locomotion
         public override void Enter()
         {
             // Set animator sprint flag if desired
+            _player.OnSprintEnter();
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), true);
         }
 
