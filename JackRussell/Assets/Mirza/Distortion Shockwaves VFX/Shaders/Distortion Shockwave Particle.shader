@@ -181,6 +181,7 @@ Shader "Mirza Beig/Distortion Shockwave Particle"
 
 			Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
 			ZWrite Off
+			Cull[_Cull]
 			ZTest LEqual
 			Offset 0 , 0
 			ColorMask RGBA
@@ -612,6 +613,7 @@ Shader "Mirza Beig/Distortion Shockwave Particle"
 			Tags { "LightMode"="DepthOnly" }
 
 			ZWrite On
+			Cull[_Cull]
 			ColorMask 0
 			AlphaToMask Off
 
@@ -1618,6 +1620,7 @@ Shader "Mirza Beig/Distortion Shockwave Particle"
 
 			ZTest LEqual
 			ZWrite On
+			Cull[_Cull]
 
 			HLSLPROGRAM
 
