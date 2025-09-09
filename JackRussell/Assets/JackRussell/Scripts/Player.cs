@@ -130,6 +130,8 @@ namespace JackRussell
         private float _rotationOverrideTimer;
         private bool _rotationOverrideExclusive;
 
+        public float Pressure { get; private set; }
+
         /// <summary>
         /// Request a temporary rotation override. If exclusive=true locomotion rotation is suspended.
         /// </summary>
@@ -424,6 +426,12 @@ namespace JackRussell
         public void OnSprintEnter()
         {
             _shockwaveParticle.Play();
+        }
+
+        public void SetPressure(float pressure)
+        {
+            if (pressure >= 100) return;
+            Pressure = pressure;
         }
     }
 }

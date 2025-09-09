@@ -64,7 +64,8 @@ namespace JackRussell.DebugTools
                 $"Input     : {_player.MoveInput.x:F2}, {_player.MoveInput.y:F2}  Sprint: {_player.SprintRequested}",
                 $"AnimatorS : {_player.AnimatorSpeed:F2}",
                 $"MovOverride: {movOverrideStr}  Vel: {ov.x:F2},{ov.y:F2},{ov.z:F2}  Exclusive: {_player.IsOverrideExclusive()}  TimeLeft: {_player.MovementOverrideTimeRemaining:F2}s",
-                $"RotOverride: {rotOverrideStr}  TimeLeft: {_player.RotationOverrideTimeRemaining:F2}s"
+                $"RotOverride: {rotOverrideStr}  TimeLeft: {_player.RotationOverrideTimeRemaining:F2}s",
+                $"Pressure : {_player.Pressure:F2}",
             };
 
             // compute size
