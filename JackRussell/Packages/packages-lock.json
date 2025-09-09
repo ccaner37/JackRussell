@@ -258,6 +258,13 @@
       "dependencies": {},
       "hash": "177dbda557fd652ce7f5d1647a3621653e094373"
     },
+    "jp.hadashikick.vitalrouter": {
+      "version": "https://github.com/hadashiA/VitalRouter.git?path=/src/VitalRouter.Unity/Assets/VitalRouter#1.7.0",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "5cfb76faeaa42bfb4f89fc162b3a811fbcc0384d"
+    },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
       "depth": 0,
