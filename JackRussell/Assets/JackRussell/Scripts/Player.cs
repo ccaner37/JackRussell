@@ -50,6 +50,7 @@ namespace JackRussell
         // Input state (polled)
         private Vector2 _moveInput;
         private bool _sprintInput;
+        private bool _inhaleInput;
         private bool _jumpRequested;
         private bool _attackRequested;
 
@@ -104,6 +105,7 @@ namespace JackRussell
         public float DashCooldown => _dashCooldown;
         // Input accessor
         public bool SprintRequested => _sprintInput;
+        public bool InhaleRequested => _inhaleInput;
 
         // Debug / read-only state info for on-screen debug overlay
         // These expose internal state machine/current-state info and override timers in a non-invasive, read-only way.
@@ -316,6 +318,8 @@ namespace JackRussell
             _actions.Player.Attack.performed += ctx => _attackRequested = true;
             _actions.Player.Sprint.performed += ctx => _sprintInput = true;
             _actions.Player.Sprint.canceled += ctx => _sprintInput = false;
+            _actions.Player.Inhale.performed += ctx => _inhaleInput = true;
+            _actions.Player.Inhale.canceled += ctx => _inhaleInput = false;
 
             // initialize states (create initial state instances)
             var idle = new IdleState(this, _locomotionSM);
@@ -331,6 +335,8 @@ namespace JackRussell
             _actions.Player.Attack.performed -= ctx => _attackRequested = true;
             _actions.Player.Sprint.performed -= ctx => _sprintInput = true;
             _actions.Player.Sprint.canceled -= ctx => _sprintInput = false;
+            _actions.Player.Inhale.performed -= ctx => _inhaleInput = true;
+            _actions.Player.Inhale.canceled -= ctx => _inhaleInput = false;
 
             _actions.Player.Disable();
             _actions.Dispose();

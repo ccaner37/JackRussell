@@ -23,13 +23,19 @@ namespace JackRussell.States.Action
 
         public override void LogicUpdate()
         {
-            // Consume attack input here or let other systems create transitions.
-            // For now, do nothing; other action states will be implemented later.
-            if (_player.ConsumeAttackRequest())
+            if (_player.InhaleRequested)
             {
-                // Example: start a simple attack state in the future.
-                // Leaving as a placeholder to be expanded.
+                ChangeState(new ActionInhaleState(_player, _stateMachine));
+                return;
             }
+
+            // Consume attack input here or let other systems create transitions.
+                // For now, do nothing; other action states will be implemented later.
+                if (_player.ConsumeAttackRequest())
+                {
+                    // Example: start a simple attack state in the future.
+                    // Leaving as a placeholder to be expanded.
+                }
         }
 
         public override void PhysicsUpdate()
