@@ -41,8 +41,18 @@ namespace JackRussell
         [SerializeField] private float _boostDuration = 0.6f;
         [SerializeField] private float _dashCooldown = 0.5f;
 
-        [Header("Effects")]
+[Header("Effects")]
         [SerializeField] private ParticleSystem _shockwaveParticle;
+
+        // Homing attack configuration (used by action states)
+        [Header("Homing Attack")]
+        [SerializeField] private float _homingRange = 12f;
+        [SerializeField] private float _homingConeAngle = 45f;
+        [SerializeField] private float _homingSpeed = 28f;
+        [SerializeField] private float _homingDuration = 0.6f;
+        [SerializeField] private float _homingHitRadius = 1f;
+        [SerializeField] private LayerMask _homingMask;
+        [SerializeField] private ParticleSystem _homingHitParticle;
 
         // Input system
         private InputSystem_Actions _actions;
@@ -103,6 +113,16 @@ namespace JackRussell
         public float DashDuration => _dashDuration;
         public float BoostDuration => _boostDuration;
         public float DashCooldown => _dashCooldown;
+
+        // Homing attack accessors (expose serialized tuning to states)
+        public float HomingRange => _homingRange;
+        public float HomingConeAngle => _homingConeAngle;
+        public float HomingSpeed => _homingSpeed;
+        public float HomingDuration => _homingDuration;
+        public float HomingHitRadius => _homingHitRadius;
+        public LayerMask HomingMask => _homingMask;
+        public ParticleSystem HomingHitParticle => _homingHitParticle;
+
         // Input accessor
         public bool SprintRequested => _sprintInput;
         public bool InhaleRequested => _inhaleInput;
@@ -415,6 +435,52 @@ namespace JackRussell
             _animator.SetFloat(ANIM_SPEED, horizontalVel.magnitude);
             _animator.SetBool(ANIM_IS_GROUNDED, _isGrounded);
             _animator.SetBool(ANIM_IS_SPRINTING, _sprintInput && _moveDirection.sqrMagnitude > 0.01f);
+        }
+
+        /// <summary>
+        /// Find the best IHomingTarget within range and cone in front of the player.
+        /// Returns null if none found.
+        /// </summary>
+        public JackRussell.States.Action.IHomingTarget FindBestHomingTarget(float range, float coneAngleDeg, LayerMask mask)
+        {
+            // Use OverlapSphere to find candidate colliders
+            Collider[] cols = Physics.OverlapSphere(transform.position, range, mask, QueryTriggerInteraction.Collide);
+            if (cols == null || cols.Length == 0) return null;
+
+            Vector3 forward = GetCurrentRotation() * Vector3.forward;
+            float bestSqr = float.MaxValue;
+            JackRussell.States.Action.IHomingTarget bestTarget = null;
+
+            foreach (var c in cols)
+            {
+                if (c == null) continue;
+
+                // try to get IHomingTarget from the collider's GameObject or parents
+                var target = c.GetComponent<JackRussell.States.Action.IHomingTarget>();
+                if (target == null)
+                {
+                    target = c.GetComponentInParent<JackRussell.States.Action.IHomingTarget>();
+                    if (target == null) continue;
+                }
+
+                if (!target.IsActive) continue;
+
+                Vector3 toTarget = target.Transform.position - transform.position;
+                float sqrDist = toTarget.sqrMagnitude;
+                if (sqrDist > range * range) continue;
+
+                // angle check: is the target within the forward cone
+                float angle = Vector3.Angle(forward, toTarget);
+                if (angle > coneAngleDeg * 0.5f) continue;
+
+                if (sqrDist < bestSqr)
+                {
+                    bestSqr = sqrDist;
+                    bestTarget = target;
+                }
+            }
+
+            return bestTarget;
         }
 
         // Expose small debug method

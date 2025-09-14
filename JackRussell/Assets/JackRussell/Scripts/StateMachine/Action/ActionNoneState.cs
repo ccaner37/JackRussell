@@ -33,8 +33,14 @@ namespace JackRussell.States.Action
                 // For now, do nothing; other action states will be implemented later.
                 if (_player.ConsumeAttackRequest())
                 {
-                    // Example: start a simple attack state in the future.
-                    // Leaving as a placeholder to be expanded.
+                    // If player is airborne, start homing attack (if a target exists)
+                    if (!_player.IsGrounded)
+                    {
+                        ChangeState(new HomingAttackState(_player, _stateMachine));
+                        return;
+                    }
+
+                    // Ground attack fallback: keep as no-op for now (could start a ground attack state)
                 }
         }
 
