@@ -6,6 +6,7 @@ using JackRussell.States.Locomotion;
 using JackRussell.States.Action;
 using VContainer;
 using JackRussell.Audio;
+using JackRussell.Rails;
 
 namespace JackRussell
 {
@@ -18,6 +19,7 @@ namespace JackRussell
         [SerializeField] private Animator _animator;
         [SerializeField] private Transform _groundCheck;
         [SerializeField] private LayerMask _groundMask;
+        [SerializeField] private RailDetector _railDetector;
 
         [Header("Speeds")]
         [SerializeField] private float _walkSpeed = 6f;
@@ -388,6 +390,18 @@ namespace JackRussell
             {
                 _rotationOverrideTimer -= Time.deltaTime;
                 if (_rotationOverrideTimer <= 0f) ClearRotationOverride();
+            }
+
+            // Check for rail attachment if not already grinding
+            if (_railDetector != null && _locomotionSM.Current != null &&
+                !(_locomotionSM.Current is GrindState))
+            {
+                _railDetector.CheckAutoAttach();
+                if (_railDetector.IsAttached)
+                {
+                    // Transition to grind state
+                    _locomotionSM.ChangeState(new GrindState(this, _locomotionSM));
+                }
             }
 
             // Logic updates: action first (may request overrides) then locomotion

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using DG.Tweening;
+using JackRussell.Rails;
 
 /// <summary>
 /// Third-person camera controller:
@@ -52,6 +53,11 @@ namespace JackRussell.CameraController
         [SerializeField] private float _shakeIntensity = 0.1f;
         [SerializeField] private float _shakeFrequency = 10f;
         [SerializeField] private AnimationCurve _shakeDecay = new AnimationCurve(new Keyframe(0, 1), new Keyframe(1, 0));
+
+        [Header("Rail Grinding")]
+        [SerializeField] private float _grindLookAheadDistance = 3f;
+        [SerializeField] private float _grindCameraSmoothTime = 0.15f;
+        [SerializeField] private float _grindPitchOffset = -5f;
 
         // Input actions
         private InputSystem_Actions _actions;
@@ -106,6 +112,9 @@ namespace JackRussell.CameraController
         {
             if (_target == null) return;
 
+            // Check if player is grinding
+            bool isGrinding = IsPlayerGrinding();
+
             // Read look input (could be mouse delta or gamepad right stick)
             Vector2 lookInput = _actions.Player.Look.ReadValue<Vector2>();
             float deltaMultiplier = DetermineLookMultiplier();
@@ -120,6 +129,13 @@ namespace JackRussell.CameraController
 
             // Desired camera position (relative to pivot)
             Vector3 pivotWorld = _target.position + _pivotOffset;
+
+            // Adjust for rail grinding
+            if (isGrinding)
+            {
+                pivotWorld = GetGrindCameraPivot();
+                _pitch += _grindPitchOffset; // Look more downward during grinding
+            }
 
             Quaternion camRot = Quaternion.Euler(_pitch, _yaw, 0f);
             Vector3 desiredLocalOffset = camRot * (Vector3.back * _defaultDistance);
@@ -150,8 +166,9 @@ namespace JackRussell.CameraController
             // Apply shake offset
             desiredWorldPos += _shakeTransform.localPosition;
 
-            // Smooth position
-            transform.position = Vector3.SmoothDamp(transform.position, desiredWorldPos, ref _currentVelocity, _positionSmoothTime);
+            // Smooth position (use grind-specific smoothing if grinding)
+            float smoothTime = isGrinding ? _grindCameraSmoothTime : _positionSmoothTime;
+            transform.position = Vector3.SmoothDamp(transform.position, desiredWorldPos, ref _currentVelocity, smoothTime);
 
             // Smooth rotation to look at pivot
             Quaternion desiredLookRot = Quaternion.LookRotation(pivotWorld - transform.position);
@@ -207,6 +224,60 @@ namespace JackRussell.CameraController
             float dur = duration > 0 ? duration : _shakeDuration;
             float str = intensity > 0 ? intensity : _shakeIntensity;
             _shakeTransform.DOPunchPosition(Vector3.one * str, dur, 20, 1f);
+        }
+
+        /// <summary>
+        /// Checks if the player is currently grinding on a rail.
+        /// </summary>
+        private bool IsPlayerGrinding()
+        {
+            if (_target == null) return false;
+
+            // Try to get the Player component from the target
+            var player = _target.GetComponent<JackRussell.Player>();
+            if (player == null) return false;
+
+            // Check if current locomotion state is GrindState
+            return player.LocomotionStateName == "GrindState";
+        }
+
+        /// <summary>
+        /// Gets the camera pivot point when grinding, looking ahead along the rail.
+        /// </summary>
+        private Vector3 GetGrindCameraPivot()
+        {
+            if (_target == null) return _target.position + _pivotOffset;
+
+            // Try to get the Player component and RailDetector
+            var player = _target.GetComponent<JackRussell.Player>();
+            if (player == null) return _target.position + _pivotOffset;
+
+            var railDetector = player.GetComponentInChildren<RailDetector>();
+            if (railDetector == null || !railDetector.IsAttached) return _target.position + _pivotOffset;
+
+            // Get current rail position and tangent
+            if (railDetector.GetCurrentRailPosition(out Vector3 railPos, out Vector3 tangent))
+            {
+                // Look ahead along the rail
+                float lookAheadDistance = _grindLookAheadDistance;
+                SplineRail currentRail = railDetector.CurrentRail;
+
+                if (currentRail != null)
+                {
+                    float currentDistance = railDetector.CurrentDistance;
+                    float lookAheadT = (currentDistance + lookAheadDistance) / currentRail.TotalLength;
+                    lookAheadT = Mathf.Clamp01(lookAheadT);
+
+                    if (currentRail.GetPositionAndTangent(lookAheadT * currentRail.TotalLength, out Vector3 lookAheadPos, out Vector3 _))
+                    {
+                        // Position camera pivot slightly ahead and above the player
+                        Vector3 playerToAhead = (lookAheadPos - _target.position).normalized;
+                        return _target.position + _pivotOffset + playerToAhead * (lookAheadDistance * 0.5f);
+                    }
+                }
+            }
+
+            return _target.position + _pivotOffset;
         }
 
         // Editor convenience: draw pivot + collision sphere
