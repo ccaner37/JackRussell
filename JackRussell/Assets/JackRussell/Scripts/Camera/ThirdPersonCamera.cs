@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using DG.Tweening;
 
 /// <summary>
 /// Third-person camera controller:
@@ -46,6 +47,12 @@ namespace JackRussell.CameraController
         [SerializeField] private float _collisionRadius = 0.35f;
         [SerializeField] private float _collisionPushBack = 0.08f; // small offset to keep camera off geometry
 
+        [Header("Shake")]
+        [SerializeField] private float _shakeDuration = 0.5f;
+        [SerializeField] private float _shakeIntensity = 0.1f;
+        [SerializeField] private float _shakeFrequency = 10f;
+        [SerializeField] private AnimationCurve _shakeDecay = new AnimationCurve(new Keyframe(0, 1), new Keyframe(1, 0));
+
         // Input actions
         private InputSystem_Actions _actions;
 
@@ -55,6 +62,9 @@ namespace JackRussell.CameraController
         private float _currentDistance;
         private Vector3 _currentVelocity = Vector3.zero;
 
+        private Transform _shakeTransform;
+        private Vector3 _shakeOffset = Vector3.zero;
+
         private void Awake()
         {
             _actions = new InputSystem_Actions();
@@ -63,6 +73,12 @@ namespace JackRussell.CameraController
             _yaw = transform.eulerAngles.y;
             _pitch = Mathf.Clamp(_initialPitch, _minPitch, _maxPitch);
             _currentDistance = Mathf.Clamp(_defaultDistance, _minDistance, _maxDistance);
+
+            // create dummy transform for shake
+            _shakeTransform = new GameObject("CameraShake").transform;
+            _shakeTransform.SetParent(transform);
+            _shakeTransform.localPosition = Vector3.zero;
+            _shakeTransform.localRotation = Quaternion.identity;
 
             if (_lockCursor)
             {
@@ -131,6 +147,9 @@ namespace JackRussell.CameraController
             // recompute desired world pos using smoothed distance
             desiredWorldPos = pivotWorld + camRot * (Vector3.back * _currentDistance);
 
+            // Apply shake offset
+            desiredWorldPos += _shakeTransform.localPosition;
+
             // Smooth position
             transform.position = Vector3.SmoothDamp(transform.position, desiredWorldPos, ref _currentVelocity, _positionSmoothTime);
 
@@ -176,6 +195,18 @@ namespace JackRussell.CameraController
         public void ClearTarget()
         {
             _target = null;
+        }
+
+        /// <summary>
+        /// Triggers camera shake effect using DOTween punch.
+        /// </summary>
+        /// <param name="duration">Duration of shake in seconds. Uses default if <=0.</param>
+        /// <param name="intensity">Intensity of shake. Uses default if <=0.</param>
+        public void ShakeCamera(float duration = -1f, float intensity = -1f)
+        {
+            float dur = duration > 0 ? duration : _shakeDuration;
+            float str = intensity > 0 ? intensity : _shakeIntensity;
+            _shakeTransform.DOPunchPosition(Vector3.one * str, dur, 20, 1f);
         }
 
         // Editor convenience: draw pivot + collision sphere

@@ -4,6 +4,8 @@ using System;
 using JackRussell.States;
 using JackRussell.States.Locomotion;
 using JackRussell.States.Action;
+using VContainer;
+using JackRussell.Audio;
 
 namespace JackRussell
 {
@@ -41,7 +43,7 @@ namespace JackRussell
         [SerializeField] private float _boostDuration = 0.6f;
         [SerializeField] private float _dashCooldown = 0.5f;
 
-[Header("Effects")]
+        [Header("Effects")]
         [SerializeField] private ParticleSystem _shockwaveParticle;
 
         // Homing attack configuration (used by action states)
@@ -151,6 +153,9 @@ namespace JackRussell
         private bool _rotationOverrideExclusive;
 
         public float Pressure { get; private set; }
+
+        [Inject] private readonly AudioManager _audioManager;
+        [SerializeField] private AudioSource _audioSource;
 
         /// <summary>
         /// Request a temporary rotation override. If exclusive=true locomotion rotation is suspended.
@@ -494,10 +499,20 @@ namespace JackRussell
             _shockwaveParticle.Play();
         }
 
+        public void OnJumpEnter()
+        {
+            _audioManager.PlaySound(SoundType.Jump, _audioSource);
+        }
+
         public void SetPressure(float pressure)
         {
             if (pressure >= 100) return;
             Pressure = pressure;
+        }
+
+        public void PlaySound(SoundType soundType)
+        {
+            _audioManager.PlaySound(soundType, _audioSource);
         }
     }
 }

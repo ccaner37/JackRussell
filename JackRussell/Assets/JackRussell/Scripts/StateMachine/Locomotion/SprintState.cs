@@ -14,6 +14,7 @@ namespace JackRussell.States.Locomotion
             // Set animator sprint flag if desired
             _player.OnSprintEnter();
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), true);
+            _player.PlaySound(Audio.SoundType.SprintStart);
         }
 
         public override void Exit()

@@ -1,5 +1,6 @@
 using UnityEngine;
 using JackRussell;
+using JackRussell.CameraController;
 
 namespace JackRussell.States.Action
 {
@@ -57,6 +58,8 @@ namespace JackRussell.States.Action
                 Quaternion look = Quaternion.LookRotation(horiz.normalized, Vector3.up);
                 _player.RequestRotationOverride(look, _maxDuration, true);
             }
+
+            _player.PlaySound(Audio.SoundType.HomingAttackStart);
         }
 
         public override void Exit()
@@ -131,6 +134,10 @@ namespace JackRussell.States.Action
 
                 // clear overrides and exit
                 ChangeState(new ActionNoneState(_player, _stateMachine));
+
+                UnityEngine.Object.FindAnyObjectByType<ThirdPersonCamera>().ShakeCamera(0.15f, 2f);
+                _player.PlaySound(Audio.SoundType.Kick);
+
                 return;
             }
         }

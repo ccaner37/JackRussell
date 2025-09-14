@@ -24,6 +24,8 @@ namespace JackRussell.States.Locomotion
 
             // Trigger animator
             _player.Animator.SetTrigger(Animator.StringToHash("JumpTrigger"));
+
+            _player.OnJumpEnter();
         }
 
         public override void LogicUpdate()
