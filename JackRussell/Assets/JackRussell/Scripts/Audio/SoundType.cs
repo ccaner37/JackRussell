@@ -7,5 +7,7 @@ namespace JackRussell.Audio
         Kick,
         SprintStart,
         Jump,
+        RailStart,
+        RailLoop,
     }
 }

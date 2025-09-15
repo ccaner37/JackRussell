@@ -22,8 +22,11 @@ namespace JackRussell.Rails
         private SplineRail _currentRail;
         private float _currentDistance;
         private float _lastAttachTime;
+        private float _lastDetachTime;
         private bool _isAttached;
         private bool _grindForward; // true = grind in positive direction, false = grind in negative direction
+        private bool _detachedFromEnd; // true if we just detached from the end of a rail
+        private bool _jumpDismount; // true if we just jumped off a rail
 
         // Cached components
         private Rigidbody _rb;
@@ -46,6 +49,14 @@ namespace JackRussell.Rails
         public SplineRail FindBestRail()
         {
             if (Time.time - _lastAttachTime < _attachCooldown) return null;
+
+            // Prevent immediate reattachment after detaching from end of rail or jump dismount
+            if ((_detachedFromEnd || _jumpDismount) && Time.time - _lastDetachTime < 0.5f)
+            {
+                string reason = _detachedFromEnd ? "end-of-rail detachment" : "jump dismount";
+                Debug.Log($"[RailDetector] Blocking reattachment - cooldown after {reason}");
+                return null;
+            }
 
             // Find all SplineRail components in the scene
             SplineRail[] allRails = FindObjectsOfType<SplineRail>();
@@ -119,9 +130,22 @@ namespace JackRussell.Rails
             if (Time.time - _lastAttachTime < _attachCooldown) return false;
 
             _currentRail = rail;
-            _currentDistance = rail.FindClosestDistance(_playerTransform.position);
+            float rawDistance = rail.FindClosestDistance(_playerTransform.position);
+
+            // Small safeguard: avoid exact t=0 which can cause issues
+            if (rawDistance < 0.01f) // Within 1cm of start
+            {
+                rawDistance = 0.01f; // Small offset from start
+                Debug.Log("[RailDetector] Applied small offset from rail start to avoid t=0 issues");
+            }
+
+            _currentDistance = rawDistance;
             _isAttached = true;
             _lastAttachTime = Time.time;
+
+            // Reset detachment flags since we successfully attached
+            _detachedFromEnd = false;
+            _jumpDismount = false;
 
             // Determine grinding direction based on player's facing
             DetermineGrindDirection();
@@ -160,6 +184,29 @@ namespace JackRussell.Rails
         /// </summary>
         public void DetachFromRail()
         {
+            // Check if we're detaching from the end of the rail
+            if (_currentRail != null && _currentDistance >= _currentRail.TotalLength - 0.1f)
+            {
+                _detachedFromEnd = true;
+                _lastDetachTime = Time.time;
+                Debug.Log("[RailDetector] Detached from end of rail - preventing immediate reattachment");
+            }
+
+            _currentRail = null;
+            _isAttached = false;
+            _currentDistance = 0f;
+            _grindForward = true; // Reset to default
+        }
+
+        /// <summary>
+        /// Detach from current rail due to jump dismount
+        /// </summary>
+        public void DetachFromRailJump()
+        {
+            _jumpDismount = true;
+            _lastDetachTime = Time.time;
+            Debug.Log("[RailDetector] Jump dismount - preventing immediate reattachment");
+
             _currentRail = null;
             _isAttached = false;
             _currentDistance = 0f;
@@ -226,9 +273,12 @@ namespace JackRussell.Rails
         {
             if (!_isAttached || _currentRail == null) return false;
 
+            // Don't detach immediately after attaching (prevent false positives at start)
+            if (Time.time - _lastAttachTime < 0.2f) return false;
+
             // Detach if reached end of rail
             return _currentDistance >= _currentRail.TotalLength - 0.1f ||
-                   _currentDistance <= 0.1f;
+                    _currentDistance <= 0.05f; // Reduced from 0.1f to avoid conflict with our 0.01f offset
         }
 
         private void OnDrawGizmosSelected()

@@ -63,14 +63,29 @@ namespace JackRussell.States.Locomotion
             _lastPosition = _player.transform.position;
             _isAccelerating = false;
 
+            _player.OnGrindEnter();
+
             // Set initial position on rail
             if (_railDetector.GetCurrentRailPosition(out Vector3 railPos, out Vector3 tangent))
             {
                 _player.transform.position = railPos;
 
-                // Set initial velocity based on grinding direction
+                // Debug: Check tangent validity
+                Debug.Log($"[GrindState] Attach at distance {_currentDistance:F3}, Tangent: {tangent}, Magnitude: {tangent.magnitude}");
+
+                // Safeguard: ensure tangent is valid
+                if (tangent.sqrMagnitude < 0.1f)
+                {
+                    Debug.LogWarning("[GrindState] Invalid tangent detected, using forward direction");
+                    tangent = _railDetector.GrindForward ? Vector3.forward : Vector3.back;
+                }
+
                 Vector3 grindDirection = _railDetector.GrindForward ? tangent : -tangent;
+                grindDirection = grindDirection.normalized;
+
                 _player.Rigidbody.velocity = grindDirection * _grindSpeed;
+
+                Debug.Log($"[GrindState] Final velocity: {_player.Rigidbody.velocity} (speed: {_grindSpeed:F1})");
             }
         }
 
@@ -78,6 +93,7 @@ namespace JackRussell.States.Locomotion
         {
             _railDetector.DetachFromRail();
             _currentRail = null;
+            _player.Animator.SetBool("IsGrinding", false);
         }
 
         public override void LogicUpdate()
@@ -86,22 +102,26 @@ namespace JackRussell.States.Locomotion
             if (_player.ConsumeJumpRequest() && _currentRail.AllowDismount)
             {
                 // Jump off the rail
-                    Vector3 jumpVelocity = Vector3.up * (_player.JumpVelocity * k_DismountJumpMultiplier);
-                    if (_railDetector.GetCurrentRailPosition(out Vector3 _, out Vector3 tangent))
-                    {
-                        // Add forward momentum from grind speed
-                        jumpVelocity += tangent * (_grindSpeed * 0.7f);
-                    }
-    
-                    _player.SetVelocityImmediate(jumpVelocity);
-                    ChangeState(new JumpState(_player, _stateMachine));
-                    return;
+                Vector3 jumpVelocity = Vector3.up * (_player.JumpVelocity * k_DismountJumpMultiplier);
+                if (_railDetector.GetCurrentRailPosition(out Vector3 _, out Vector3 tangent))
+                {
+                    // Add forward momentum from grind speed
+                    jumpVelocity += tangent * (_grindSpeed * 0.7f);
+                }
+
+                // Use special detach method for jump dismounts to prevent immediate reattachment
+                _railDetector.DetachFromRailJump();
+
+                _player.SetVelocityImmediate(Vector3.zero);
+                ChangeState(new JumpState(_player, _stateMachine));
+                return;
             }
 
             // Check if we should detach (end of rail, etc.)
             if (_railDetector.ShouldDetach())
             {
                 ChangeState(new FallState(_player, _stateMachine));
+                Debug.LogError("ShouldDeatch1");
                 return;
             }
 
@@ -118,6 +138,7 @@ namespace JackRussell.States.Locomotion
             {
                 // Lost rail, transition to fall
                 ChangeState(new FallState(_player, _stateMachine));
+                Debug.LogError("GetCurrentRailPosition1");
                 return;
             }
 
@@ -139,12 +160,19 @@ namespace JackRussell.States.Locomotion
             if (!_railDetector.GetCurrentRailPosition(out targetPos, out tangent))
             {
                 ChangeState(new FallState(_player, _stateMachine));
+                Debug.LogError("GetCurrentRailPosition2");
                 return;
             }
 
             // Move player along rail
             Vector3 currentPos = _player.transform.position;
             Vector3 newPos = Vector3.Lerp(currentPos, targetPos, deltaTime / k_PositionSmoothTime);
+
+            // Debug: Check if we're at the start and having issues
+            if (_currentDistance < 0.1f)
+            {
+                Debug.Log($"[GrindState] Physics at start - Current: {currentPos}, Target: {targetPos}, Distance: {_currentDistance:F3}");
+            }
 
             // Apply reduced gravity while grinding
             Vector3 velocity = (newPos - currentPos) / deltaTime;

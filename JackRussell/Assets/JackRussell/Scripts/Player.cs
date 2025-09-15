@@ -518,6 +518,14 @@ namespace JackRussell
             _audioManager.PlaySound(SoundType.Jump, _audioSource);
         }
 
+        public void OnGrindEnter()
+        {
+            Animator.Play("5080_0_narancia_01_skill_03_lp");
+            Animator.SetBool("IsGrinding", true);
+            PlaySound(SoundType.RailStart);
+            PlaySound(SoundType.RailLoop);
+        }
+
         public void SetPressure(float pressure)
         {
             if (pressure >= 100) return;

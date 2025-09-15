@@ -44,6 +44,8 @@ half4 _SecondaryGlitchColor;
 half _BaseEmission;
 half _GlitchFrequency;
 half _ChaoticDistortion;
+half3 _RailDirection;
+half _Scale;
 
 CBUFFER_END
 
@@ -67,6 +69,9 @@ UNITY_DOTS_INSTANCING_START(MaterialPropertyMetadata)
     UNITY_DOTS_INSTANCED_PROP(float , _DetailAlbedoMapScale)
     UNITY_DOTS_INSTANCED_PROP(float , _DetailNormalMapScale)
     UNITY_DOTS_INSTANCED_PROP(float , _Surface)
+    UNITY_DOTS_INSTANCED_PROP(float , _DistanceScale)
+    UNITY_DOTS_INSTANCED_PROP(float3, _RailDirection)
+    UNITY_DOTS_INSTANCED_PROP(float , _Scale)
 UNITY_DOTS_INSTANCING_END(MaterialPropertyMetadata)
 
 // Here, we want to avoid overriding a property like e.g. _BaseColor with something like this:
@@ -93,6 +98,9 @@ static float  unity_DOTS_Sampled_ClearCoatSmoothness;
 static float  unity_DOTS_Sampled_DetailAlbedoMapScale;
 static float  unity_DOTS_Sampled_DetailNormalMapScale;
 static float  unity_DOTS_Sampled_Surface;
+static float  unity_DOTS_Sampled_DistanceScale;
+static float3 unity_DOTS_Sampled_RailDirection;
+static float  unity_DOTS_Sampled_Scale;
 
 void SetupDOTSLitMaterialPropertyCaches()
 {
@@ -110,6 +118,9 @@ void SetupDOTSLitMaterialPropertyCaches()
     unity_DOTS_Sampled_DetailAlbedoMapScale = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float , _DetailAlbedoMapScale);
     unity_DOTS_Sampled_DetailNormalMapScale = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float , _DetailNormalMapScale);
     unity_DOTS_Sampled_Surface              = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float , _Surface);
+    unity_DOTS_Sampled_DistanceScale        = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float , _DistanceScale);
+    unity_DOTS_Sampled_RailDirection        = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float3, _RailDirection);
+    unity_DOTS_Sampled_TextureDensity       = UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(float , _TextureDensity);
 }
 
 #undef UNITY_SETUP_DOTS_MATERIAL_PROPERTY_CACHES
@@ -129,6 +140,9 @@ void SetupDOTSLitMaterialPropertyCaches()
 #define _DetailAlbedoMapScale   unity_DOTS_Sampled_DetailAlbedoMapScale
 #define _DetailNormalMapScale   unity_DOTS_Sampled_DetailNormalMapScale
 #define _Surface                unity_DOTS_Sampled_Surface
+#define _DistanceScale          unity_DOTS_Sampled_DistanceScale
+#define _RailDirection          unity_DOTS_Sampled_RailDirection
+#define _Scale                  unity_DOTS_Sampled_Scale
 
 #endif
 

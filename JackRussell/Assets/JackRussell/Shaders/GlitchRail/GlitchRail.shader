@@ -77,7 +77,7 @@ Shader "Universal Render Pipeline/GlitchRail"
         [Header(Glitch Rail Effect)]
         _NoiseTexture("Noise Texture", 2D) = "white" {}
         _GlitchIntensity("Glitch Intensity", Range(0, 2)) = 1
-        _NoiseScale("Noise Scale", Range(0.01, 0.1)) = 2
+        _NoiseScale("Noise Scale", Range(0.01, 1)) = 2
         _GlitchSpeed("Glitch Speed", Range(0, 5)) = 1
         _DataLineThickness("Data Line Thickness", Range(0.001, 0.1)) = 0.02
         _GlitchColor("Glitch Color", Color) = (0, 1, 1, 1)
@@ -85,6 +85,8 @@ Shader "Universal Render Pipeline/GlitchRail"
         _BaseEmission("Base Emission", Range(0, 2)) = 0.5
         _GlitchFrequency("Glitch Frequency", Range(0.1, 20)) = 5
         _ChaoticDistortion("Chaotic Distortion", Range(0, 0.1)) = 0.02
+        _RailDirection("Rail Direction", Vector) = (0, 0, 1, 0)
+        _Scale("Effect Scale", Range(0.01, 2.0)) = 0.5
     }
 
     SubShader
