@@ -60,16 +60,31 @@ namespace JackRussell.States.Locomotion
 
             Vector3 desired = _player.MoveDirection;
             float targetSpeed = _player.RunSpeed;
-            Vector3 desiredVel = desired * targetSpeed;
 
-            Vector3 horizontalVel = new Vector3(_player.Rigidbody.velocity.x, 0f, _player.Rigidbody.velocity.z);
-            Vector3 velocityDiff = desiredVel - horizontalVel;
+            Vector3 currentVel = new Vector3(_player.Rigidbody.velocity.x, 0f, _player.Rigidbody.velocity.z);
+            float currentSpeed = currentVel.magnitude;
 
-            _player.AddGroundForce(velocityDiff * _player.AccelGround);
-            _player.ClampHorizontalSpeed(_player.RunSpeed);
+            Vector3 force;
+            if (currentSpeed < targetSpeed)
+            {
+                force = desired.normalized * (_player.AccelGround * 10) - currentVel * _player.Damping;
+            }
+            else
+            {
+                force = -currentVel * _player.Damping;
+            }
+
+            _player.AddGroundForce(force);
+
+            // Project velocity onto ground plane to keep movement along the surface
+            if (_player.IsGrounded)
+            {
+                Vector3 projectedVel = Vector3.ProjectOnPlane(_player.Rigidbody.velocity, _player.GroundNormal);
+                _player.Rigidbody.velocity = projectedVel;
+            }
 
             // Rotate toward movement direction
-            _player.RotateTowardsDirection(_player.MoveDirection, Time.fixedDeltaTime, isAir: false);
+            _player.RotateTowardsDirection(desired, Time.fixedDeltaTime, isAir: false);
         }
     }
 }

@@ -31,6 +31,7 @@ namespace JackRussell
         [SerializeField] private float _accelGround = 60f;
         [SerializeField] private float _accelAir = 20f;
         [SerializeField] private float _deceleration = 80f;
+        [SerializeField] private float _damping = 5f;
 
         [Header("Jump & Gravity")]
         [SerializeField] private float _jumpVelocity = 10f;
@@ -39,6 +40,7 @@ namespace JackRussell
         [Header("Ground Check")]
         [SerializeField] private float _groundCheckRadius = 0.25f;
         [SerializeField] private Vector3 _groundCheckOffset = Vector3.zero;
+        [SerializeField] private float _maxSlopeAngle = 45f; // degrees
 
         [Header("Dash / Boost")]
         [SerializeField] private float _dashDuration = 0.18f;
@@ -83,6 +85,7 @@ namespace JackRussell
 
         // Runtime flags
         private bool _isGrounded;
+        private Vector3 _groundNormal = Vector3.up;
 
         // Animator parameter hashes (dummy names)
         private static readonly int ANIM_SPEED = Animator.StringToHash("Speed");
@@ -100,12 +103,14 @@ namespace JackRussell
         [SerializeField] private float _rotationSmoothing = 0.12f;     // (kept for potential blending; primary uses MoveTowardsAngle)
         [SerializeField] private bool _debugRotation = false;          // draw debug lines / logs when true
         [SerializeField] private float _snapAngleThreshold = 160f;     // if angle diff > this and instantaneous requested, snap
+        private float _rotationVelocity;
 
         // Public read-only helpers for states
         public Vector3 MoveDirection => _moveDirection;
         public Rigidbody Rigidbody => _rb;
         public Animator Animator => _animator;
         public bool IsGrounded => _isGrounded;
+        public Vector3 GroundNormal => _groundNormal;
         public float WalkSpeed => _walkSpeed;
         public float RunSpeed => _runSpeed;
         public float BoostSpeed => _boostSpeed;
@@ -113,6 +118,7 @@ namespace JackRussell
         public float AccelGround => _accelGround;
         public float AccelAir => _accelAir;
         public float Deceleration => _deceleration;
+        public float Damping => _damping;
         public float JumpVelocity => _jumpVelocity;
         public float DashDuration => _dashDuration;
         public float BoostDuration => _boostDuration;
@@ -224,10 +230,19 @@ namespace JackRussell
             if (instantaneous && Mathf.Abs(angleDiff) >= _snapAngleThreshold)
             {
                 newYaw = targetYaw;
+                _rotationVelocity = 0f;
             }
             else
             {
-                newYaw = instantaneous ? targetYaw : Mathf.MoveTowardsAngle(currentYaw, targetYaw, maxDelta);
+                if (instantaneous)
+                {
+                    newYaw = targetYaw;
+                    _rotationVelocity = 0f;
+                }
+                else
+                {
+                    newYaw = Mathf.SmoothDampAngle(currentYaw, targetYaw, ref _rotationVelocity, _rotationSmoothing, _turnSpeed * (isAir ? _airTurnMultiplier : 1f));
+                }
             }
 
             Quaternion newRot = Quaternion.Euler(0f, newYaw, 0f);
@@ -415,7 +430,23 @@ namespace JackRussell
         private void FixedUpdate()
         {
             // ground check
-            _isGrounded = Physics.CheckSphere(_groundCheck.position + _groundCheckOffset, _groundCheckRadius, _groundMask, QueryTriggerInteraction.Ignore);
+            bool sphereGrounded = Physics.CheckSphere(_groundCheck.position + _groundCheckOffset, _groundCheckRadius, _groundMask, QueryTriggerInteraction.Ignore);
+
+            // ground normal detection
+            Vector3 normal = Vector3.up;
+            if (sphereGrounded)
+            {
+                RaycastHit hit;
+                if (Physics.Raycast(transform.position, Vector3.down, out hit, 2f, _groundMask))
+                {
+                    normal = hit.normal;
+                }
+            }
+
+            // check if slope is walkable
+            float slopeAngle = Vector3.Angle(normal, Vector3.up);
+            _isGrounded = sphereGrounded && slopeAngle <= _maxSlopeAngle;
+            _groundNormal = normal;
 
             // Physics update: action first (so overrides are applied), then locomotion
             _actionSM.PhysicsUpdate();

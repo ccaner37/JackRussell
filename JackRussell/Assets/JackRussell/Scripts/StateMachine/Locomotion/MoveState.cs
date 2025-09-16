@@ -72,16 +72,28 @@ namespace JackRussell.States.Locomotion
             // Ground movement acceleration
             Vector3 desired = _player.MoveDirection;
             float targetSpeed = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
-            Vector3 desiredVel = desired * targetSpeed;
 
-            Vector3 horizontalVel = new Vector3(_player.Rigidbody.velocity.x, 0f, _player.Rigidbody.velocity.z);
-            Vector3 velocityDiff = desiredVel - horizontalVel;
+            Vector3 currentVel = new Vector3(_player.Rigidbody.velocity.x, 0f, _player.Rigidbody.velocity.z);
+            float currentSpeed = currentVel.magnitude;
 
-            _player.AddGroundForce(velocityDiff * _player.AccelGround);
+            Vector3 force;
+            if (currentSpeed < targetSpeed)
+            {
+                force = desired.normalized * _player.AccelGround - currentVel * _player.Damping;
+            }
+            else
+            {
+                force = -currentVel * _player.Damping;
+            }
 
-            // clamp to appropriate top speed
-            float clampTo = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
-            _player.ClampHorizontalSpeed(clampTo);
+            _player.AddGroundForce(force);
+
+            // Project velocity onto ground plane to keep movement along the surface
+            if (_player.IsGrounded)
+            {
+                Vector3 projectedVel = Vector3.ProjectOnPlane(_player.Rigidbody.velocity, _player.GroundNormal);
+                _player.Rigidbody.velocity = projectedVel;
+            }
 
             // Rotate player toward move direction (grounded)
             _player.RotateTowardsDirection(desired, Time.fixedDeltaTime, isAir: false);
