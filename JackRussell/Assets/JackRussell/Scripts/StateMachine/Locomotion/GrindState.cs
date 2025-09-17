@@ -183,10 +183,11 @@ namespace JackRussell.States.Locomotion
 
             _player.SetVelocityImmediate(velocity);
 
-            // Rotate player to face movement direction
-            if (velocity.sqrMagnitude > 0.1f)
+            // Rotate player to face rail direction (use tangent for proper 3D alignment)
+            if (tangent.sqrMagnitude > 0.1f)
             {
-                _player.RotateTowardsDirection(velocity, deltaTime, isAir: false);
+                Vector3 grindDirection = _railDetector.GrindForward ? tangent : -tangent;
+                _player.RotateTowardsDirection(grindDirection, deltaTime, isAir: false, instantaneous: false, allow3DRotation: true);
             }
 
             _lastPosition = newPos;

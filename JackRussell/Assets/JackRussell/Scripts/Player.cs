@@ -194,7 +194,7 @@ namespace JackRussell
         /// Implemented with explicit yaw MoveTowardsAngle for predictable, tunable turning.
         /// Falls back to horizontal velocity if move input is tiny.
         /// </summary>
-        public void RotateTowardsDirection(Vector3 direction, float deltaTime, bool isAir = false, bool instantaneous = false)
+        public void RotateTowardsDirection(Vector3 direction, float deltaTime, bool isAir = false, bool instantaneous = false, bool allow3DRotation = false)
         {
             // If rotation override is exclusive, apply it immediately
             if (_hasRotationOverride && _rotationOverrideExclusive)
@@ -205,7 +205,7 @@ namespace JackRussell
             }
 
             // Primary direction is the provided one; if it's too small, fallback to current horizontal velocity
-            Vector3 dir = new Vector3(direction.x, 0f, direction.z);
+            Vector3 dir = direction;
             if (dir.sqrMagnitude < 0.0001f)
             {
                 Vector3 hv = new Vector3(_rb.velocity.x, 0f, _rb.velocity.z);
@@ -217,48 +217,85 @@ namespace JackRussell
                 dir.Normalize();
             }
 
-            // compute target yaw (degrees)
-            float targetYaw = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
+            Quaternion targetRotation;
 
-            // current yaw from the chosen rotation target
-            float currentYaw = GetCurrentRotation().eulerAngles.y;
-
-            // compute max angular change this frame
-            float maxDelta = _turnSpeed * (isAir ? _airTurnMultiplier : 1f) * deltaTime;
-
-            // if instantaneous requested and angle is large, snap; otherwise move toward angle
-            float angleDiff = Mathf.DeltaAngle(currentYaw, targetYaw);
-            float newYaw;
-            if (instantaneous && Mathf.Abs(angleDiff) >= _snapAngleThreshold)
+            if (allow3DRotation)
             {
-                newYaw = targetYaw;
-                _rotationVelocity = 0f;
+                // Full 3D rotation using LookRotation for proper alignment with rail direction
+                targetRotation = Quaternion.LookRotation(dir, Vector3.up);
+
+                // Apply smooth interpolation for 3D rotation
+                Quaternion currentRotation = GetCurrentRotation();
+                float maxDelta = _turnSpeed * (isAir ? _airTurnMultiplier : 1f) * deltaTime;
+
+                if (instantaneous)
+                {
+                    ApplyRotation(targetRotation, true);
+                }
+                else
+                {
+                    Quaternion newRot = Quaternion.RotateTowards(currentRotation, targetRotation, maxDelta);
+                    ApplyRotation(newRot, true);
+                }
+
+                if (_debugRotation)
+                {
+                    Vector3 origin = transform.position + Vector3.up * 1.2f;
+                    Debug.DrawLine(origin, origin + dir * 2f, Color.red, 0.1f);
+                    Debug.DrawLine(origin, origin + currentRotation * Vector3.forward * 2f, Color.green, 0.1f);
+                }
             }
             else
             {
-                if (instantaneous)
+                // Original 2D horizontal-only rotation logic
+                Vector3 horizontalDir = new Vector3(dir.x, 0f, dir.z);
+                if (horizontalDir.sqrMagnitude < 0.0001f) return;
+
+                horizontalDir.Normalize();
+
+                // compute target yaw (degrees)
+                float targetYaw = Mathf.Atan2(horizontalDir.x, horizontalDir.z) * Mathf.Rad2Deg;
+
+                // current yaw from the chosen rotation target
+                float currentYaw = GetCurrentRotation().eulerAngles.y;
+
+                // compute max angular change this frame
+                float maxDelta = _turnSpeed * (isAir ? _airTurnMultiplier : 1f) * deltaTime;
+
+                // if instantaneous requested and angle is large, snap; otherwise move toward angle
+                float angleDiff = Mathf.DeltaAngle(currentYaw, targetYaw);
+                float newYaw;
+                if (instantaneous && Mathf.Abs(angleDiff) >= _snapAngleThreshold)
                 {
                     newYaw = targetYaw;
                     _rotationVelocity = 0f;
                 }
                 else
                 {
-                    newYaw = Mathf.SmoothDampAngle(currentYaw, targetYaw, ref _rotationVelocity, _rotationSmoothing, _turnSpeed * (isAir ? _airTurnMultiplier : 1f));
+                    if (instantaneous)
+                    {
+                        newYaw = targetYaw;
+                        _rotationVelocity = 0f;
+                    }
+                    else
+                    {
+                        newYaw = Mathf.SmoothDampAngle(currentYaw, targetYaw, ref _rotationVelocity, _rotationSmoothing, _turnSpeed * (isAir ? _airTurnMultiplier : 1f));
+                    }
                 }
-            }
 
-            Quaternion newRot = Quaternion.Euler(0f, newYaw, 0f);
-            ApplyRotation(newRot, true);
+                targetRotation = Quaternion.Euler(0f, newYaw, 0f);
+                ApplyRotation(targetRotation, true);
 
-            if (_debugRotation)
-            {
-                // draw debug lines for target direction vs forward
-                Vector3 origin = transform.position + Vector3.up * 1.2f;
-                Vector3 forward = Quaternion.Euler(0f, currentYaw, 0f) * Vector3.forward;
-                Vector3 targetFwd = Quaternion.Euler(0f, targetYaw, 0f) * Vector3.forward;
-                Debug.DrawLine(origin, origin + forward * 2f, Color.green, 0.1f);
-                Debug.DrawLine(origin, origin + targetFwd * 2f, Color.red, 0.1f);
-                //Debug.Log($"Rotate: curYaw={currentYaw:F1} targetYaw={targetYaw:F1} newYaw={newYaw:F1} angleDiff={angleDiff:F1}");
+                if (_debugRotation)
+                {
+                    // draw debug lines for target direction vs forward
+                    Vector3 origin = transform.position + Vector3.up * 1.2f;
+                    Vector3 forward = Quaternion.Euler(0f, currentYaw, 0f) * Vector3.forward;
+                    Vector3 targetFwd = Quaternion.Euler(0f, targetYaw, 0f) * Vector3.forward;
+                    Debug.DrawLine(origin, origin + forward * 2f, Color.green, 0.1f);
+                    Debug.DrawLine(origin, origin + targetFwd * 2f, Color.red, 0.1f);
+                    //Debug.Log($"Rotate: curYaw={currentYaw:F1} targetYaw={targetYaw:F1} newYaw={newYaw:F1} angleDiff={angleDiff:F1}");
+                }
             }
         }
 
