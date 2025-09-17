@@ -1,4 +1,5 @@
 using JackRussell.Audio;
+using JackRussell.States.Action;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -9,6 +10,7 @@ namespace JackRussell.GameScope
     public class RootLifetimeScope : LifetimeScope
     {
         [SerializeField] private SoundDatabase _soundDatabase;
+        [SerializeField] private GameObject _homingIndicatorPrefab;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -17,7 +19,11 @@ namespace JackRussell.GameScope
             builder.Register<AudioManager>(Lifetime.Singleton);
 
             builder.RegisterInstance(_soundDatabase);
-            
+
+            // Register homing indicator prefab and manager
+            builder.RegisterInstance(_homingIndicatorPrefab);
+            builder.Register<HomingIndicatorManager>(Lifetime.Singleton);
+
             // Vital Router //
             builder.RegisterVitalRouter(routing =>
             {

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System;
+using System.Collections.Generic;
 using JackRussell.States;
 using JackRussell.States.Locomotion;
 using JackRussell.States.Action;
@@ -163,6 +164,7 @@ namespace JackRussell
         public float Pressure { get; private set; }
 
         [Inject] private readonly AudioManager _audioManager;
+        [Inject] private readonly HomingIndicatorManager _indicatorManager;
         [SerializeField] private AudioSource _audioSource;
 
         /// <summary>
@@ -423,6 +425,9 @@ namespace JackRussell
             _actionSM.LogicUpdate(Time.deltaTime);
             _locomotionSM.LogicUpdate(Time.deltaTime);
 
+            // Update homing indicators
+            UpdateHomingIndicators();
+
             // animator generic properties
             UpdateAnimator();
         }
@@ -485,6 +490,28 @@ namespace JackRussell
             _animator.SetFloat(ANIM_SPEED, horizontalVel.magnitude);
             _animator.SetBool(ANIM_IS_GROUNDED, _isGrounded);
             _animator.SetBool(ANIM_IS_SPRINTING, _sprintInput && _moveDirection.sqrMagnitude > 0.01f);
+        }
+
+        private void UpdateHomingIndicators()
+        {
+            if (_indicatorManager == null) return;
+
+            if (!_isGrounded)
+            {
+                var target = FindBestHomingTarget(_homingRange, _homingConeAngle, _homingMask);
+                if (target != null)
+                {
+                    _indicatorManager.ShowIndicators(new List<JackRussell.States.Action.IHomingTarget> { target });
+                }
+                else
+                {
+                    _indicatorManager.HideAllIndicators();
+                }
+            }
+            else
+            {
+                _indicatorManager.HideAllIndicators();
+            }
         }
 
         /// <summary>
@@ -566,6 +593,11 @@ namespace JackRussell
         public void PlaySound(SoundType soundType)
         {
             _audioManager.PlaySound(soundType, _audioSource);
+        }
+
+        public void HideHomingIndicators()
+        {
+            _indicatorManager?.HideAllIndicators();
         }
     }
 }

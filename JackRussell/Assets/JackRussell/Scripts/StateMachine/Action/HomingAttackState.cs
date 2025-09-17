@@ -66,6 +66,7 @@ namespace JackRussell.States.Action
         {
             _player.ClearMovementOverride();
             _player.ClearRotationOverride();
+            _player.HideHomingIndicators();
         }
 
         public override void LogicUpdate()
