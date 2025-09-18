@@ -93,7 +93,7 @@ namespace JackRussell.States.Locomotion
         {
             _railDetector.DetachFromRail();
             _currentRail = null;
-            _player.Animator.SetBool("IsGrinding", false);
+            _player.OnGrindExit();
         }
 
         public override void LogicUpdate()

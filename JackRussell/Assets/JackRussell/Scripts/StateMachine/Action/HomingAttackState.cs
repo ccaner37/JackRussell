@@ -142,7 +142,7 @@ namespace JackRussell.States.Action
                 // apply small bounce using player's jump velocity
                 //Vector3 after = _player.Rigidbody.velocity;
                 //after.y = _player.JumpVelocity;
-                _player.SetVelocityImmediate(new Vector3(0, 5,0));
+                //_player.SetVelocityImmediate(new Vector3(0, 5,0));
 
                 // clear overrides and exit
                 ChangeState(new ActionNoneState(_player, _stateMachine));

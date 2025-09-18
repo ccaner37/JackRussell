@@ -625,7 +625,13 @@ namespace JackRussell
             Animator.Play("5080_0_narancia_01_skill_03_lp");
             Animator.SetBool("IsGrinding", true);
             PlaySound(SoundType.RailStart);
-            PlaySound(SoundType.RailLoop);
+            StartLoopedSound(SoundType.RailLoop);
+        }
+
+        public void OnGrindExit()
+        {
+            Animator.SetBool("IsGrinding", false);
+            StopLoopedSound(SoundType.RailLoop);
         }
 
         public void SetPressure(float pressure)
