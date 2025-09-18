@@ -12,10 +12,12 @@ namespace JackRussell.States.Action
 
         public override void Enter()
         {
+            _player.StartLoopedSound(Audio.SoundType.InhaleLoop);
         }
 
         public override void Exit()
         {
+            _player.StopLoopedSound(Audio.SoundType.InhaleLoop);
         }
 
         public override void LogicUpdate()

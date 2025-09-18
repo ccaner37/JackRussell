@@ -9,5 +9,6 @@ namespace JackRussell.Audio
         Jump,
         RailStart,
         RailLoop,
+        InhaleLoop,
     }
 }

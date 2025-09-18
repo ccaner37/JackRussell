@@ -398,6 +398,8 @@ namespace JackRussell
 
         private void OnEnable()
         {
+            _audioManager.Initialize();
+
             _actions.Player.Enable();
             _actions.Player.Jump.performed += ctx => _jumpRequested = true;
             _actions.Player.Attack.performed += ctx => _attackRequested = true;
@@ -634,6 +636,16 @@ namespace JackRussell
         public void PlaySound(SoundType soundType)
         {
             _audioManager.PlaySound(soundType, _audioSource);
+        }
+
+        public void StartLoopedSound(SoundType soundType, float fadeInDuration = 0.5f)
+        {
+            _audioManager.StartLoopedSound(soundType, fadeInDuration);
+        }
+
+        public void StopLoopedSound(SoundType soundType, float fadeOutDuration = 0.5f)
+        {
+            _audioManager.StopLoopedSound(soundType, fadeOutDuration);
         }
 
         public void HideHomingIndicators()
