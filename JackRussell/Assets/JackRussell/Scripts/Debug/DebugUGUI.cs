@@ -1,11 +1,12 @@
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace JackRussell.DebugTools
 {
     /// <summary>
     /// Simple on-screen debug overlay using OnGUI.
     /// Attach to any GameObject and assign the Player reference (or leave blank to find one at runtime).
-    /// Draws a compact multi-line status panel in the top-left.
+    /// Draws a compact multi-line status panel in the top-left and system debug info in top-right.
     /// </summary>
     public class DebugUGUI : MonoBehaviour
     {
@@ -18,6 +19,15 @@ namespace JackRussell.DebugTools
 
         private GUIStyle _labelStyle;
         private GUIStyle _boxStyle;
+
+        // FPS calculation
+        private float _fpsAccumulator = 0f;
+        private int _fpsFrameCount = 0;
+        private float _fps = 0f;
+
+
+        // Timescale slider
+        private float _timeScale = 1f;
 
         private void Awake()
         {
@@ -33,12 +43,26 @@ namespace JackRussell.DebugTools
             };
 
             _boxStyle = new GUIStyle(EditorGUIUtilitySafe.boxStyle);
+
+            _timeScale = Time.timeScale;
+        }
+
+        private void Update()
+        {
+            // FPS calculation
+            _fpsAccumulator += Time.deltaTime;
+            _fpsFrameCount++;
+            if (_fpsAccumulator >= 0.5f)
+            {
+                _fps = _fpsFrameCount / _fpsAccumulator;
+                _fpsAccumulator = 0f;
+                _fpsFrameCount = 0;
+            }
         }
 
         private void OnGUI()
         {
             if (!_enabledOverlay) return;
-            if (_player == null) return;
 
             if (_labelStyle == null)
             {
@@ -49,6 +73,18 @@ namespace JackRussell.DebugTools
                 };
             }
 
+            // Draw left panel (player info)
+            if (_player != null)
+            {
+                DrawLeftPanel();
+            }
+
+            // Draw right panel (system info)
+            DrawRightPanel();
+        }
+
+        private void DrawLeftPanel()
+        {
             // Build lines
             string movOverrideStr = _player.HasMovementOverride() ? "YES" : "NO";
             Vector3 ov = _player.GetOverrideVelocity();
@@ -95,6 +131,56 @@ namespace JackRussell.DebugTools
                 GUI.Label(new Rect(x, y, boxRect.width - _padding.x, _fontSize + 6), line, _labelStyle);
                 y += _labelStyle.lineHeight;
             }
+        }
+
+        private void DrawRightPanel()
+        {
+            // Build lines for system info
+            long memoryMB = Profiler.GetTotalAllocatedMemoryLong() / 1024 / 1024;
+
+            string[] lines = new string[]
+            {
+                $"FPS: {_fps:F1}",
+                $"Frame Time: {Time.deltaTime * 1000:F1}ms",
+                $"Memory: {memoryMB}MB",
+                $"Time Scale: {_timeScale:F2}",
+            };
+
+            // compute size
+            float width = 0f;
+            float height = 0f;
+            foreach (var line in lines)
+            {
+                Vector2 size = _labelStyle.CalcSize(new GUIContent(line));
+                if (size.x > width) width = size.x;
+                height += size.y;
+            }
+            width += _padding.x * 2f;
+            height += _padding.y * 2f;
+
+            // Add space for slider
+            height += 30f; // slider height
+
+            Rect boxRect = new Rect(Screen.width - width - 10, 10, width, height);
+            // draw background
+            Color prevColor = GUI.color;
+            GUI.color = _bgColor;
+            GUI.Box(boxRect, GUIContent.none, _boxStyle);
+            GUI.color = prevColor;
+
+            // draw lines
+            float y = boxRect.y + _padding.y / 2f;
+            float x = boxRect.x + _padding.x / 2f;
+            foreach (var line in lines)
+            {
+                GUI.Label(new Rect(x, y, boxRect.width - _padding.x, _fontSize + 6), line, _labelStyle);
+                y += _labelStyle.lineHeight;
+            }
+
+            // Draw timescale slider
+            Rect sliderRect = new Rect(x, y, boxRect.width - _padding.x, 20);
+            _timeScale = GUI.HorizontalSlider(sliderRect, _timeScale, 0.1f, 2.0f);
+            Time.timeScale = _timeScale;
         }
     }
 
