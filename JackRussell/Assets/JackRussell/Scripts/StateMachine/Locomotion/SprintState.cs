@@ -11,6 +11,20 @@ namespace JackRussell.States.Locomotion
 
         public override void Enter()
         {
+            // Check pressure
+            if (_player.Pressure < 5f)
+            {
+                // not enough pressure, go back to move or idle
+                if (_player.MoveDirection.sqrMagnitude > 0.001f)
+                    ChangeState(new MoveState(_player, _stateMachine));
+                else
+                    ChangeState(new IdleState(_player, _stateMachine));
+                return;
+            }
+
+            // Consume pressure
+            _player.SetPressure(_player.Pressure - 5f);
+
             // Set animator sprint flag if desired
             _player.OnSprintEnter();
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), true);

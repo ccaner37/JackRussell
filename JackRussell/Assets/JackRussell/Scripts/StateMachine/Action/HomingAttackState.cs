@@ -30,6 +30,17 @@ namespace JackRussell.States.Action
 
         public override void Enter()
         {
+            // Check pressure
+            if (_player.Pressure < 10f)
+            {
+                // not enough pressure, exit immediately
+                ChangeState(new ActionNoneState(_player, _stateMachine));
+                return;
+            }
+
+            // Consume pressure
+            _player.SetPressure(_player.Pressure - 10f);
+
             // find a valid target using player's helper
             _target = _player.FindBestHomingTarget(_player.HomingRange, _player.HomingConeAngle, _player.HomingMask);
             _timer = _maxDuration;

@@ -1,5 +1,6 @@
 using JackRussell.Audio;
 using JackRussell.States.Action;
+using JackRussell.UI;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -23,6 +24,9 @@ namespace JackRussell.GameScope
             // Register homing indicator prefab and manager
             builder.RegisterInstance(_homingIndicatorPrefab);
             builder.Register<HomingIndicatorManager>(Lifetime.Singleton);
+
+            // Register UI components
+            builder.RegisterComponentInHierarchy<PressureBarUI>();
 
             // Vital Router //
             builder.RegisterVitalRouter(routing =>

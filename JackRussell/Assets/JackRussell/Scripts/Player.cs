@@ -8,6 +8,7 @@ using JackRussell.States.Action;
 using VContainer;
 using JackRussell.Audio;
 using JackRussell.Rails;
+using VitalRouter;
 
 namespace JackRussell
 {
@@ -165,6 +166,7 @@ namespace JackRussell
 
         [Inject] private readonly AudioManager _audioManager;
         [Inject] private readonly HomingIndicatorManager _indicatorManager;
+        [Inject] private readonly ICommandPublisher _commandPublisher;
         [SerializeField] private AudioSource _audioSource;
 
         /// <summary>
@@ -623,8 +625,10 @@ namespace JackRussell
 
         public void SetPressure(float pressure)
         {
-            if (pressure >= 100) return;
+            if (pressure >= 100) pressure = 100;
+            if (pressure < 0) pressure = 0;
             Pressure = pressure;
+            _commandPublisher.PublishAsync(new PressureUpdateCommand(Pressure));
         }
 
         public void PlaySound(SoundType soundType)
