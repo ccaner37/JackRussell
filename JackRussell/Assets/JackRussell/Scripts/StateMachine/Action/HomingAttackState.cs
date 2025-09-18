@@ -147,7 +147,7 @@ namespace JackRussell.States.Action
                 // clear overrides and exit
                 ChangeState(new ActionNoneState(_player, _stateMachine));
 
-                UnityEngine.Object.FindAnyObjectByType<ThirdPersonCamera>().ShakeCamera(0.15f, 2f);
+                UnityEngine.Object.FindAnyObjectByType<CinemachineCameraController>().ShakeCamera(1.2f, 2f);
                 _player.PlaySound(Audio.SoundType.Kick);
 
                 return;

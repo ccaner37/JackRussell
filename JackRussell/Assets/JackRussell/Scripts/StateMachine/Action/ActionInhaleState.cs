@@ -8,7 +8,7 @@ namespace JackRussell.States.Action
 
         public override string Name => nameof(ActionInhaleState);
 
-        private float _inhaleSpeed = 2f;
+        private float _inhaleSpeed = 10f;
 
         public override void Enter()
         {
