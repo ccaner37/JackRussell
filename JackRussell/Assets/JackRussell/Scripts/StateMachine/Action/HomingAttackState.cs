@@ -149,6 +149,7 @@ namespace JackRussell.States.Action
 
                 UnityEngine.Object.FindAnyObjectByType<CinemachineCameraController>().ShakeCamera(1.2f, 2f);
                 _player.PlaySound(Audio.SoundType.Kick);
+                _player.PlaySound(Audio.SoundType.Spinz808);
 
                 return;
             }

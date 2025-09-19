@@ -10,5 +10,6 @@ namespace JackRussell.Audio
         RailStart,
         RailLoop,
         InhaleLoop,
+        Spinz808,
     }
 }
