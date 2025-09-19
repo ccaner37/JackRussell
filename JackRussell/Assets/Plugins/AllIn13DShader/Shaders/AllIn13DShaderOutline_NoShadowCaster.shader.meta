@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 900c1dc9f254377408ec79aaac14c26b
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 316173
+  packageName: All In 1 3D-Shader
+  packageVersion: 2.1
+  assetPath: Assets/Plugins/AllIn13DShader/Shaders/AllIn13DShaderOutline_NoShadowCaster.shader
+  uploadId: 791196
