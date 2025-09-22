@@ -171,6 +171,9 @@ namespace JackRussell
         [Inject] private readonly AudioManager _audioManager;
         [Inject] private readonly HomingIndicatorManager _indicatorManager;
         [Inject] private readonly ICommandPublisher _commandPublisher;
+        [Inject] private readonly HomingExitAnimationConfig _homingExitConfig;
+
+        public HomingExitAnimationConfig HomingExitConfig => _homingExitConfig;
         [SerializeField] private AudioSource _audioSource;
 
         /// <summary>

@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61ea544e110211b4e87a5d67aab2a91e, type: 3}
+  m_Name: HomingExitAnimationConfig 1
+  m_EditorClassIdentifier: 
+  exitAnimations:
+  - animationName: HomingExit2
+    enterOffset: 0.11
+    exitNormalizedTime: 0.78
+    transitionDuration: 0.05
+  - animationName: HomingExit3
+    enterOffset: 0.1
+    exitNormalizedTime: 0.5
+    transitionDuration: 0.05
+  - animationName: HomingExit4
+    enterOffset: 0.15
+    exitNormalizedTime: 0.5
+    transitionDuration: 0.07
+  - animationName: HomingExit5
+    enterOffset: 0.15
+    exitNormalizedTime: 0.5
+    transitionDuration: 0.07
+  - animationName: HomingExit6
+    enterOffset: 0.15
+    exitNormalizedTime: 0.5
+    transitionDuration: 0.07
+  - animationName: HomingExit7
+    enterOffset: 0.15
+    exitNormalizedTime: 0.5
+    transitionDuration: 0.07
+  jumpDownAnimation:
+    animationName: Jump_Down_A_Loop
+    enterOffset: 0
+    exitNormalizedTime: 0
+    transitionDuration: 0.1

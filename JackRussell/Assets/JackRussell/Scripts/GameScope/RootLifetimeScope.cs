@@ -5,6 +5,7 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 using VitalRouter.VContainer;
+using JackRussell;
 
 namespace JackRussell.GameScope
 {
@@ -12,6 +13,7 @@ namespace JackRussell.GameScope
     {
         [SerializeField] private SoundDatabase _soundDatabase;
         [SerializeField] private GameObject _homingIndicatorPrefab;
+        [SerializeField] private HomingExitAnimationConfig _homingExitConfig;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -20,6 +22,9 @@ namespace JackRussell.GameScope
             builder.Register<AudioManager>(Lifetime.Singleton);
 
             builder.RegisterInstance(_soundDatabase);
+
+            // Register homing exit animation config
+            builder.RegisterInstance(_homingExitConfig);
 
             // Register homing indicator prefab and manager
             builder.RegisterInstance(_homingIndicatorPrefab);

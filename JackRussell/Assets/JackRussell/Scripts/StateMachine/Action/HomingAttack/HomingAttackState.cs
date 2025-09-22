@@ -171,8 +171,8 @@ namespace JackRussell.States.Action
                     // apply upward push
                     _player.SetVelocityImmediate(new Vector3(0f, _player.JumpVelocity * 0.7f, 0f));
 
-                    // exit state
-                    ChangeState(new ActionNoneState(_player, _stateMachine));
+                    // exit state to HomingExitState for animation transitions
+                    ChangeState(new HomingExitState(_player, _stateMachine));
                     return;
                 }
             }
