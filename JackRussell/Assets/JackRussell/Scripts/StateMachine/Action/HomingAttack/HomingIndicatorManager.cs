@@ -12,7 +12,7 @@ namespace JackRussell.States.Action
     {
         [SerializeField] private GameObject _indicatorPrefab;
 
-        private readonly Dictionary<IHomingTarget, HomingIndicator> _activeIndicators = new();
+        private readonly Dictionary<HomingTarget, HomingIndicator> _activeIndicators = new();
         private Transform _indicatorParent;
 
         [Inject]
@@ -26,12 +26,12 @@ namespace JackRussell.States.Action
         /// Shows indicators on the specified targets.
         /// Hides indicators on targets not in the list.
         /// </summary>
-        public void ShowIndicators(IEnumerable<IHomingTarget> targets)
+        public void ShowIndicators(IEnumerable<HomingTarget> targets)
         {
-            HashSet<IHomingTarget> currentTargets = new HashSet<IHomingTarget>(targets);
+            HashSet<HomingTarget> currentTargets = new HashSet<HomingTarget>(targets);
 
             // Hide indicators for targets no longer valid
-            List<IHomingTarget> toRemove = new List<IHomingTarget>();
+            List<HomingTarget> toRemove = new List<HomingTarget>();
             foreach (var kvp in _activeIndicators)
             {
                 if (!currentTargets.Contains(kvp.Key) || !kvp.Key.IsActive)
@@ -54,7 +54,7 @@ namespace JackRussell.States.Action
                     HomingIndicator indicator = indicatorGO.GetComponent<HomingIndicator>();
                     if (indicator != null)
                     {
-                        indicator.SetTarget(target.Transform);
+                        indicator.SetTarget(target.TargetTransform);
                         _activeIndicators[target] = indicator;
                     }
                     else
@@ -81,7 +81,7 @@ namespace JackRussell.States.Action
         /// <summary>
         /// Hides the indicator for a specific target.
         /// </summary>
-        public void HideIndicator(IHomingTarget target)
+        public void HideIndicator(HomingTarget target)
         {
             if (_activeIndicators.TryGetValue(target, out var indicator))
             {

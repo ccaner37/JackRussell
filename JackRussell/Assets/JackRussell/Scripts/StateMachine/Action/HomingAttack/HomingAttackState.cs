@@ -6,7 +6,7 @@ namespace JackRussell.States.Action
 {
     /// <summary>
     /// Airborne homing attack state.
-    /// Locks to the nearest IHomingTarget within the player's configured range/cone,
+    /// Locks to the nearest HomingTarget within the player's configured range/cone,
     /// drives the player towards it, and invokes OnHomingHit when close enough.
     /// After hit (or timeout) the state returns to ActionNoneState.
     /// </summary>
@@ -16,7 +16,7 @@ namespace JackRussell.States.Action
         private readonly float _speed;
         private readonly float _hitRadius;
 
-        private IHomingTarget _target;
+        private HomingTarget _target;
         private float _timer;
         private float _initialDistance;
         private bool _reachTriggered;
@@ -60,7 +60,7 @@ namespace JackRussell.States.Action
             _player.OnHomingAttackEnter();
 
             // initialize homing attack variables
-            Vector3 toTarget = (_target.Transform.position - _player.transform.position);
+            Vector3 toTarget = (_target.TargetTransform.position - _player.transform.position);
             _initialDistance = toTarget.magnitude;
             _reachTriggered = false;
             _hitStopActive = false;
@@ -121,7 +121,7 @@ namespace JackRussell.States.Action
             }
 
             // recompute direction to target
-            Vector3 toTarget = _target.Transform.position - _player.transform.position;
+            Vector3 toTarget = _target.TargetTransform.position - _player.transform.position;
             float currentDistance = toTarget.magnitude;
             Vector3 horiz = new Vector3(toTarget.x, 0f, toTarget.z); // horizontal direction for hit check
 
@@ -151,6 +151,7 @@ namespace JackRussell.States.Action
                         _hitStopTimer = 0.2f;
                         _player.SetVelocityImmediate(Vector3.zero);
                         _player.ClearMovementOverride();
+                        _target.OnHomingHit(_player);
                     }
                 }
 
@@ -161,14 +162,14 @@ namespace JackRussell.States.Action
                 if (_hitStopTimer <= 0f)
                 {
                     // invoke target hit
-                    _target.OnHomingHit(_player);
+                    //_target.OnHomingHit(_player);
 
                     // play optional particle from player
                     var ps = _player.HomingHitParticle;
                     if (ps != null) ps.Play();
 
                     // apply upward push
-                    _player.SetVelocityImmediate(new Vector3(0f, _player.JumpVelocity, 0f));
+                    _player.SetVelocityImmediate(new Vector3(0f, _player.JumpVelocity * 0.7f, 0f));
 
                     // exit state
                     ChangeState(new ActionNoneState(_player, _stateMachine));

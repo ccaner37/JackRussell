@@ -4,21 +4,21 @@ using JackRussell;
 namespace JackRussell.States.Action
 {
     /// <summary>
-    /// Simple example implementation of IHomingTarget.
+    /// Simple example implementation of HomingTarget.
     /// Attach to enemies, springs or items you want the player to be able to homing-attack.
     /// This example will disable the GameObject on hit; replace with damage/response logic as needed.
     /// </summary>
     [RequireComponent(typeof(Collider))]
-    public class SimpleHomingTarget : MonoBehaviour, IHomingTarget
+    public class SimpleHomingTarget : HomingTarget
     {
         [SerializeField] private bool _isActive = true;
         [SerializeField] private ParticleSystem _hitEffect;
 
-        public Transform Transform => transform;
+        public override Transform TargetTransform => transform;
 
-        public bool IsActive => _isActive;
+        public override bool IsActive => _isActive;
 
-        public void OnHomingHit(Player player)
+        public override void OnHomingHit(Player player)
         {
             // Play an optional hit effect
             if (_hitEffect != null)
