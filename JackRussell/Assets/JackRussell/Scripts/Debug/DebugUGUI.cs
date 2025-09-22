@@ -95,7 +95,7 @@ namespace JackRussell.DebugTools
                 $"Locomotion: {_player.LocomotionStateName} ({_player.LocomotionStateTime:F2}s)",
                 $"Action    : {_player.ActionStateName} ({_player.ActionStateTime:F2}s)",
                 $"Grounded  : {_player.IsGrounded}",
-                $"Velocity  : {_player.Rigidbody.velocity.x:F2}, {_player.Rigidbody.velocity.y:F2}, {_player.Rigidbody.velocity.z:F2} (horiz {new Vector3(_player.Rigidbody.velocity.x,0,_player.Rigidbody.velocity.z).magnitude:F2})",
+                $"Velocity  : {_player.Rigidbody.linearVelocity.x:F2}, {_player.Rigidbody.linearVelocity.y:F2}, {_player.Rigidbody.linearVelocity.z:F2} (horiz {new Vector3(_player.Rigidbody.linearVelocity.x,0,_player.Rigidbody.linearVelocity.z).magnitude:F2})",
                 $"MoveDir   : {_player.MoveDirection.x:F2}, {_player.MoveDirection.y:F2}, {_player.MoveDirection.z:F2}",
                 $"Input     : {_player.MoveInput.x:F2}, {_player.MoveInput.y:F2}  Sprint: {_player.SprintRequested}",
                 $"AnimatorS : {_player.AnimatorSpeed:F2}",

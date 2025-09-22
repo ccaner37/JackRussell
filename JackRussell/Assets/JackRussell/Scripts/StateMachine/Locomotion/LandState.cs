@@ -23,7 +23,7 @@ namespace JackRussell.States.Locomotion
             _player.Animator.SetTrigger(Animator.StringToHash("LandTrigger"));
 
             // Optionally zero vertical velocity to avoid small bounces
-            var v = _player.Rigidbody.velocity;
+            var v = _player.Rigidbody.linearVelocity;
             v.y = 0f;
             _player.SetVelocityImmediate(v);
         }

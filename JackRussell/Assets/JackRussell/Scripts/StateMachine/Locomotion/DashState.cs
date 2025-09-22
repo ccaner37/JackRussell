@@ -31,7 +31,7 @@ namespace JackRussell.States.Locomotion
             _player.Animator.SetBool(Animator.StringToHash("IsDashing"), true);
 
             // Immediately apply velocity for snappy start
-            _player.SetVelocityImmediate(new Vector3(_dashVelocity.x, _player.Rigidbody.velocity.y, _dashVelocity.z));
+            _player.SetVelocityImmediate(new Vector3(_dashVelocity.x, _player.Rigidbody.linearVelocity.y, _dashVelocity.z));
         }
 
         public override void Exit()
@@ -47,7 +47,7 @@ namespace JackRussell.States.Locomotion
             if (_player.ConsumeJumpRequest() && _player.IsGrounded)
             {
                 // Allow jumping out of a dash: set vertical velocity and transition to JumpState
-                Vector3 v = _player.Rigidbody.velocity;
+                Vector3 v = _player.Rigidbody.linearVelocity;
                 v.y = _player.JumpVelocity;
                 _player.SetVelocityImmediate(v);
                 ChangeState(new JumpState(_player, _stateMachine));
@@ -77,7 +77,7 @@ namespace JackRussell.States.Locomotion
             }
 
             // Ensure dash horizontal velocity is maintained
-            Vector3 current = _player.Rigidbody.velocity;
+            Vector3 current = _player.Rigidbody.linearVelocity;
             _player.SetVelocityImmediate(new Vector3(_dashVelocity.x, current.y, _dashVelocity.z));
         }
     }

@@ -59,7 +59,7 @@ namespace JackRussell.States.Locomotion
 
             _currentRail = _railDetector.CurrentRail;
             _currentDistance = _railDetector.CurrentDistance;
-            _grindSpeed = Mathf.Max(_player.Rigidbody.velocity.magnitude, _currentRail.BaseSpeed);
+            _grindSpeed = Mathf.Max(_player.Rigidbody.linearVelocity.magnitude, _currentRail.BaseSpeed);
             _lastPosition = _player.transform.position;
             _isAccelerating = false;
 
@@ -83,9 +83,9 @@ namespace JackRussell.States.Locomotion
                 Vector3 grindDirection = _railDetector.GrindForward ? tangent : -tangent;
                 grindDirection = grindDirection.normalized;
 
-                _player.Rigidbody.velocity = grindDirection * _grindSpeed;
+                _player.Rigidbody.linearVelocity = grindDirection * _grindSpeed;
 
-                Debug.Log($"[GrindState] Final velocity: {_player.Rigidbody.velocity} (speed: {_grindSpeed:F1})");
+                Debug.Log($"[GrindState] Final velocity: {_player.Rigidbody.linearVelocity} (speed: {_grindSpeed:F1})");
             }
         }
 

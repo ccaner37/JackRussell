@@ -92,9 +92,9 @@ namespace JackRussell.Rails
                 float angleScore = 0f;
 
                 // Check angle between player velocity and rail tangent
-                if (_rb != null && _rb.velocity.sqrMagnitude > 0.1f)
+                if (_rb != null && _rb.linearVelocity.sqrMagnitude > 0.1f)
                 {
-                    Vector3 velocityDir = _rb.velocity.normalized;
+                    Vector3 velocityDir = _rb.linearVelocity.normalized;
                     float angle = Vector3.Angle(velocityDir, railTangent);
                     angleScore = Mathf.Min(angle, 180f - angle); // Handle direction reversal
                 }

@@ -75,7 +75,7 @@ namespace JackRussell.States.Locomotion
             Vector3 desired = _player.MoveDirection;
             float targetSpeed = _player.RunSpeed;
 
-            Vector3 currentVel = new Vector3(_player.Rigidbody.velocity.x, 0f, _player.Rigidbody.velocity.z);
+            Vector3 currentVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
             float currentSpeed = currentVel.magnitude;
 
             Vector3 force;
@@ -93,8 +93,8 @@ namespace JackRussell.States.Locomotion
             // Project velocity onto ground plane to keep movement along the surface
             if (_player.IsGrounded)
             {
-                Vector3 projectedVel = Vector3.ProjectOnPlane(_player.Rigidbody.velocity, _player.GroundNormal);
-                _player.Rigidbody.velocity = projectedVel;
+                Vector3 projectedVel = Vector3.ProjectOnPlane(_player.Rigidbody.linearVelocity, _player.GroundNormal);
+                _player.Rigidbody.linearVelocity = projectedVel;
             }
 
             // Rotate toward movement direction

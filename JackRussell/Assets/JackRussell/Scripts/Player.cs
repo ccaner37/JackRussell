@@ -214,7 +214,7 @@ namespace JackRussell
             Vector3 dir = direction;
             if (dir.sqrMagnitude < 0.0001f)
             {
-                Vector3 hv = new Vector3(_rb.velocity.x, 0f, _rb.velocity.z);
+                Vector3 hv = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
                 if (hv.sqrMagnitude < 0.0001f) return; // nothing meaningful to rotate to
                 dir = hv.normalized;
             }
@@ -364,7 +364,7 @@ namespace JackRussell
         // Simple physics helpers states will use
         public void SetVelocityImmediate(Vector3 v)
         {
-            _rb.velocity = v;
+            _rb.linearVelocity = v;
         }
 
         public void AddGroundForce(Vector3 force)
@@ -374,11 +374,11 @@ namespace JackRussell
 
         public void ClampHorizontalSpeed(float maxSpeed)
         {
-            Vector3 horizontal = new Vector3(_rb.velocity.x, 0f, _rb.velocity.z);
+            Vector3 horizontal = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
             if (horizontal.magnitude > maxSpeed)
             {
                 Vector3 clamped = horizontal.normalized * maxSpeed;
-                _rb.velocity = new Vector3(clamped.x, _rb.velocity.y, clamped.z);
+                _rb.linearVelocity = new Vector3(clamped.x, _rb.linearVelocity.y, clamped.z);
             }
         }
 
@@ -534,7 +534,7 @@ namespace JackRussell
 
         private void UpdateAnimator()
         {
-            Vector3 horizontalVel = new Vector3(_rb.velocity.x, 0f, _rb.velocity.z);
+            Vector3 horizontalVel = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
             _animator.SetFloat(ANIM_SPEED, horizontalVel.magnitude);
             _animator.SetBool(ANIM_IS_GROUNDED, _isGrounded);
             _animator.SetBool(ANIM_IS_SPRINTING, _sprintInput && _moveDirection.sqrMagnitude > 0.01f);

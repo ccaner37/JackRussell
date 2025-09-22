@@ -44,7 +44,7 @@ namespace JackRussell.States.Locomotion
             float targetSpeed = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
             Vector3 desiredVel = desired * targetSpeed;
 
-            Vector3 horizontalVel = new Vector3(_player.Rigidbody.velocity.x, 0f, _player.Rigidbody.velocity.z);
+            Vector3 horizontalVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
             Vector3 velocityDiff = desiredVel - horizontalVel;
 
             _player.AddGroundForce(velocityDiff * (_player.AccelAir * k_AirControlFactor));

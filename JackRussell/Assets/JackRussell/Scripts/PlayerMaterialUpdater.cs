@@ -50,7 +50,7 @@ namespace JackRussell
                 var rb = _player.Rigidbody;
                 if (rb != null)
                 {
-                    Vector3 hvel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+                    Vector3 hvel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
                     horizontalSpeed = hvel.magnitude;
                 }
             }

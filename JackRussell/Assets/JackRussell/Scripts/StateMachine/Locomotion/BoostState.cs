@@ -31,7 +31,7 @@ namespace JackRussell.States.Locomotion
             _player.Animator.SetBool(Animator.StringToHash("IsBoosting"), true);
 
             // Immediate velocity change (keep vertical velocity)
-            _player.SetVelocityImmediate(new Vector3(boostVel.x, _player.Rigidbody.velocity.y, boostVel.z));
+            _player.SetVelocityImmediate(new Vector3(boostVel.x, _player.Rigidbody.linearVelocity.y, boostVel.z));
         }
 
         public override void Exit()
@@ -45,7 +45,7 @@ namespace JackRussell.States.Locomotion
             // Allow jump during boost
             if (_player.ConsumeJumpRequest() && _player.IsGrounded)
             {
-                Vector3 v = _player.Rigidbody.velocity;
+                Vector3 v = _player.Rigidbody.linearVelocity;
                 v.y = _player.JumpVelocity;
                 _player.SetVelocityImmediate(v);
                 ChangeState(new JumpState(_player, _stateMachine));
@@ -78,7 +78,7 @@ namespace JackRussell.States.Locomotion
             Vector3 boostVel = steer.normalized * _player.BoostSpeed;
             _player.RequestMovementOverride(boostVel, _timer, exclusive: true);
             // Maintain horizontal component
-            Vector3 cur = _player.Rigidbody.velocity;
+            Vector3 cur = _player.Rigidbody.linearVelocity;
             _player.SetVelocityImmediate(new Vector3(boostVel.x, cur.y, boostVel.z));
         }
     }
