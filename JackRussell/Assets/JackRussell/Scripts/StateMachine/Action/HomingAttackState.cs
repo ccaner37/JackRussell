@@ -52,8 +52,7 @@ namespace JackRussell.States.Action
                 return;
             }
 
-            _player.Animator.ResetTrigger("HomingAttackReach");
-            _player.Animator.Play("3001_1_stapla_05_Kick_01_in");
+            _player.OnHomingAttackEnter();
 
             // request movement override toward target (will be refreshed each physics update)
             Vector3 toTarget = (_target.Transform.position - _player.transform.position);
@@ -63,11 +62,10 @@ namespace JackRussell.States.Action
             vel.y = _player.Rigidbody.velocity.y;
             _player.RequestMovementOverride(vel, _maxDuration, true);
 
-            // request rotation override so the model faces the target while homing
-            if (horiz.sqrMagnitude > 0.0001f)
+            // rotate towards target (full 3D rotation, instantaneous for initial snap)
+            if (toTarget.sqrMagnitude > 0.0001f)
             {
-                Quaternion look = Quaternion.LookRotation(horiz.normalized, Vector3.up);
-                _player.RequestRotationOverride(look, _maxDuration, true);
+                _player.RotateTowardsDirection(toTarget, Time.fixedDeltaTime, isAir: true, instantaneous: true, allow3DRotation: true);
             }
 
             _player.PlaySound(Audio.SoundType.HomingAttackStart);
@@ -76,7 +74,6 @@ namespace JackRussell.States.Action
         public override void Exit()
         {
             _player.ClearMovementOverride();
-            _player.ClearRotationOverride();
             _player.HideHomingIndicators();
         }
 
@@ -106,31 +103,29 @@ namespace JackRussell.States.Action
                 return;
             }
 
-            // recompute horizontal direction to target and steer
+            // recompute direction to target
             Vector3 toTarget = _target.Transform.position - _player.transform.position;
-            Vector3 horiz = new Vector3(toTarget.x, toTarget.y, toTarget.z);
+            Vector3 horiz = new Vector3(toTarget.x, 0f, toTarget.z); // horizontal direction for rotation and hit check
             Vector3 currentVel = _player.Rigidbody.velocity;
 
-            if (horiz.sqrMagnitude > 0.0001f)
+            if (toTarget.sqrMagnitude > 0.0001f)
             {
-                Vector3 desired = horiz.normalized * _speed;
-                // preserve vertical velocity
-                //desired.y = currentVel.y;
+                Vector3 desired = toTarget.normalized * _speed; // use full direction for movement to allow vertical movement
                 // apply immediate velocity so physics drives the motion predictably
                 _player.SetVelocityImmediate(desired);
 
-                // refresh movement override and rotation override so timers remain accurate
+                // refresh movement override so timers remain accurate
                 _player.RequestMovementOverride(desired, Mathf.Max(0f, _timer), true);
 
-                Quaternion look = Quaternion.LookRotation(horiz.normalized, Vector3.up);
-                _player.RequestRotationOverride(look, Mathf.Max(0f, _timer), true);
+                // rotate towards target (full 3D rotation, smooth)
+                _player.RotateTowardsDirection(toTarget, Time.fixedDeltaTime, isAir: true, instantaneous: false, allow3DRotation: true);
             }
 
             // hit check (use horizontal distance)
             float horizDist = horiz.magnitude;
             if (horizDist <= _hitRadius)
             {
-                _player.Animator.SetTrigger("HomingAttackReach");
+                _player.OnHomingAttackReach();
 
                 // invoke target hit
                 _target.OnHomingHit(_player);
