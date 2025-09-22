@@ -18,6 +18,11 @@ namespace JackRussell.States.Action
 
         private IHomingTarget _target;
         private float _timer;
+        private float _initialDistance;
+        private bool _reachTriggered;
+        private bool _effectTriggered;
+        private bool _hitStopActive;
+        private float _hitStopTimer;
 
         public HomingAttackState(Player player, StateMachine stateMachine) : base(player, stateMachine)
         {
@@ -54,12 +59,17 @@ namespace JackRussell.States.Action
 
             _player.OnHomingAttackEnter();
 
-            // request movement override toward target (will be refreshed each physics update)
+            // initialize homing attack variables
             Vector3 toTarget = (_target.Transform.position - _player.transform.position);
+            _initialDistance = toTarget.magnitude;
+            _reachTriggered = false;
+            _hitStopActive = false;
+
+            // request movement override toward target (will be refreshed each physics update)
             Vector3 horiz = new Vector3(toTarget.x, 0f, toTarget.z);
             Vector3 vel = (horiz.sqrMagnitude > 0.0001f ? horiz.normalized : Vector3.zero) * _speed;
             // preserve current vertical velocity by adding rb.velocity.y
-            vel.y = _player.Rigidbody.velocity.y;
+            vel.y = _player.Rigidbody.linearVelocity.y;
             _player.RequestMovementOverride(vel, _maxDuration, true);
 
             // rotate towards target (full 3D rotation, instantaneous for initial snap)
@@ -75,6 +85,13 @@ namespace JackRussell.States.Action
         {
             _player.ClearMovementOverride();
             _player.HideHomingIndicators();
+
+            // Reset vertical rotation to horizontal
+            Quaternion currentRot = _player.transform.rotation;
+            Vector3 euler = currentRot.eulerAngles;
+            euler.x = 0f; // reset pitch
+            euler.z = 0f; // reset roll
+            _player.transform.rotation = Quaternion.Euler(euler);
         }
 
         public override void LogicUpdate()
@@ -105,48 +122,69 @@ namespace JackRussell.States.Action
 
             // recompute direction to target
             Vector3 toTarget = _target.Transform.position - _player.transform.position;
-            Vector3 horiz = new Vector3(toTarget.x, 0f, toTarget.z); // horizontal direction for rotation and hit check
-            Vector3 currentVel = _player.Rigidbody.velocity;
+            float currentDistance = toTarget.magnitude;
+            Vector3 horiz = new Vector3(toTarget.x, 0f, toTarget.z); // horizontal direction for hit check
 
-            if (toTarget.sqrMagnitude > 0.0001f)
-            {
-                Vector3 desired = toTarget.normalized * _speed; // use full direction for movement to allow vertical movement
-                // apply immediate velocity so physics drives the motion predictably
-                _player.SetVelocityImmediate(desired);
-
-                // refresh movement override so timers remain accurate
-                _player.RequestMovementOverride(desired, Mathf.Max(0f, _timer), true);
-
-                // rotate towards target (full 3D rotation, smooth)
-                _player.RotateTowardsDirection(toTarget, Time.fixedDeltaTime, isAir: true, instantaneous: false, allow3DRotation: true);
-            }
-
-            // hit check (use horizontal distance)
-            float horizDist = horiz.magnitude;
-            if (horizDist <= _hitRadius)
+            // trigger OnHomingAttackReach when close to target
+            if (!_reachTriggered && currentDistance <= 4f)
             {
                 _player.OnHomingAttackReach();
+                _reachTriggered = true;
+            }
 
-                // invoke target hit
-                _target.OnHomingHit(_player);
-
-                // play optional particle from player
-                var ps = _player.HomingHitParticle;
-                if (ps != null) ps.Play();
-
-                // apply small bounce using player's jump velocity
-                //Vector3 after = _player.Rigidbody.velocity;
-                //after.y = _player.JumpVelocity;
-                //_player.SetVelocityImmediate(new Vector3(0, 5,0));
-
-                // clear overrides and exit
-                ChangeState(new ActionNoneState(_player, _stateMachine));
-
+            if (!_effectTriggered && currentDistance <= 2f)
+            {
+                // camera shake and sounds
                 UnityEngine.Object.FindAnyObjectByType<CinemachineCameraController>().ShakeCamera(1.2f, 2f);
                 _player.PlaySound(Audio.SoundType.Kick);
                 _player.PlaySound(Audio.SoundType.Spinz808);
+                _effectTriggered = true;
+            }
 
-                return;
+            // hit check (use 3D distance for consistency, with buffer to prevent overshooting)
+                if (currentDistance <= _hitRadius)
+                {
+                    if (!_hitStopActive)
+                    {
+                        // start hit stop
+                        _hitStopActive = true;
+                        _hitStopTimer = 0.2f;
+                        _player.SetVelocityImmediate(Vector3.zero);
+                        _player.ClearMovementOverride();
+                    }
+                }
+
+            if (_hitStopActive)
+            {
+                // during hit stop
+                _hitStopTimer -= Time.fixedDeltaTime;
+                if (_hitStopTimer <= 0f)
+                {
+                    // invoke target hit
+                    _target.OnHomingHit(_player);
+
+                    // play optional particle from player
+                    var ps = _player.HomingHitParticle;
+                    if (ps != null) ps.Play();
+
+                    // apply upward push
+                    _player.SetVelocityImmediate(new Vector3(0f, _player.JumpVelocity, 0f));
+
+                    // exit state
+                    ChangeState(new ActionNoneState(_player, _stateMachine));
+                    return;
+                }
+            }
+            else
+            {
+                // normal movement and rotation
+                if (toTarget.sqrMagnitude > 0.0001f)
+                {
+                    Vector3 desired = toTarget.normalized * _speed;
+                    _player.SetVelocityImmediate(desired);
+                    _player.RequestMovementOverride(desired, Mathf.Max(0f, _timer), true);
+                    _player.RotateTowardsDirection(toTarget, Time.fixedDeltaTime, isAir: true, instantaneous: false, allow3DRotation: true);
+                }
             }
         }
     }
