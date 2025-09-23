@@ -17,6 +17,7 @@ namespace JackRussell.Rails
         [SerializeField] private float _acceleration = 20f;
         [SerializeField] private float _deceleration = 25f;
         [SerializeField] private bool _allowDismount = true;
+        [SerializeField] private bool _isGrindable = true; // Whether this rail can be used for grinding
         [SerializeField] private LayerMask _playerLayer = 1 << 0; // Default layer
 
         [Header("Detection")]
@@ -39,6 +40,7 @@ namespace JackRussell.Rails
         public float Acceleration => _acceleration;
         public float Deceleration => _deceleration;
         public bool AllowDismount => _allowDismount;
+        public bool IsGrindable => _isGrindable;
         public LayerMask PlayerLayer => _playerLayer;
         public float AttachDistance => _attachDistance;
         public Vector3 AttachOffset => _attachOffset;

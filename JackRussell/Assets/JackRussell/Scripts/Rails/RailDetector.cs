@@ -67,6 +67,12 @@ namespace JackRussell.Rails
 
             foreach (SplineRail rail in allRails)
             {
+                // Skip rails that are not grindable (e.g., path-only rails)
+                if (!rail.IsGrindable)
+                {
+                    continue;
+                }
+
                 // Sample points along the spline to find the closest point to player
                 float closestSplineDistance = rail.FindClosestDistance(_playerTransform.position);
                 rail.GetPositionAndTangent(closestSplineDistance, out Vector3 closestSplinePos, out Vector3 railTangent);

@@ -26,5 +26,6 @@ namespace JackRussell.States.Action
         /// </summary>
         /// <param name="player">Player that hit the target.</param>
         public abstract void OnHomingHit(Player player);
+        public virtual void OnHitStopEnd(Player player) {}
     }
 }

@@ -142,18 +142,18 @@ namespace JackRussell.States.Action
             }
 
             // hit check (use 3D distance for consistency, with buffer to prevent overshooting)
-                if (currentDistance <= _hitRadius)
+            if (currentDistance <= _hitRadius) // hit radius 1 in player rn
+            {
+                if (!_hitStopActive)
                 {
-                    if (!_hitStopActive)
-                    {
-                        // start hit stop
-                        _hitStopActive = true;
-                        _hitStopTimer = 0.2f;
-                        _player.SetVelocityImmediate(Vector3.zero);
-                        _player.ClearMovementOverride();
-                        _target.OnHomingHit(_player);
-                    }
+                    // start hit stop
+                    _hitStopActive = true;
+                    _hitStopTimer = 0.22f;
+                    _player.SetVelocityImmediate(Vector3.zero);
+                    _player.ClearMovementOverride();
+                    _target.OnHomingHit(_player);
                 }
+            }
 
             if (_hitStopActive)
             {
@@ -162,14 +162,15 @@ namespace JackRussell.States.Action
                 if (_hitStopTimer <= 0f)
                 {
                     // invoke target hit
-                    //_target.OnHomingHit(_player);
+                    _target.OnHitStopEnd(_player);
 
                     // play optional particle from player
                     var ps = _player.HomingHitParticle;
                     if (ps != null) ps.Play();
 
-                    // apply upward push
-                    _player.SetVelocityImmediate(new Vector3(0f, _player.JumpVelocity * 0.7f, 0f));
+                    // apply upward push with slight backward momentum
+                    Vector3 backwardPush = -_player.transform.forward * (_player.JumpVelocity * 0.3f);
+                    _player.SetVelocityImmediate(new Vector3(backwardPush.x, _player.JumpVelocity * 0.85f, backwardPush.z));
 
                     // exit state to HomingExitState for animation transitions
                     ChangeState(new HomingExitState(_player, _stateMachine));
