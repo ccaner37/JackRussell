@@ -29,11 +29,13 @@ namespace JackRussell.States.Locomotion
             _player.OnSprintEnter();
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), true);
             _player.PlaySound(Audio.SoundType.SprintStart);
+            _player.PlaySprintSpeedUp();
         }
 
         public override void Exit()
         {
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), false);
+            _player.StopSprintSpeedUp();
         }
 
         public override void LogicUpdate()

@@ -175,6 +175,7 @@ namespace JackRussell
 
         public HomingExitAnimationConfig HomingExitConfig => _homingExitConfig;
         [SerializeField] private AudioSource _audioSource;
+        [SerializeField] private AudioSource _sprintAudioSource;
 
         /// <summary>
         /// Request a temporary rotation override. If exclusive=true locomotion rotation is suspended.
@@ -674,6 +675,27 @@ namespace JackRussell
         public void StopLoopedSound(SoundType soundType, float fadeOutDuration = 0.5f)
         {
             _audioManager.StopLoopedSound(soundType, fadeOutDuration);
+        }
+
+        public void PlaySprintSpeedUp()
+        {
+            if (_sprintAudioSource != null)
+            {
+                _sprintAudioSource.volume = 1f;
+            }
+            _audioManager.PlaySound(SoundType.SprintSpeedUp, _sprintAudioSource);
+        }
+
+        public void StopSprintSpeedUp(float fadeDuration = 0.5f)
+        {
+            if (_sprintAudioSource != null && _sprintAudioSource.isPlaying)
+            {
+                _sprintAudioSource.DOKill();
+                _sprintAudioSource.DOFade(0f, fadeDuration).OnComplete(() =>
+                {
+                    if (_sprintAudioSource != null) _sprintAudioSource.Stop();
+                });
+            }
         }
 
         public void HideHomingIndicators()

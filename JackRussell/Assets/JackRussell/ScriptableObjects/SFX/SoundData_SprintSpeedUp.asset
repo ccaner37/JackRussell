@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20f33aee7434dad44b071bf1db34737f, type: 3}
-  m_Name: SoundData_SprintStart
+  m_Name: SoundData_SprintSpeedUp
   m_EditorClassIdentifier: 
-  SoundType: 3
+  SoundType: 10
   AudioClips:
-  - {fileID: 8300000, guid: feb14b41195e2e34a97dd4de0c0fc260, type: 3}
+  - {fileID: 8300000, guid: 154034b1ab11fe2418b76d7ab0ae1f61, type: 3}
   Volume: 1
   Loop: 0
   IsRandomized: 0

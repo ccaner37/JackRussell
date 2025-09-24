@@ -12,5 +12,6 @@ namespace JackRussell.Audio
         InhaleLoop,
         Spinz808,
         Bell,
+        SprintSpeedUp,
     }
 }
