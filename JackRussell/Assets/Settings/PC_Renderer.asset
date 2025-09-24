@@ -43,6 +43,29 @@ MonoBehaviour:
       restoreCamera: 1
       offset: {x: 0, y: 0, z: 0, w: 0}
       cameraFieldOfView: 60
+--- !u!114 &-2572896121660252506
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7822966882a22ee42b0f91cd13b0c81d, type: 3}
+  m_Name: SpeedLinesRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  speedLinesMaterial: {fileID: 2100000, guid: 30f52a5782b07aa4687181b121e4f66f, type: 2}
+  intensity: 0
+  animationSpeed: 3
+  lineCount: 24
+  innerRadius: 0.729
+  outerRadius: 2
+  lineWidth: 0.03
+  fadeStrength: 2
+  speedLinesColor: {r: 1, g: 1, b: 1, a: 1}
+  renderPassEvent: 600
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72,7 +95,8 @@ MonoBehaviour:
   - {fileID: 3391906448296828122}
   - {fileID: -6076035065493464683}
   - {fileID: 6202913557589794039}
-  m_RendererFeatureMap: ad6b866f10d7b46cdadc1692f178122f00000000000000000000000000000000
+  - {fileID: -2572896121660252506}
+  m_RendererFeatureMap: ad6b866f10d7b46cdadc1692f178122f00000000000000000000000000000000a6de75f09b3c4bdc
   m_UseNativeRenderPass: 1
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -129,11 +153,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
-  m_Name: Render Feature - Outline Transparent
+  m_Name: Render Feature  Outline Transparent
   m_EditorClassIdentifier: 
   m_Active: 1
   settings:
-    passTag: RenderObjectsFeature
+    passTag: Render Feature  Outline Transparent
     Event: 500
     filterSettings:
       RenderQueueType: 1

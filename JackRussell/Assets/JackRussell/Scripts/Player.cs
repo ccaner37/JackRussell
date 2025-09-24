@@ -53,8 +53,10 @@ namespace JackRussell
 
         [Header("Effects")]
         [SerializeField] private Material _playerMaterial;
-        [SerializeField] private VisualEffect _smokeVisualEffect; 
+        [SerializeField] private VisualEffect _smokeVisualEffect;
         [SerializeField] private ParticleSystem _shockwaveParticle;
+
+        public Material PlayerMaterial => _playerMaterial;
 
         // Homing attack configuration (used by action states)
         [Header("Homing Attack")]

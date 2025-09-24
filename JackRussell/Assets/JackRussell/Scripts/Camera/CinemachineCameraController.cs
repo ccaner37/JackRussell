@@ -3,6 +3,7 @@ using Unity.Cinemachine;
 using UnityEngine.InputSystem;
 using JackRussell.Rails;
 using System;
+using UnityEngine.Rendering;
 
 namespace JackRussell.CameraController
 {
@@ -58,6 +59,8 @@ namespace JackRussell.CameraController
         private float _currentRadius;
         private float _targetRadius;
         private float _radiusVelocity;
+
+        public Volume Volume;
 
         private void Awake()
         {
@@ -152,6 +155,11 @@ namespace JackRussell.CameraController
 
             impulseSource.GenerateImpulseWithVelocity(impulseVelocity);
         }
+
+        /// <summary>
+        /// Gets the CinemachineCamera component.
+        /// </summary>
+        public CinemachineCamera GetCinemachineCamera() => _cinemachineCamera;
 
         /// <summary>
         /// Sets the camera target at runtime.

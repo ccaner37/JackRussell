@@ -1,10 +1,25 @@
 using JackRussell;
+using JackRussell.CameraController;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
+using Unity.Cinemachine;
+using DG.Tweening;
 
 namespace JackRussell.States.Locomotion
 {
     public class SprintState : PlayerStateBase
     {
+        private float _defaultFOV = 60f;
+        private float _defaultLensDistortion = 0f;
+        private float _defaultChromaticAberration = 0f;
+        private float _defaultGlitchAmount = 0f;
+        private CinemachineCameraController _cameraController;
+        private Volume _volume;
+        private LensDistortion _lensDistortion;
+        private ChromaticAberration _chromaticAberration;
+        private RendererController _rendererController;
+
         public SprintState(Player player, StateMachine stateMachine) : base(player, stateMachine) { }
 
         public override string Name => nameof(SprintState);
@@ -30,12 +45,64 @@ namespace JackRussell.States.Locomotion
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), true);
             _player.PlaySound(Audio.SoundType.SprintStart);
             _player.PlaySprintSpeedUp();
+
+            // Find components
+            _cameraController = Object.FindObjectOfType<CinemachineCameraController>();
+            _volume = _cameraController.Volume;
+            _rendererController = Object.FindObjectOfType<RendererController>();
+            if (_volume != null && _volume.profile != null)
+            {
+                _volume.profile.TryGet<LensDistortion>(out _lensDistortion);
+                _volume.profile.TryGet<ChromaticAberration>(out _chromaticAberration);
+            }
+
+            // Store defaults
+            if (_cameraController != null && _cameraController.GetCinemachineCamera() != null)
+            {
+                _defaultFOV = _cameraController.GetCinemachineCamera().Lens.FieldOfView;
+            }
+            if (_lensDistortion != null)
+            {
+                _defaultLensDistortion = _lensDistortion.intensity.value;
+            }
+            if (_chromaticAberration != null)
+            {
+                _defaultChromaticAberration = _chromaticAberration.intensity.value;
+            }
+            if (_player.PlayerMaterial != null)
+            {
+                _defaultGlitchAmount = _player.PlayerMaterial.GetFloat("_GlitchAmount");
+                _player.PlayerMaterial.EnableKeyword("_GLITCH_ON");
+            }
         }
 
         public override void Exit()
         {
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), false);
             _player.StopSprintSpeedUp();
+
+            // Revert sprint effects
+            if (_cameraController != null && _cameraController.GetCinemachineCamera() != null)
+            {
+                _cameraController.GetCinemachineCamera().Lens.FieldOfView = _defaultFOV;
+            }
+            if (_lensDistortion != null)
+            {
+                _lensDistortion.intensity.value = _defaultLensDistortion;
+            }
+            if (_chromaticAberration != null)
+            {
+                _chromaticAberration.intensity.value = _defaultChromaticAberration;
+            }
+            if (_player.PlayerMaterial != null)
+            {
+                _player.PlayerMaterial.SetFloat("_GlitchAmount", _defaultGlitchAmount);
+                _player.PlayerMaterial.DisableKeyword("_GLITCH_ON");
+            }
+            if (_rendererController != null)
+            {
+                _rendererController.SetSpeedLinesIntensity(0f);
+            }
         }
 
         public override void LogicUpdate()
@@ -101,6 +168,40 @@ namespace JackRussell.States.Locomotion
 
             // Rotate toward movement direction
             _player.RotateTowardsDirection(desired, Time.fixedDeltaTime, isAir: false);
+
+            // Update sprint effects
+            float factor = Mathf.Clamp01(currentSpeed / _player.RunSpeed);
+            UpdateSprintEffects(factor);
+        }
+
+        private void UpdateSprintEffects(float factor)
+        {
+            // FOV
+            if (_cameraController != null && _cameraController.GetCinemachineCamera() != null)
+            {
+                float targetFOV = _defaultFOV + (80f - _defaultFOV) * factor;
+                _cameraController.GetCinemachineCamera().Lens.FieldOfView = targetFOV;
+            }
+            // Lens Distortion
+            if (_lensDistortion != null)
+            {
+                _lensDistortion.intensity.value = -0.1f * factor;
+            }
+            // Chromatic Aberration
+            if (_chromaticAberration != null)
+            {
+                _chromaticAberration.intensity.value = 0.1f * factor;
+            }
+            // Glitch
+            if (_player.PlayerMaterial != null)
+            {
+                _player.PlayerMaterial.SetFloat("_GlitchAmount", 0.05f * factor);
+            }
+            // Speed Lines
+            if (_rendererController != null)
+            {
+                _rendererController.SetSpeedLinesIntensity(factor);
+            }
         }
     }
 }

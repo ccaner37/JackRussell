@@ -33,6 +33,9 @@ namespace JackRussell.GameScope
             // Register UI components
             builder.RegisterComponentInHierarchy<PressureBarUI>();
 
+            // Register renderer controller
+            builder.RegisterComponentInHierarchy<RendererController>();
+
             // Vital Router //
             builder.RegisterVitalRouter(routing =>
             {
