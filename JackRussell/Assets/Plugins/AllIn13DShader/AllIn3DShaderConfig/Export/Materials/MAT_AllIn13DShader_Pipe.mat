@@ -7,16 +7,15 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MAT_AllIn13DShader
+  m_Name: MAT_AllIn13DShader_Pipe
   m_Shader: {fileID: 4800000, guid: 0dde7f0097aeb2541aea684ca0ad0e3c, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _CAST_SHADOWS_ON
-  - _FADE_BURN_ON
   - _FOG_ON
   - _GREYSCALESTAGE_BEFORELIGHTING
-  - _HIGHLIGHTS_ON
+  - _HEIGHT_GRADIENT_ON
   - _LIGHTMODEL_CLASSIC
   - _MATCAPBLENDMODE_MULTIPLY
   - _OUTLINETYPE_NONE
@@ -47,7 +46,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3000
+  m_CustomRenderQueue: 2000
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -156,8 +155,8 @@ Material:
     - _AlphaRoundOn: 0
     - _AnisoShininess: 0.85
     - _Anisotropy: 0.45
-    - _BlendDst: 10
-    - _BlendSrc: 5
+    - _BlendDst: 0
+    - _BlendSrc: 1
     - _BlendingMaskCutoffB: 0.1
     - _BlendingMaskCutoffG: 0.1
     - _BlendingMaskCutoffWhite: 0.15
@@ -177,7 +176,7 @@ Material:
     - _Contrast: 1
     - _ContrastBrightnessOn: 0
     - _ContrastLM: 1
-    - _CullingMode: 2
+    - _CullingMode: 0
     - _CustomAmbientLightOn: 0
     - _CustomShadowColorOn: 0
     - _DepthColoringOn: 0
@@ -194,12 +193,12 @@ Material:
     - _EmissionSelfGlow: 1
     - _FaceDownCutoff: 0.25
     - _FadeAmount: 0
-    - _FadeBurnOn: 1
-    - _FadeBurnWidth: 0.02
+    - _FadeBurnOn: 0
+    - _FadeBurnWidth: 0.01
     - _FadeByCamDistanceOn: 0
     - _FadeOn: 0
     - _FadePower: 1
-    - _FadeTransition: 0.246
+    - _FadeTransition: 0.2
     - _FogOn: 1
     - _GeneralAlpha: 1
     - _Glitch: 0
@@ -216,14 +215,14 @@ Material:
     - _HandDrawnAmount: 10
     - _HandDrawnSpeed: 5
     - _HardnessFakeGI: 0.734
-    - _HeightGradientOn: 0
+    - _HeightGradientOn: 1
     - _HeightGradientPositionSpace: 0
     - _HighlightCutoff: 0.5
     - _HighlightSmoothness: 0.5
-    - _Highlights: 1
+    - _Highlights: 0
     - _HighlightsStrength: 1
     - _Hit: 0
-    - _HitBlend: 0.176
+    - _HitBlend: 1
     - _HitGlow: 5
     - _Hologram: 0
     - _HologramAccentAlpha: 0.5
@@ -244,7 +243,7 @@ Material:
     - _HueShiftEnabled: 0
     - _HueShiftLM: 0
     - _InflateBlend: 1
-    - _IntersectionFadeFactor: 0.099999994
+    - _IntersectionFadeFactor: 1
     - _IntersectionFadeOn: 0
     - _IntersectionGlowOn: 0
     - _LightModel: 1
@@ -278,7 +277,7 @@ Material:
     - _ReceivedShadowsType: 0
     - _Reflections: 1
     - _ReflectionsAtten: 1
-    - _RenderPreset: 2
+    - _RenderPreset: 1
     - _RimAttenuation: 1
     - _RimLighting: 1
     - _RimLightingStage: 1
@@ -289,12 +288,12 @@ Material:
     - _ScaleWithCameraDistance: 0
     - _ScreenSpaceUVOn: 0
     - _ScrollTextureOn: 0
-    - _ScrollTextureX: 0
-    - _ScrollTextureY: 0
+    - _ScrollTextureX: 1
+    - _ScrollTextureY: 1
     - _ShadingModel: 1
     - _ShadowCutoff: 0.2
     - _ShakeBlend: 1
-    - _ShakeSpeedMult: 0.25
+    - _ShakeSpeedMult: 1
     - _Shininess: 6.94
     - _Smoothness: 0.5
     - _SpecularAtten: 1
@@ -342,21 +341,21 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _AOColor: {r: 0, g: 0, b: 0, a: 0}
-    - _Color: {r: 0.9150943, g: 0.9150943, b: 0.9150943, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _CustomAmbientColor: {r: 0.65, g: 0.65, b: 0.65, a: 1}
     - _DepthGlowColor: {r: 1, g: 0.9869999, b: 0.6, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FadeBurnColor: {r: 2.6701567, g: 0.052356016, b: 0, a: 1}
     - _GlitchOffset: {r: -0.5, g: 0, b: 0, a: 0}
-    - _GradientHeightColor01: {r: 0.2, g: 0.2, b: 0.2, a: 1}
-    - _GradientHeightColor02: {r: 1, g: 1, b: 1, a: 1}
+    - _GradientHeightColor01: {r: 1, g: 1, b: 1, a: 1}
+    - _GradientHeightColor02: {r: 0, g: 0, b: 0, a: 1}
     - _GreyscaleTintColor: {r: 1, g: 1, b: 1, a: 1}
     - _HighlightOffset: {r: 0, g: 0, b: 0, a: 0}
     - _HighlightsColor: {r: 2, g: 2, b: 2, a: 1}
     - _HitColor: {r: 1, g: 1, b: 1, a: 1}
     - _HologramColor: {r: 1.25, g: 2.8, b: 6.8, a: 1}
     - _HologramLineDirection: {r: 0, g: 1, b: 0, a: 0}
-    - _RimColor: {r: 1, g: 1, b: 1, a: 1}
+    - _RimColor: {r: 1, g: 0, b: 0, a: 1}
     - _RimOffset: {r: 0, g: 0, b: 0, a: 0}
     - _SSSColor: {r: 1, g: 1, b: 1, a: 1}
     - _ShakeMaxDisplacement: {r: 0.1, g: 0.1, b: 0.1, a: 0}
