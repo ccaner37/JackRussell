@@ -159,7 +159,7 @@ namespace JackRussell.Rails
 
             // Draw attach distance as a sphere around the rail's center
             Gizmos.color = Color.blue;
-            Gizmos.DrawWireSphere(transform.position, _attachDistance);
+            //Gizmos.DrawWireSphere(transform.position, _attachDistance);
 
             // Also draw attach distance at key points along the spline
             if (_splineContainer.Spline.Count >= 2)

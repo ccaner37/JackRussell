@@ -52,6 +52,9 @@ namespace JackRussell.States.Locomotion
             // Allow existing horizontal momentum to persist; optionally clamp to a large air max
             _player.ClampHorizontalSpeed(Mathf.Max(targetSpeed, horizontalVel.magnitude));
 
+            // Rotate in air with reduced responsiveness
+            _player.RotateTowardsDirection(desired, Time.fixedDeltaTime, isAir: true);
+
             // Apply extra gravity if user configured gravity multiplier (handled by Player or states if necessary)
         }
     }

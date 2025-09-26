@@ -1,5 +1,7 @@
 using UnityEngine;
 using JackRussell;
+using System.Collections;
+using DG.Tweening;
 
 namespace JackRussell.States.Action
 {
@@ -13,6 +15,7 @@ namespace JackRussell.States.Action
     {
         [SerializeField] private bool _isActive = true;
         [SerializeField] private ParticleSystem _hitEffect;
+        [SerializeField] private MeshRenderer _renderer;
 
         public override Transform TargetTransform => transform;
 
@@ -27,8 +30,17 @@ namespace JackRussell.States.Action
             }
 
             // Example behavior: deactivate the target (could be destroy, apply damage, spring bounce, etc.)
-            //_isActive = false;
-            //gameObject.SetActive(false);
+            transform.DOPunchScale(Vector3.one, 0.25f, 10, 1).OnComplete(() => StartCoroutine(EnableBack()));
+        }
+
+        private IEnumerator EnableBack()
+        {
+            //yield return new WaitForSeconds(0.1f);
+            _isActive = false;
+            _renderer.enabled = false;
+            yield return new WaitForSeconds(2f);
+            _renderer.enabled = true;
+            _isActive = true;
         }
 
 #if UNITY_EDITOR

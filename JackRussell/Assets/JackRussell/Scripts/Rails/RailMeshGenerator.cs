@@ -31,28 +31,6 @@ namespace JackRussell.Rails
         private SplineContainer _splineContainer;
         private Mesh _generatedMesh;
 
-        private void Awake()
-        {
-            InitializeComponents();
-        }
-
-        private void OnEnable()
-        {
-            InitializeComponents();
-            GenerateRailMesh();
-        }
-
-        private void Update()
-        {
-            if (!Application.isPlaying || _updateInPlayMode)
-            {
-                if (_splineContainer != null && _splineContainer.Spline != null &&
-                    _splineContainer.Spline.Count >= 2)
-                {
-                    GenerateRailMesh();
-                }
-            }
-        }
 
         private void InitializeComponents()
         {
@@ -88,8 +66,10 @@ namespace JackRussell.Rails
         /// <summary>
         /// Generate the rail mesh by creating a tube along the spline
         /// </summary>
+        [ContextMenu("Generate Rail Mesh")]
         public void GenerateRailMesh()
         {
+            InitializeComponents();
             if (!_generateMesh || _splineContainer == null || _splineContainer.Spline == null) return;
 
             var spline = _splineContainer.Spline;

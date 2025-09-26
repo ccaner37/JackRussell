@@ -14,6 +14,7 @@ namespace JackRussell.States.Locomotion
         private float _defaultLensDistortion = 0f;
         private float _defaultChromaticAberration = 0f;
         private float _defaultGlitchAmount = 0f;
+        private float _sprintTime = 0f;
         private CinemachineCameraController _cameraController;
         private Volume _volume;
         private LensDistortion _lensDistortion;
@@ -57,6 +58,7 @@ namespace JackRussell.States.Locomotion
             }
 
             // Store defaults
+            _sprintTime = 0f;
             if (_cameraController != null && _cameraController.GetCinemachineCamera() != null)
             {
                 _defaultFOV = _cameraController.GetCinemachineCamera().Lens.FieldOfView;
@@ -159,6 +161,13 @@ namespace JackRussell.States.Locomotion
 
             _player.AddGroundForce(force);
 
+            // Update sprint time
+            _sprintTime += Time.fixedDeltaTime;
+
+            // Update sprint effects
+            float factor = Mathf.Clamp01(currentSpeed / _player.RunSpeed);
+            UpdateSprintEffects(factor);
+
             // Project velocity onto ground plane to keep movement along the surface
             if (_player.IsGrounded)
             {
@@ -168,14 +177,16 @@ namespace JackRussell.States.Locomotion
 
             // Rotate toward movement direction
             _player.RotateTowardsDirection(desired, Time.fixedDeltaTime, isAir: false);
-
-            // Update sprint effects
-            float factor = Mathf.Clamp01(currentSpeed / _player.RunSpeed);
-            UpdateSprintEffects(factor);
         }
 
         private void UpdateSprintEffects(float factor)
         {
+            float effectValue = factor;
+            if (_player.GlitchCurve != null)
+            {
+                effectValue = _player.GlitchCurve.Evaluate(_sprintTime);
+            }
+
             // FOV
             if (_cameraController != null && _cameraController.GetCinemachineCamera() != null)
             {
@@ -190,12 +201,13 @@ namespace JackRussell.States.Locomotion
             // Chromatic Aberration
             if (_chromaticAberration != null)
             {
-                _chromaticAberration.intensity.value = 0.1f * factor;
+                _chromaticAberration.intensity.value = 1f * effectValue;
             }
             // Glitch
             if (_player.PlayerMaterial != null)
             {
-                _player.PlayerMaterial.SetFloat("_GlitchAmount", 0.05f * factor);
+                float glitchValue = 0.6f * effectValue;
+                _player.PlayerMaterial.SetFloat("_GlitchAmount", glitchValue);
             }
             // Speed Lines
             if (_rendererController != null)
