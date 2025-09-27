@@ -36,6 +36,8 @@ namespace JackRussell.States.Locomotion
                 return;
             }
 
+            _player.Animator.Play("thug_life");
+
             // Find closest point on path to start
             _currentDistance = _path.FindClosestDistance(_player.transform.position);
 

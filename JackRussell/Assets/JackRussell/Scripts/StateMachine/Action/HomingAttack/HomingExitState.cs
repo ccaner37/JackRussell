@@ -56,5 +56,13 @@ namespace JackRussell.States.Action
                 ChangeState(new ActionNoneState(_player, _stateMachine));
             }
         }
+
+        public override void Exit()
+        {
+            if (_player.LocomotionStateName == "PathFollowState")
+            {
+                        _player.Animator.Play("thug_life");
+            }
+        }
     }
 }

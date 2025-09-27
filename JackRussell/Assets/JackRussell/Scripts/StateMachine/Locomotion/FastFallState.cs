@@ -3,19 +3,25 @@ using UnityEngine;
 namespace JackRussell.States.Locomotion
 {
     /// <summary>
-    /// Fall state: applied when vertical velocity is downwards. Waits for landing.
+    /// Fast fall state: applied when crouch is held during fall. Increases downward speed.
+    /// Transitions back to FallState when crouch is released or when grounded.
     /// </summary>
-    public class FallState : PlayerStateBase
+    public class FastFallState : PlayerStateBase
     {
         private const float k_AirControlFactor = 0.5f;
+        private const float k_FastFallMultiplier = 20f; // multiplier for extra downward force
 
-        public FallState(Player player, StateMachine stateMachine) : base(player, stateMachine) { }
+        public FastFallState(Player player, StateMachine stateMachine) : base(player, stateMachine) { }
 
-        public override string Name => nameof(FallState);
+        public override string Name => nameof(FastFallState);
 
         public override void Enter()
         {
-            // Could set fall animator parameter if desired
+            // Cancel all velocity to immediately start fast falling straight down
+            _player.SetVelocityImmediate(Vector3.zero);
+
+            // Could set fast fall animator parameter if desired
+            _player.Animator.Play("fast_fall_enter");
         }
 
         public override void LogicUpdate()
@@ -27,12 +33,7 @@ namespace JackRussell.States.Locomotion
                 return;
             }
 
-            // If crouch requested, transition to FastFallState
-            if (_player.CrouchRequested)
-            {
-                ChangeState(new FastFallState(_player, _stateMachine));
-                return;
-            }
+            // Fast fall state persists until grounded (crouch input was the trigger to enter)
 
             // If attack requested, action state machine handles it (action SM runs in Player)
         }
@@ -62,7 +63,9 @@ namespace JackRussell.States.Locomotion
             // Rotate in air with reduced responsiveness
             _player.RotateTowardsDirection(desired, Time.fixedDeltaTime, isAir: true);
 
-            // Apply extra gravity if user configured gravity multiplier (handled by Player or states if necessary)
+            // Apply extra gravity for fast fall
+            Vector3 extraGravity = Physics.gravity * (k_FastFallMultiplier - 1f);
+            if (extraGravity != Vector3.zero) _player.AddGroundForce(extraGravity);
         }
     }
 }

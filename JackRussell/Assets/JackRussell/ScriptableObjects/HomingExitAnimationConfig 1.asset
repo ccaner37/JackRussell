@@ -38,7 +38,7 @@ MonoBehaviour:
     exitNormalizedTime: 0.5
     transitionDuration: 0.07
   jumpDownAnimation:
-    animationName: Jump_Down_A_Loop
+    animationName: Ungrounded
     enterOffset: 0
     exitNormalizedTime: 0
     transitionDuration: 0.1

@@ -10,7 +10,7 @@ namespace JackRussell.States.Locomotion
     public class LandState : PlayerStateBase
     {
         private float _timer;
-        private readonly float _landDuration = 0.12f;
+        private readonly float _landDuration = 0.05f;
 
         public LandState(Player player, StateMachine stateMachine) : base(player, stateMachine) { }
 

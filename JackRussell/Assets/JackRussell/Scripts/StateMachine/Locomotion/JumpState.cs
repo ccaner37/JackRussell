@@ -30,6 +30,13 @@ namespace JackRussell.States.Locomotion
 
         public override void LogicUpdate()
         {
+            // If crouch requested, transition to FastFallState for immediate fast descent
+            if (_player.CrouchRequested)
+            {
+                ChangeState(new FastFallState(_player, _stateMachine));
+                return;
+            }
+
             // If we start falling, transition to FallState
             if (_player.Rigidbody.linearVelocity.y < 0f)
             {
