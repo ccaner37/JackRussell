@@ -19,7 +19,7 @@ namespace JackRussell.States.Action
 
         public override void Enter()
         {
-            // Randomly select from configured exit animations
+            // Randomly select from configured exit animations, avoiding the same as last time
             var exitAnimations = _player.HomingExitConfig.exitAnimations;
             if (exitAnimations.Count == 0)
             {
@@ -28,8 +28,20 @@ namespace JackRussell.States.Action
                 return;
             }
 
-            int randomIndex = Random.Range(0, exitAnimations.Count);
+            int randomIndex;
+            if (exitAnimations.Count == 1)
+            {
+                randomIndex = 0;
+            }
+            else
+            {
+                do
+                {
+                    randomIndex = Random.Range(0, exitAnimations.Count);
+                } while (randomIndex == _player.LastHomingExitIndex);
+            }
             _selectedExitData = exitAnimations[randomIndex];
+            _player.LastHomingExitIndex = randomIndex;
 
             // Smooth crossfade with configured offset and duration
             _player.Animator.CrossFade(_selectedExitData.animationName, _selectedExitData.transitionDuration, 0, _selectedExitData.enterOffset);

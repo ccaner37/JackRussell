@@ -181,6 +181,7 @@ namespace JackRussell
         [Inject] private readonly HomingExitAnimationConfig _homingExitConfig;
 
         public HomingExitAnimationConfig HomingExitConfig => _homingExitConfig;
+        public int LastHomingExitIndex { get; set; } = -1;
         [SerializeField] private AudioSource _audioSource;
         [SerializeField] private AudioSource _sprintAudioSource;
 
