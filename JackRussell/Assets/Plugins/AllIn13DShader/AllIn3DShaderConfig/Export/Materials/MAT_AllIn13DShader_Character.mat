@@ -47,7 +47,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3000
+  m_CustomRenderQueue: 2000
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -156,8 +156,8 @@ Material:
     - _AlphaRoundOn: 0
     - _AnisoShininess: 0.85
     - _Anisotropy: 0.45
-    - _BlendDst: 10
-    - _BlendSrc: 5
+    - _BlendDst: 0
+    - _BlendSrc: 1
     - _BlendingMaskCutoffB: 0.1
     - _BlendingMaskCutoffG: 0.1
     - _BlendingMaskCutoffWhite: 0.15
@@ -278,7 +278,7 @@ Material:
     - _ReceivedShadowsType: 0
     - _Reflections: 1
     - _ReflectionsAtten: 1
-    - _RenderPreset: 2
+    - _RenderPreset: 1
     - _RimAttenuation: 1
     - _RimLighting: 1
     - _RimLightingStage: 1

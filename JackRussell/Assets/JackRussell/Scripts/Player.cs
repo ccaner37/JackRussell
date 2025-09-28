@@ -11,6 +11,7 @@ using JackRussell.Rails;
 using VitalRouter;
 using UnityEngine.VFX;
 using DG.Tweening;
+using AllIn13DShader;
 
 namespace JackRussell
 {
@@ -722,6 +723,8 @@ namespace JackRussell
             // Implement player material effects
             if (_playerMaterial != null)
             {
+                DemoUtils.SetMaterialTransparent(_playerMaterial);
+
                 _playerMaterial.DOKill();
 
                 // Enable keywords and set properties
@@ -763,6 +766,8 @@ namespace JackRussell
                 seq.Join(_playerMaterial.DOFloat(0f, "_ScrollTextureY", 0.8f));
                 seq.OnComplete(() =>
                 {
+                    DemoUtils.SetMaterialOpaque(_playerMaterial);
+
                     _playerMaterial.SetFloat("_FadeOn", 0f);
                     _playerMaterial.DisableKeyword("_FADE_ON");
 
@@ -800,6 +805,8 @@ namespace JackRussell
                 // _playerMaterial.SetFloat("_IntersectionFadeFactor", 0.7f);
                 _playerMaterial.SetFloat("_VertexDistortionAmount", 0.2f);
                 _playerMaterial.SetFloat("_ScrollTextureY", 20f);
+
+                DemoUtils.SetMaterialTransparent(_playerMaterial);
             }
         }
 
@@ -824,6 +831,8 @@ namespace JackRussell
                 // _playerMaterial.SetFloat("_IntersectionFadeFactor", 0.1f);
                 _playerMaterial.SetFloat("_VertexDistortionAmount", 0f);
                 _playerMaterial.SetFloat("_ScrollTextureY", 0f);
+
+                DemoUtils.SetMaterialOpaque(_playerMaterial);
             }
         }
     }
