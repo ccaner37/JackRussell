@@ -1,5 +1,6 @@
 using JackRussell;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace JackRussell.States.Locomotion
 {
@@ -17,25 +18,28 @@ namespace JackRussell.States.Locomotion
 
         public override void Enter()
         {
-            // could set animator flags specific to moving
+            // Subscribe to jump press
+            _player.Actions.Player.Jump.performed += OnJumpPressed;
         }
 
         public override void Exit()
         {
-            // clear animator flags if set
+            // Unsubscribe
+            _player.Actions.Player.Jump.performed -= OnJumpPressed;
+        }
+
+        private void OnJumpPressed(InputAction.CallbackContext context)
+        {
+            if (_player.IsGrounded)
+            {
+                ChangeState(new JumpState(_player, _stateMachine));
+            }
         }
 
         public override void LogicUpdate()
         {
             // Rotate player toward move direction
             _player.RotateTowardsDirection(_player.MoveDirection, Time.deltaTime, isAir: false);
-
-            // Jump transition
-            if (_player.ConsumeJumpRequest() && _player.IsGrounded)
-            {
-                ChangeState(new JumpState(_player, _stateMachine));
-                return;
-            }
 
             // Dash/Boost transition: use attack input (dash if not sprinting, boost if sprinting)
             if (_player.ConsumeAttackRequest())

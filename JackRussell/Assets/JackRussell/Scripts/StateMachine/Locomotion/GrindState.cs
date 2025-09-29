@@ -1,6 +1,7 @@
 using JackRussell;
 using JackRussell.Rails;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace JackRussell.States.Locomotion
 {
@@ -65,6 +66,9 @@ namespace JackRussell.States.Locomotion
 
             _player.OnGrindEnter();
 
+            // Subscribe to jump press
+            _player.Actions.Player.Jump.performed += OnJumpPressed;
+
             // Set initial position on rail
             if (_railDetector.GetCurrentRailPosition(out Vector3 railPos, out Vector3 tangent))
             {
@@ -91,6 +95,9 @@ namespace JackRussell.States.Locomotion
 
         public override void Exit()
         {
+            // Unsubscribe
+            _player.Actions.Player.Jump.performed -= OnJumpPressed;
+
             _railDetector.DetachFromRail();
             _currentRail = null;
             _player.OnGrindExit();
@@ -98,25 +105,6 @@ namespace JackRussell.States.Locomotion
 
         public override void LogicUpdate()
         {
-            // Check for dismount input (jump)
-            if (_player.ConsumeJumpRequest() && _currentRail.AllowDismount)
-            {
-                // Jump off the rail
-                Vector3 jumpVelocity = Vector3.up * (_player.JumpVelocity * k_DismountJumpMultiplier);
-                if (_railDetector.GetCurrentRailPosition(out Vector3 _, out Vector3 tangent))
-                {
-                    // Add forward momentum from grind speed
-                    jumpVelocity += tangent * (_grindSpeed * 0.7f);
-                }
-
-                // Use special detach method for jump dismounts to prevent immediate reattachment
-                _railDetector.DetachFromRailJump();
-
-                _player.SetVelocityImmediate(Vector3.zero);
-                ChangeState(new JumpState(_player, _stateMachine));
-                return;
-            }
-
             // Check if we should detach (end of rail, etc.)
             if (_railDetector.ShouldDetach())
             {
@@ -213,6 +201,26 @@ namespace JackRussell.States.Locomotion
 
             // Smooth speed changes
             _grindSpeed = Mathf.Lerp(_grindSpeed, targetSpeed, Time.deltaTime / k_SpeedSmoothTime);
+        }
+
+        private void OnJumpPressed(InputAction.CallbackContext context)
+        {
+            if (_currentRail.AllowDismount)
+            {
+                // Jump off the rail
+                Vector3 jumpVelocity = Vector3.up * (_player.JumpVelocity * k_DismountJumpMultiplier);
+                if (_railDetector.GetCurrentRailPosition(out Vector3 _, out Vector3 tangent))
+                {
+                    // Add forward momentum from grind speed
+                    jumpVelocity += tangent * (_grindSpeed * 0.7f);
+                }
+
+                // Use special detach method for jump dismounts to prevent immediate reattachment
+                _railDetector.DetachFromRailJump();
+
+                _player.SetVelocityImmediate(Vector3.zero);
+                ChangeState(new JumpState(_player, _stateMachine));
+            }
         }
     }
 }

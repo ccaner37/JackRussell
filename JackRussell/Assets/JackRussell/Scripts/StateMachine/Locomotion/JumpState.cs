@@ -26,8 +26,9 @@ namespace JackRussell.States.Locomotion
             // Reset air sprint flag for new jump
             _player.ResetSprintInAir();
 
-            // Subscribe to sprint press
+            // Subscribe to sprint and jump presses
             _player.Actions.Player.Sprint.performed += OnSprintPressed;
+            _player.Actions.Player.Jump.performed += OnJumpPressed;
 
             // Trigger animator
             _player.Animator.SetTrigger(Animator.StringToHash("JumpTrigger"));
@@ -58,6 +59,7 @@ namespace JackRussell.States.Locomotion
         {
             // Unsubscribe
             _player.Actions.Player.Sprint.performed -= OnSprintPressed;
+            _player.Actions.Player.Jump.performed -= OnJumpPressed;
         }
 
         private void OnSprintPressed(InputAction.CallbackContext context)
@@ -65,6 +67,18 @@ namespace JackRussell.States.Locomotion
             if (!_player.HasSprintedInAir)
             {
                 ChangeState(new SprintState(_player, _stateMachine));
+            }
+        }
+
+        private void OnJumpPressed(InputAction.CallbackContext context)
+        {
+            if (!_player.HasDoubleJumped)
+            {
+                _player.MarkDoubleJumped();
+                Vector3 v = _player.Rigidbody.linearVelocity;
+                v.y = _player.JumpVelocity;
+                _player.SetVelocityImmediate(v);
+                _player.OnJumpEnter(); // play jump sound
             }
         }
 

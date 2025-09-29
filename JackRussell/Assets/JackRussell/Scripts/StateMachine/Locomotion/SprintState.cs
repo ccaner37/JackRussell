@@ -1,6 +1,7 @@
 using JackRussell;
 using JackRussell.CameraController;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using Unity.Cinemachine;
@@ -50,6 +51,9 @@ namespace JackRussell.States.Locomotion
                 _player.MarkSprintInAir();
             }
 
+            // Subscribe to jump press
+            _player.Actions.Player.Jump.performed += OnJumpPressed;
+
             // Set animator sprint flag if desired
             _player.OnSprintEnter();
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), true);
@@ -89,6 +93,9 @@ namespace JackRussell.States.Locomotion
 
         public override void Exit()
         {
+            // Unsubscribe
+            _player.Actions.Player.Jump.performed -= OnJumpPressed;
+
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), false);
             _player.StopSprintSpeedUp();
 
@@ -141,12 +148,7 @@ namespace JackRussell.States.Locomotion
                 return;
             }
 
-            // Jump
-            if (_player.ConsumeJumpRequest() && _player.IsGrounded)
-            {
-                ChangeState(new JumpState(_player, _stateMachine));
-                return;
-            }
+            // Jump handled by event subscription
 
             // Attack => boost
             if (_player.ConsumeAttackRequest())
@@ -238,6 +240,14 @@ namespace JackRussell.States.Locomotion
             if (_rendererController != null)
             {
                 _rendererController.SetSpeedLinesIntensity(factor);
+            }
+        }
+
+        private void OnJumpPressed(InputAction.CallbackContext context)
+        {
+            if (_player.IsGrounded)
+            {
+                ChangeState(new JumpState(_player, _stateMachine));
             }
         }
     }

@@ -1,5 +1,6 @@
 using JackRussell;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace JackRussell.States.Locomotion
 {
@@ -19,18 +20,19 @@ namespace JackRussell.States.Locomotion
 
         public override void Enter()
         {
-            // Ensure animator flags if needed
+            // Subscribe to jump press
+            _player.Actions.Player.Jump.performed += OnJumpPressed;
         }
 
         public override void Exit()
         {
-            // clear any local flags if set
+            // Unsubscribe
+            _player.Actions.Player.Jump.performed -= OnJumpPressed;
         }
 
-        public override void LogicUpdate()
+        private void OnJumpPressed(InputAction.CallbackContext context)
         {
-            // If player requests a jump, consume it and apply immediate vertical velocity.
-            if (_player.ConsumeJumpRequest() && _player.IsGrounded)
+            if (_player.IsGrounded)
             {
                 // simple jump handling here; a dedicated JumpState can replace this later
                 Vector3 v = _player.Rigidbody.linearVelocity;
@@ -39,9 +41,11 @@ namespace JackRussell.States.Locomotion
                 _player.Animator.SetTrigger(Animator.StringToHash("JumpTrigger"));
                 // switch to JumpState so proper jump state logic runs
                 ChangeState(new JumpState(_player, _stateMachine));
-                return;
             }
+        }
 
+        public override void LogicUpdate()
+        {
             // Transition to Move or Sprint when there is input
             if (_player.MoveDirection.sqrMagnitude > k_InputDeadzone)
             {

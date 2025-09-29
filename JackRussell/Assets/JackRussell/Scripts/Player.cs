@@ -98,6 +98,7 @@ namespace JackRussell
 
         // Runtime flags
         private bool _isGrounded;
+        private bool _wasGrounded;
         private Vector3 _groundNormal = Vector3.up;
 
         // Animator parameter hashes (dummy names)
@@ -173,6 +174,7 @@ namespace JackRussell
 
         public float Pressure { get; private set; }
         public bool HasSprintedInAir { get; private set; }
+        public bool HasDoubleJumped { get; private set; }
 
         [Inject] private readonly AudioManager _audioManager;
         [Inject] private readonly HomingIndicatorManager _indicatorManager;
@@ -465,6 +467,14 @@ namespace JackRussell
             _isGrounded = sphereGrounded && slopeAngle <= _maxSlopeAngle;
             _groundNormal = normal;
 
+            // Reset air flags when landing
+            if (_isGrounded && !_wasGrounded)
+            {
+                HasSprintedInAir = false;
+                HasDoubleJumped = false;
+            }
+            _wasGrounded = _isGrounded;
+
             // Physics update: action first (so overrides are applied), then locomotion
             _actionSM.PhysicsUpdate();
             _locomotionSM.PhysicsUpdate();
@@ -630,6 +640,11 @@ namespace JackRussell
         public void ResetSprintInAir()
         {
             HasSprintedInAir = false;
+        }
+
+        public void MarkDoubleJumped()
+        {
+            HasDoubleJumped = true;
         }
 
         public void PlaySound(SoundType soundType)
