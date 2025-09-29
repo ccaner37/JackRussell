@@ -1,5 +1,6 @@
 using JackRussell;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace JackRussell.States.Locomotion
 {
@@ -21,6 +22,12 @@ namespace JackRussell.States.Locomotion
             Vector3 v = _player.Rigidbody.linearVelocity;
             v.y = _player.JumpVelocity;
             _player.SetVelocityImmediate(v);
+
+            // Reset air sprint flag for new jump
+            _player.ResetSprintInAir();
+
+            // Subscribe to sprint press
+            _player.Actions.Player.Sprint.performed += OnSprintPressed;
 
             // Trigger animator
             _player.Animator.SetTrigger(Animator.StringToHash("JumpTrigger"));
@@ -45,6 +52,20 @@ namespace JackRussell.States.Locomotion
             }
 
             // Allow action states to trigger overrides (handled elsewhere)
+        }
+
+        public override void Exit()
+        {
+            // Unsubscribe
+            _player.Actions.Player.Sprint.performed -= OnSprintPressed;
+        }
+
+        private void OnSprintPressed(InputAction.CallbackContext context)
+        {
+            if (!_player.HasSprintedInAir)
+            {
+                ChangeState(new SprintState(_player, _stateMachine));
+            }
         }
 
         public override void PhysicsUpdate()

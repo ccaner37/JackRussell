@@ -41,6 +41,15 @@ namespace JackRussell.States.Locomotion
             // Consume pressure
             _player.SetPressure(_player.Pressure - 5f);
 
+            // If entering from air, neutralize Y velocity and mark as sprinted
+            if (!_player.IsGrounded)
+            {
+                Vector3 v = _player.Rigidbody.linearVelocity;
+                v.y = 0f;
+                _player.SetVelocityImmediate(v);
+                _player.MarkSprintInAir();
+            }
+
             // Set animator sprint flag if desired
             _player.OnSprintEnter();
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), true);
@@ -110,15 +119,25 @@ namespace JackRussell.States.Locomotion
         public override void LogicUpdate()
         {
             // Rotate toward movement direction
-            _player.RotateTowardsDirection(_player.MoveDirection, Time.deltaTime, isAir: false);
+            _player.RotateTowardsDirection(_player.MoveDirection, Time.deltaTime, isAir: !_player.IsGrounded);
 
-            // If sprint is released or no move input, go back to Move or Idle
+            // If sprint is released or no move input, go back to appropriate state
             if (!_player.SprintRequested)
             {
                 if (_player.MoveDirection.sqrMagnitude > 0.001f)
-                    ChangeState(new MoveState(_player, _stateMachine));
+                {
+                    if (_player.IsGrounded)
+                        ChangeState(new MoveState(_player, _stateMachine));
+                    else
+                        ChangeState(new FallState(_player, _stateMachine));
+                }
                 else
-                    ChangeState(new IdleState(_player, _stateMachine));
+                {
+                    if (_player.IsGrounded)
+                        ChangeState(new IdleState(_player, _stateMachine));
+                    else
+                        ChangeState(new FallState(_player, _stateMachine));
+                }
                 return;
             }
 
@@ -176,6 +195,11 @@ namespace JackRussell.States.Locomotion
             {
                 Vector3 projectedVel = Vector3.ProjectOnPlane(_player.Rigidbody.linearVelocity, _player.GroundNormal);
                 _player.Rigidbody.linearVelocity = projectedVel;
+            }
+            else
+            {
+                // Reduce gravity during air sprint for straighter flight
+                _player.AddGroundForce(-Physics.gravity * 0.5f); // counteract 50% of gravity
             }
 
         }

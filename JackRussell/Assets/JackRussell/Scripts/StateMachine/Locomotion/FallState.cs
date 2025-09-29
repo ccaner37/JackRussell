@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace JackRussell.States.Locomotion
 {
@@ -15,7 +16,8 @@ namespace JackRussell.States.Locomotion
 
         public override void Enter()
         {
-            // Could set fall animator parameter if desired
+            // Subscribe to sprint press
+            _player.Actions.Player.Sprint.performed += OnSprintPressed;
         }
 
         public override void LogicUpdate()
@@ -35,6 +37,20 @@ namespace JackRussell.States.Locomotion
             }
 
             // If attack requested, action state machine handles it (action SM runs in Player)
+        }
+
+        public override void Exit()
+        {
+            // Unsubscribe
+            _player.Actions.Player.Sprint.performed -= OnSprintPressed;
+        }
+
+        private void OnSprintPressed(InputAction.CallbackContext context)
+        {
+            if (!_player.HasSprintedInAir)
+            {
+                ChangeState(new SprintState(_player, _stateMachine));
+            }
         }
 
         public override void PhysicsUpdate()

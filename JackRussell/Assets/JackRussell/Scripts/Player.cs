@@ -73,6 +73,7 @@ namespace JackRussell
 
         // Input system
         private InputSystem_Actions _actions;
+        public InputSystem_Actions Actions => _actions;
 
         // Input state (polled)
         private Vector2 _moveInput;
@@ -171,6 +172,7 @@ namespace JackRussell
         private bool _rotationOverrideExclusive;
 
         public float Pressure { get; private set; }
+        public bool HasSprintedInAir { get; private set; }
 
         [Inject] private readonly AudioManager _audioManager;
         [Inject] private readonly HomingIndicatorManager _indicatorManager;
@@ -618,6 +620,16 @@ namespace JackRussell
             if (pressure < 0) pressure = 0;
             Pressure = pressure;
             _commandPublisher.PublishAsync(new PressureUpdateCommand(Pressure));
+        }
+
+        public void MarkSprintInAir()
+        {
+            HasSprintedInAir = true;
+        }
+
+        public void ResetSprintInAir()
+        {
+            HasSprintedInAir = false;
         }
 
         public void PlaySound(SoundType soundType)
