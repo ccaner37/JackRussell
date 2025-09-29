@@ -30379,7 +30379,7 @@ MonoBehaviour:
   _boostSpeed: 50
   _dashSpeed: 40
   _accelGround: 30
-  _accelAir: 0.5
+  _accelAir: 0.6
   _deceleration: 30
   _damping: 2
   _jumpVelocity: 10
@@ -31489,11 +31489,9 @@ MonoBehaviour:
     m_Bits: 128
   _homingHitParticle: {fileID: 0}
   _modelRoot: {fileID: 0}
-  _turnSpeed: 720
-  _airTurnMultiplier: 0.6
-  _rotationSmoothing: 0.12
+  _turnSpeed: 0.1
+  _airTurnMultiplier: 0.3
   _debugRotation: 1
-  _snapAngleThreshold: 160
   _audioSource: {fileID: 1424996167}
   _sprintAudioSource: {fileID: 1780207494}
 --- !u!4 &2079142863

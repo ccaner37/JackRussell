@@ -109,6 +109,9 @@ namespace JackRussell.States.Locomotion
 
         public override void LogicUpdate()
         {
+            // Rotate toward movement direction
+            _player.RotateTowardsDirection(_player.MoveDirection, Time.deltaTime, isAir: false);
+
             // If sprint is released or no move input, go back to Move or Idle
             if (!_player.SprintRequested)
             {
@@ -175,8 +178,6 @@ namespace JackRussell.States.Locomotion
                 _player.Rigidbody.linearVelocity = projectedVel;
             }
 
-            // Rotate toward movement direction
-            _player.RotateTowardsDirection(desired, Time.fixedDeltaTime, isAir: false);
         }
 
         private void UpdateSprintEffects(float factor)

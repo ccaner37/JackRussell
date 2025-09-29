@@ -110,12 +110,9 @@ namespace JackRussell
 
         [Header("Rotation")]
         [SerializeField] private Transform _modelRoot;                 // optional: rotate the visual model instead of root
-        [SerializeField] private float _turnSpeed = 720f;              // degrees per second (tune for feel)
+        [SerializeField] private float _turnSpeed = 0.5f;              // lerp factor for smooth rotation
         [SerializeField] private float _airTurnMultiplier = 0.35f;     // multiplier to turn speed while airborne
-        [SerializeField] private float _rotationSmoothing = 0.12f;     // (kept for potential blending; primary uses MoveTowardsAngle)
         [SerializeField] private bool _debugRotation = false;          // draw debug lines / logs when true
-        [SerializeField] private float _snapAngleThreshold = 160f;     // if angle diff > this and instantaneous requested, snap
-        private float _rotationVelocity;
 
         // Public read-only helpers for states
         public Vector3 MoveDirection => _moveDirection;
@@ -209,7 +206,7 @@ namespace JackRussell
         /// <summary>
         /// Rotate player (or modelRoot if assigned) toward the given direction.
         /// Uses Rigidbody.MoveRotation for physics-friendly rotation.
-        /// Implemented with explicit yaw MoveTowardsAngle for predictable, tunable turning.
+        /// Simple smooth rotation using Lerp.
         /// Falls back to horizontal velocity if move input is tiny.
         /// </summary>
         public void RotateTowardsDirection(Vector3 direction, float deltaTime, bool isAir = false, bool instantaneous = false, bool allow3DRotation = false)
@@ -235,89 +232,42 @@ namespace JackRussell
                 dir.Normalize();
             }
 
+            Quaternion currentRotation = GetCurrentRotation();
             Quaternion targetRotation;
 
             if (allow3DRotation)
             {
-                // Full 3D rotation using LookRotation for proper alignment with rail direction
+                // Full 3D rotation
                 targetRotation = Quaternion.LookRotation(dir, Vector3.up);
-
-                // Apply smooth interpolation for 3D rotation
-                Quaternion currentRotation = GetCurrentRotation();
-                float maxDelta = _turnSpeed * (isAir ? _airTurnMultiplier : 1f) * deltaTime;
-
-                if (instantaneous)
-                {
-                    ApplyRotation(targetRotation, true);
-                }
-                else
-                {
-                    Quaternion newRot = Quaternion.RotateTowards(currentRotation, targetRotation, maxDelta);
-                    ApplyRotation(newRot, true);
-                }
-
-                if (_debugRotation)
-                {
-                    Vector3 origin = transform.position + Vector3.up * 1.2f;
-                    Debug.DrawLine(origin, origin + dir * 2f, Color.red, 0.1f);
-                    Debug.DrawLine(origin, origin + currentRotation * Vector3.forward * 2f, Color.green, 0.1f);
-                }
             }
             else
             {
-                // Original 2D horizontal-only rotation logic
-                Vector3 horizontalDir = new Vector3(dir.x, 0f, dir.z);
-                if (horizontalDir.sqrMagnitude < 0.0001f) return;
+                // 2D horizontal rotation using LerpAngle for smooth yaw interpolation
+                float currentYaw = currentRotation.eulerAngles.y;
+                float targetYaw = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
+                float lerpFactor = _turnSpeed * (isAir ? _airTurnMultiplier : 1f);
+                float newYaw = instantaneous ? targetYaw : Mathf.LerpAngle(currentYaw, targetYaw, lerpFactor);
+                Quaternion newRot = Quaternion.Euler(0f, newYaw, 0f);
+                ApplyRotation(newRot, true);
+                return;
+            }
 
-                horizontalDir.Normalize();
+            // 3D rotation
+            // Smooth lerp rotation
+            float lerpFactor3D = _turnSpeed * (isAir ? _airTurnMultiplier : 1f);
+            Quaternion newRot3D = instantaneous ? targetRotation : Quaternion.Lerp(currentRotation, targetRotation, lerpFactor3D);
 
-                // compute target yaw (degrees)
-                float targetYaw = Mathf.Atan2(horizontalDir.x, horizontalDir.z) * Mathf.Rad2Deg;
+            ApplyRotation(newRot3D, true);
 
-                // current yaw from the chosen rotation target
-                float currentYaw = GetCurrentRotation().eulerAngles.y;
-
-                // compute max angular change this frame
-                float maxDelta = _turnSpeed * (isAir ? _airTurnMultiplier : 1f) * deltaTime;
-
-                // if instantaneous requested and angle is large, snap; otherwise move toward angle
-                float angleDiff = Mathf.DeltaAngle(currentYaw, targetYaw);
-                float newYaw;
-                if (instantaneous && Mathf.Abs(angleDiff) >= _snapAngleThreshold)
-                {
-                    newYaw = targetYaw;
-                    _rotationVelocity = 0f;
-                }
-                else
-                {
-                    if (instantaneous)
-                    {
-                        newYaw = targetYaw;
-                        _rotationVelocity = 0f;
-                    }
-                    else
-                    {
-                        newYaw = Mathf.SmoothDampAngle(currentYaw, targetYaw, ref _rotationVelocity, _rotationSmoothing, _turnSpeed * (isAir ? _airTurnMultiplier : 1f));
-                    }
-                }
-
-                targetRotation = Quaternion.Euler(0f, newYaw, 0f);
-                ApplyRotation(targetRotation, true);
-
-                if (_debugRotation)
-                {
-                    // draw debug lines for target direction vs forward
-                    Vector3 origin = transform.position + Vector3.up * 1.2f;
-                    Vector3 forward = Quaternion.Euler(0f, currentYaw, 0f) * Vector3.forward;
-                    Vector3 targetFwd = Quaternion.Euler(0f, targetYaw, 0f) * Vector3.forward;
-                    Debug.DrawLine(origin, origin + forward * 2f, Color.green, 0.1f);
-                    Debug.DrawLine(origin, origin + targetFwd * 2f, Color.red, 0.1f);
-                    //Debug.Log($"Rotate: curYaw={currentYaw:F1} targetYaw={targetYaw:F1} newYaw={newYaw:F1} angleDiff={angleDiff:F1}");
-                }
+            if (_debugRotation)
+            {
+                Vector3 origin = transform.position + Vector3.up * 1.2f;
+                Debug.DrawLine(origin, origin + currentRotation * Vector3.forward * 2f, Color.green, 0.1f);
+                Debug.DrawLine(origin, origin + targetRotation * Vector3.forward * 2f, Color.red, 0.1f);
             }
         }
 
-        private Quaternion GetCurrentRotation()
+        public Quaternion GetCurrentRotation()
         {
             if (_modelRoot != null) return _modelRoot.rotation;
             return transform.rotation;
@@ -329,13 +279,9 @@ namespace JackRussell
             {
                 _modelRoot.rotation = rot;
             }
-            else if (_rb != null && useRigidbody)
-            {
-                _rb.MoveRotation(rot);
-            }
             else
             {
-                transform.rotation = rot;
+                _rb.MoveRotation(rot);
             }
         }
 

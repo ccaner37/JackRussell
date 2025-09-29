@@ -27,6 +27,9 @@ namespace JackRussell.States.Locomotion
 
         public override void LogicUpdate()
         {
+            // Rotate player toward move direction
+            _player.RotateTowardsDirection(_player.MoveDirection, Time.deltaTime, isAir: false);
+
             // Jump transition
             if (_player.ConsumeJumpRequest() && _player.IsGrounded)
             {
@@ -95,8 +98,6 @@ namespace JackRussell.States.Locomotion
                 _player.Rigidbody.linearVelocity = projectedVel;
             }
 
-            // Rotate player toward move direction (grounded)
-            _player.RotateTowardsDirection(desired, Time.fixedDeltaTime, isAir: false);
         }
     }
 }
