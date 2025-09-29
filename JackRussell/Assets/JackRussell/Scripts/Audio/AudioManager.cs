@@ -34,7 +34,7 @@ namespace JackRussell.Audio
 
                 if (clipToPlay != null)
                 {
-                    float originalPitch = audioSource != null ? audioSource.pitch : 1f; // Store original pitch
+                    //float originalPitch = audioSource != null ? audioSource.pitch : 1f; // Store original pitch
 
                     if (audioSource != null)
                     {
@@ -47,7 +47,7 @@ namespace JackRussell.Audio
                             audioSource.pitch = 1f; // Reset to default if not randomized
                         }
                         audioSource.PlayOneShot(clipToPlay, data.Volume * volumeMultiplier);
-                        audioSource.pitch = originalPitch; // Restore original pitch after playing
+                        //audioSource.pitch = originalPitch; // Restore original pitch after playing
                     }
                     else
                     {
