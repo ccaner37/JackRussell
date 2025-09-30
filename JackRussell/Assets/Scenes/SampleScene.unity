@@ -32577,8 +32577,8 @@ MonoBehaviour:
   _pelvisOffsetMultiplier: 0.1
   _pelvisLerpSpeed: 3
   _maxRotationSpeedForIK: 600
-  _moveRollMaxDegrees: -15
-  _sprintRollMaxDegrees: -15
+  _moveRollMaxDegrees: -30
+  _sprintRollMaxDegrees: -45
   _homingRange: 12
   _homingConeAngle: 90
   _homingSpeed: 20
