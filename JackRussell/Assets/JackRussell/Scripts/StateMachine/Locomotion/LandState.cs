@@ -18,9 +18,22 @@ namespace JackRussell.States.Locomotion
 
         public override void Enter()
         {
-            _timer = _landDuration;
-            // trigger landing animation
-            _player.Animator.SetTrigger(Animator.StringToHash("LandTrigger"));
+            _timer = 0.4f; // adjust to animation length
+            // trigger landing-move animation based on speed/sprint, if speed > 3
+            Vector3 horizontalVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
+            if (horizontalVel.magnitude > 6f)
+            {
+                bool isSprinting = _player.Animator.GetBool(Animator.StringToHash("IsSprinting"));
+                bool highSpeed = horizontalVel.magnitude > _player.WalkSpeed * 1.2F;
+                if (isSprinting || highSpeed)
+                {
+                    _player.Animator.SetTrigger(Animator.StringToHash("LandMoveHighTrigger"));
+                }
+                else
+                {
+                    _player.Animator.SetTrigger(Animator.StringToHash("LandMoveLowTrigger"));
+                }
+            }
 
             // Optionally zero vertical velocity to avoid small bounces
             var v = _player.Rigidbody.linearVelocity;

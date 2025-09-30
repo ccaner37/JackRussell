@@ -53,10 +53,18 @@ namespace JackRussell.States.Locomotion
                 return;
             }
 
-            // If no input, go to Idle
+            // If no input, go to WalkStop if moving fast enough
             if (_player.MoveDirection.sqrMagnitude < k_InputDeadzone)
             {
-                ChangeState(new IdleState(_player, _stateMachine));
+                Vector3 horizontalVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
+                if (horizontalVel.magnitude > 3f)
+                {
+                    ChangeState(new WalkStopState(_player, _stateMachine));
+                }
+                else
+                {
+                    ChangeState(new IdleState(_player, _stateMachine));
+                }
                 return;
             }
 

@@ -17,6 +17,7 @@ namespace JackRussell.States.Locomotion
         private float _defaultChromaticAberration = 0f;
         private float _defaultGlitchAmount = 0f;
         private float _sprintTime = 0f;
+        private bool _enteredFromAir;
         private CinemachineCameraController _cameraController;
         private Volume _volume;
         private LensDistortion _lensDistortion;
@@ -50,6 +51,11 @@ namespace JackRussell.States.Locomotion
                 v.y = 0f;
                 _player.SetVelocityImmediate(v);
                 _player.MarkSprintInAir();
+                _enteredFromAir = true;
+            }
+            else
+            {
+                _enteredFromAir = false;
             }
 
             // Subscribe to jump press
@@ -142,10 +148,17 @@ namespace JackRussell.States.Locomotion
                 else
                 {
                     if (_player.IsGrounded)
-                        ChangeState(new IdleState(_player, _stateMachine));
+                        ChangeState(new SprintStopState(_player, _stateMachine));
                     else
                         ChangeState(new FallState(_player, _stateMachine));
                 }
+                return;
+            }
+
+            // Check for landing from air
+            if (_enteredFromAir && _player.IsGrounded)
+            {
+                ChangeState(new LandState(_player, _stateMachine));
                 return;
             }
 

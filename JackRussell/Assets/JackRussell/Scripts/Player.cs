@@ -118,6 +118,7 @@ namespace JackRussell
 
         // Animator parameter hashes (dummy names)
         private static readonly int ANIM_SPEED = Animator.StringToHash("Speed");
+        private static readonly int ANIM_INPUT_LENGTH = Animator.StringToHash("InputLength");
         private static readonly int ANIM_IS_GROUNDED = Animator.StringToHash("IsGrounded");
         private static readonly int ANIM_IS_SPRINTING = Animator.StringToHash("IsSprinting");
         private static readonly int ANIM_IS_BOOSTING = Animator.StringToHash("IsBoosting");
@@ -559,6 +560,7 @@ namespace JackRussell
         {
             Vector3 horizontalVel = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
             _animator.SetFloat(ANIM_SPEED, horizontalVel.magnitude);
+            _animator.SetFloat(ANIM_INPUT_LENGTH, _moveInput.magnitude);
             _animator.SetBool(ANIM_IS_GROUNDED, _isGrounded);
             _animator.SetBool(ANIM_IS_SPRINTING, _sprintInput && _moveDirection.sqrMagnitude > 0.01f);
         }
