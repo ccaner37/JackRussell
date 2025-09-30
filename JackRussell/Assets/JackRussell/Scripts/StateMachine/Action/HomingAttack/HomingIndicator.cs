@@ -12,16 +12,14 @@ namespace JackRussell.States.Action
     {
         [SerializeField] private Image _indicatorImage;
         [SerializeField] private RectTransform _rotatingPart;
+        [SerializeField] private RectTransform _parentTransform;
+        [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField] private float _minScale = 0.5f;
         [SerializeField] private float _maxScale = 1.5f;
         [SerializeField] private float _minDistance = 5f;
         [SerializeField] private float _maxDistance = 20f;
         [SerializeField] private float _appearDuration = 0.3f;
-        [SerializeField] private Ease _appearEase = Ease.OutBack;
-        [SerializeField] private float _rotationSpeedStart = 720f; // degrees per second
-        [SerializeField] private float _rotationSpeedEnd = 180f;
         [SerializeField] private float _rotationSlowDownDuration = 1f;
-        [SerializeField] private int _sortingOrder = 1000;
 
         private Transform _targetTransform;
         private Camera _mainCamera;
@@ -32,45 +30,6 @@ namespace JackRussell.States.Action
         private void Awake()
         {
             _mainCamera = Camera.main;
-            if (_indicatorImage == null)
-            {
-                _indicatorImage = GetComponentInChildren<Image>();
-            }
-            if (_rotatingPart == null)
-            {
-                // Assume it's a child named "RotatingPart"
-                Transform rotatingChild = transform.Find("RotatingPart");
-                if (rotatingChild != null)
-                {
-                    _rotatingPart = rotatingChild.GetComponent<RectTransform>();
-                }
-            }
-
-            // Ensure always visible
-            Canvas canvas = GetComponent<Canvas>();
-            if (canvas != null)
-            {
-                canvas.overrideSorting = true;
-                canvas.sortingOrder = _sortingOrder;
-            }
-
-            // Make UI elements render on top of meshes
-            // if (_indicatorImage != null && _indicatorImage.material != null)
-            // {
-            //     Material mat = UnityEngine.Object.Instantiate(_indicatorImage.material);
-            //     mat.renderQueue = 4000; // Overlay queue
-            //     _indicatorImage.material = mat;
-            // }
-            // if (_rotatingPart != null)
-            // {
-            //     Image rotatingImage = _rotatingPart.GetComponent<Image>();
-            //     if (rotatingImage != null && rotatingImage.material != null)
-            //     {
-            //         Material mat = UnityEngine.Object.Instantiate(rotatingImage.material);
-            //         mat.renderQueue = 4000; // Overlay queue
-            //         rotatingImage.material = mat;
-            //     }
-            // }
         }
 
         private void OnEnable()
@@ -128,25 +87,22 @@ namespace JackRussell.States.Action
             _isAppearing = true;
 
             // Reset initial state
-            transform.localScale = Vector3.zero;
-            if (_indicatorImage != null)
+            _parentTransform.localScale = new Vector3(6f, 6f, 6f);
+            if (_canvasGroup != null)
             {
-                Color color = _indicatorImage.color;
-                color.a = 0f;
-                _indicatorImage.color = color;
+                _canvasGroup.alpha = 0f;
             }
             if (_rotatingPart != null)
             {
                 _rotatingPart.localRotation = Quaternion.identity;
             }
 
-            // Animate scale and alpha with enhanced bounce
+            // Animate scale down and alpha fade
             Sequence sequence = DOTween.Sequence();
-            sequence.Append(transform.DOScale(1.2f, _appearDuration * 0.7f).SetEase(Ease.OutBack)); // Overshoot
-            sequence.Append(transform.DOScale(1f, _appearDuration * 0.3f).SetEase(Ease.InOutQuad)); // Settle
-            if (_indicatorImage != null)
+            sequence.Append(_parentTransform.DOScale(Vector3.one, _appearDuration).SetEase(Ease.OutQuad));
+            if (_canvasGroup != null)
             {
-                sequence.Join(_indicatorImage.DOFade(1f, _appearDuration));
+                sequence.Join(_canvasGroup.DOFade(1f, _appearDuration));
             }
 
             // Add rotation animation for the rotating part

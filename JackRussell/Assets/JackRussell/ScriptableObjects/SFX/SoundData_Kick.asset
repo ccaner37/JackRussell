@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SoundType: 2
   AudioClips:
-  - {fileID: 8300000, guid: 635316924f7a67c44babf90045fc6d48, type: 3}
+  - {fileID: 8300000, guid: f02cb2857a7e9374b9602679c15f0456, type: 3}
   Volume: 1
   Loop: 0
   IsRandomized: 0

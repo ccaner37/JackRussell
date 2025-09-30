@@ -299,16 +299,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _indicatorImage: {fileID: 6091114982110260890}
   _rotatingPart: {fileID: 925841016201009472}
+  _parentTransform: {fileID: 378219097224689591}
+  _canvasGroup: {fileID: 7112175300503234168}
   _minScale: 0.5
   _maxScale: 1.5
   _minDistance: 5
   _maxDistance: 20
   _appearDuration: 0.3
-  _appearEase: 27
-  _rotationSpeedStart: 10
-  _rotationSpeedEnd: 5
   _rotationSlowDownDuration: 4
-  _sortingOrder: 1000
 --- !u!1 &8507229542292630182
 GameObject:
   m_ObjectHideFlags: 0
@@ -393,8 +391,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 378219097224689591}
+  - component: {fileID: 7112175300503234168}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Parent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -422,3 +421,15 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 189, y: 189}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &7112175300503234168
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9155899914598822181}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0

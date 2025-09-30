@@ -137,7 +137,6 @@ namespace JackRussell.States.Action
                 // camera shake and sounds
                 UnityEngine.Object.FindAnyObjectByType<CinemachineCameraController>().ShakeCamera(1.2f, 2f);
                 _player.PlaySound(Audio.SoundType.Kick);
-                _player.PlaySound(Audio.SoundType.Spinz808);
                 _effectTriggered = true;
             }
 
