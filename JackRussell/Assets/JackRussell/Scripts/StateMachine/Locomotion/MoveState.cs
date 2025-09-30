@@ -57,7 +57,7 @@ namespace JackRussell.States.Locomotion
             if (_player.MoveDirection.sqrMagnitude < k_InputDeadzone)
             {
                 Vector3 horizontalVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
-                if (horizontalVel.magnitude > 3f)
+                if (horizontalVel.magnitude > 8f)
                 {
                     ChangeState(new WalkStopState(_player, _stateMachine));
                 }

@@ -9,7 +9,7 @@ namespace JackRussell.States.Locomotion
     public class SprintStopState : PlayerStateBase
     {
         private float _timer;
-        private readonly float _stopDuration = 0.1f; // adjust to animation length
+        private readonly float _stopDuration = 0.01f; // adjust to animation length
 
         public SprintStopState(Player player, StateMachine stateMachine) : base(player, stateMachine) { }
 
