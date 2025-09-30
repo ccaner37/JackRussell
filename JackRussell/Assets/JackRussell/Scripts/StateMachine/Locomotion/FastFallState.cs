@@ -10,6 +10,7 @@ namespace JackRussell.States.Locomotion
     {
         private const float k_AirControlFactor = 0.5f;
         private const float k_FastFallMultiplier = 20f; // multiplier for extra downward force
+        private float _fastFallDelayTimer;
 
         public FastFallState(Player player, StateMachine stateMachine) : base(player, stateMachine) { }
 
@@ -20,8 +21,11 @@ namespace JackRussell.States.Locomotion
             // Cancel all velocity to immediately start fast falling straight down
             _player.SetVelocityImmediate(Vector3.zero);
 
+            // Delay before applying fast fall force
+            _fastFallDelayTimer = 0.1f;
+
             // Could set fast fall animator parameter if desired
-            _player.Animator.Play("fast_fall_enter");
+            _player.Animator.CrossFade("fast_fall_enter", 0.08f);
         }
 
         public override void LogicUpdate()
@@ -63,9 +67,15 @@ namespace JackRussell.States.Locomotion
             // Rotate in air with reduced responsiveness
             _player.RotateTowardsDirection(desired, Time.fixedDeltaTime, isAir: true);
 
-            // Apply extra gravity for fast fall
-            Vector3 extraGravity = Physics.gravity * (k_FastFallMultiplier - 1f);
-            if (extraGravity != Vector3.zero) _player.AddGroundForce(extraGravity);
+            // Update delay timer
+            _fastFallDelayTimer -= Time.fixedDeltaTime;
+
+            // Apply extra gravity for fast fall after delay
+            if (_fastFallDelayTimer <= 0f)
+            {
+                Vector3 extraGravity = Physics.gravity * (k_FastFallMultiplier - 1f);
+                if (extraGravity != Vector3.zero) _player.AddGroundForce(extraGravity);
+            }
         }
     }
 }
