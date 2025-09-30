@@ -17,6 +17,7 @@ namespace JackRussell.States.Locomotion
         private float _defaultChromaticAberration = 0f;
         private float _defaultGlitchAmount = 0f;
         private float _sprintTime = 0f;
+        private float _airSprintTimer = 0f;
         private bool _enteredFromAir;
         private CinemachineCameraController _cameraController;
         private Volume _volume;
@@ -52,6 +53,7 @@ namespace JackRussell.States.Locomotion
                 _player.SetVelocityImmediate(v);
                 _player.MarkSprintInAir();
                 _enteredFromAir = true;
+                _airSprintTimer = 0f;
             }
             else
             {
@@ -143,14 +145,18 @@ namespace JackRussell.States.Locomotion
                     if (_player.IsGrounded)
                         ChangeState(new MoveState(_player, _stateMachine));
                     else
+                    {
                         ChangeState(new FallState(_player, _stateMachine));
+                    }
                 }
                 else
                 {
                     if (_player.IsGrounded)
                         ChangeState(new SprintStopState(_player, _stateMachine));
                     else
+                    {
                         ChangeState(new FallState(_player, _stateMachine));
+                    }
                 }
                 return;
             }
@@ -202,6 +208,17 @@ namespace JackRussell.States.Locomotion
             // Update sprint time
             _sprintTime += Time.fixedDeltaTime;
 
+            // Check air sprint timer
+            if (_enteredFromAir && !_player.IsGrounded)
+            {
+                _airSprintTimer += Time.fixedDeltaTime;
+                if (_airSprintTimer >= 0.4f)
+                {
+                    ChangeState(new FallState(_player, _stateMachine));
+                    return;
+                }
+            }
+
             // Update sprint effects
             float factor = Mathf.Clamp01(currentSpeed / _player.RunSpeed);
             UpdateSprintEffects(factor);
@@ -215,7 +232,7 @@ namespace JackRussell.States.Locomotion
             else
             {
                 // Reduce gravity during air sprint for straighter flight
-                _player.AddGroundForce(-Physics.gravity * 0.5f); // counteract 50% of gravity
+                _player.AddGroundForce(-Physics.gravity * 0.5f);
             }
 
             // Apply turn adjustments (more pronounced for sprint)

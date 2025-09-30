@@ -89,6 +89,15 @@ namespace JackRussell.States.Locomotion
             // Allow existing horizontal momentum to persist; optionally clamp to a large air max
             _player.ClampHorizontalSpeed(Mathf.Max(targetSpeed, horizontalVel.magnitude));
 
+            // General speed decay if speed > WalkSpeed
+            Vector3 currentVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
+            float currentSpeed = currentVel.magnitude;
+            if (currentSpeed > _player.WalkSpeed * 0.6f)
+            {
+                Vector3 targetVel = currentVel.normalized * Mathf.Lerp(currentSpeed, _player.WalkSpeed * 0.6f, Time.fixedDeltaTime * 6f);
+                _player.Rigidbody.linearVelocity = new Vector3(targetVel.x, _player.Rigidbody.linearVelocity.y, targetVel.z);
+            }
+
             // Rotate in air with reduced responsiveness
             _player.RotateTowardsDirection(desired, Time.fixedDeltaTime, isAir: true);
 

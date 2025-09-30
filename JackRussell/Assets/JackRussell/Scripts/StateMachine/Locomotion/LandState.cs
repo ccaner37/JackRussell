@@ -24,7 +24,7 @@ namespace JackRussell.States.Locomotion
             if (horizontalVel.magnitude > 6f)
             {
                 bool isSprinting = _player.Animator.GetBool(Animator.StringToHash("IsSprinting"));
-                bool highSpeed = horizontalVel.magnitude > _player.RunSpeed * 0.8f;
+                bool highSpeed = horizontalVel.magnitude > _player.RunSpeed * 0.7f;
                 if (isSprinting || highSpeed)
                 {
                     _player.Animator.SetTrigger(Animator.StringToHash("LandMoveHighTrigger"));

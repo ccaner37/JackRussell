@@ -21,12 +21,15 @@ namespace JackRussell.States.Locomotion
         {
             // Subscribe to jump press
             _player.Actions.Player.Jump.performed += OnJumpPressed;
+            // Subscribe to sprint press
+            _player.Actions.Player.Sprint.performed += OnSprintPressed;
         }
 
         public override void Exit()
         {
             // Unsubscribe
             _player.Actions.Player.Jump.performed -= OnJumpPressed;
+            _player.Actions.Player.Sprint.performed -= OnSprintPressed;
         }
 
         private void OnJumpPressed(InputAction.CallbackContext context)
@@ -35,6 +38,11 @@ namespace JackRussell.States.Locomotion
             {
                 ChangeState(new JumpState(_player, _stateMachine));
             }
+        }
+
+        private void OnSprintPressed(InputAction.CallbackContext context)
+        {
+            ChangeState(new SprintState(_player, _stateMachine));
         }
 
         public override void LogicUpdate()
@@ -68,12 +76,6 @@ namespace JackRussell.States.Locomotion
                 return;
             }
 
-            // Sprint transition handled implicitly by SprintRequested flag in physics (or use a SprintState if preferred)
-            if (_player.SprintRequested)
-            {
-                ChangeState(new SprintState(_player, _stateMachine));
-                return;
-            }
         }
 
         public override void PhysicsUpdate()
