@@ -6,6 +6,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using Unity.Cinemachine;
 using DG.Tweening;
+using RootMotion.FinalIK;
 
 namespace JackRussell.States.Locomotion
 {
@@ -203,6 +204,9 @@ namespace JackRussell.States.Locomotion
                 // Reduce gravity during air sprint for straighter flight
                 _player.AddGroundForce(-Physics.gravity * 0.5f); // counteract 50% of gravity
             }
+
+            // Apply turn adjustments (more pronounced for sprint)
+            _player.ApplyTurnAdjustments(_player.GetIKWeight(), _player.SprintRollMaxDegrees, 1.5f);
 
         }
 

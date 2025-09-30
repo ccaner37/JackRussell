@@ -1,6 +1,7 @@
 using JackRussell;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using DG.Tweening;
 
 namespace JackRussell.States.Locomotion
 {
@@ -101,6 +102,9 @@ namespace JackRussell.States.Locomotion
                 Vector3 projectedVel = Vector3.ProjectOnPlane(_player.Rigidbody.linearVelocity, _player.GroundNormal);
                 _player.Rigidbody.linearVelocity = projectedVel;
             }
+
+            // Apply turn adjustments
+            _player.ApplyTurnAdjustments(_player.GetIKWeight(), _player.MoveRollMaxDegrees, 1f);
 
         }
     }

@@ -1,6 +1,7 @@
 using JackRussell;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using DG.Tweening;
 
 namespace JackRussell.States.Locomotion
 {
@@ -59,6 +60,9 @@ namespace JackRussell.States.Locomotion
 
         public override void PhysicsUpdate()
         {
+            // Reset turn adjustments when idle
+            _player.ApplyTurnAdjustments(0f, 0f, 0f);
+
             // If an action state has requested a movement override, apply it (exclusive)
             if (_player.HasMovementOverride())
             {

@@ -12,6 +12,7 @@ using VitalRouter;
 using UnityEngine.VFX;
 using DG.Tweening;
 using AllIn13DShader;
+using RootMotion.FinalIK;
 
 namespace JackRussell
 {
@@ -57,6 +58,20 @@ namespace JackRussell
         [SerializeField] private VisualEffect _smokeVisualEffect;
         [SerializeField] private ParticleSystem _shockwaveParticle;
         [SerializeField] private AnimationCurve _glitchCurve;
+
+        [Header("IK")]
+        [SerializeField] private FullBodyBipedIK _ik;
+        [SerializeField] private Transform _pelvisTarget;
+        [SerializeField] private float _pelvisOffsetMultiplier = 0.1f;
+        [SerializeField] private float _pelvisLerpSpeed = 5f;
+        [SerializeField] private float _maxRotationSpeedForIK = 5f; // degrees per second
+
+        [Header("Model Root Adjustments")]
+        [SerializeField] private float _moveRollMaxDegrees = -10f;
+        [SerializeField] private float _sprintRollMaxDegrees = -15f;
+        private Vector3 _basePelvisPosition;
+        private Quaternion _originalModelRootLocalRot;
+        private Vector3 _originalModelRootLocalPos;
 
         public Material PlayerMaterial => _playerMaterial;
         public AnimationCurve GlitchCurve => _glitchCurve;
@@ -176,6 +191,27 @@ namespace JackRussell
         public bool HasSprintedInAir { get; private set; }
         public bool HasDoubleJumped { get; private set; }
 
+        // IK accessors
+        public FullBodyBipedIK IK => _ik;
+        public Transform PelvisTarget => _pelvisTarget;
+        public float PelvisOffsetMultiplier => _pelvisOffsetMultiplier;
+        public float PelvisLerpSpeed => _pelvisLerpSpeed;
+        public float MaxRotationSpeedForIK => _maxRotationSpeedForIK;
+        public Vector3 BasePelvisPosition => _basePelvisPosition;
+        public Transform ModelRoot => _modelRoot;
+        public Quaternion OriginalModelRootLocalRot => _originalModelRootLocalRot;
+        public Vector3 OriginalModelRootLocalPos => _originalModelRootLocalPos;
+        public float MoveRollMaxDegrees => _moveRollMaxDegrees;
+        public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
+
+        /// <summary>
+        /// Get the IK weight based on movement and rotation speed.
+        /// </summary>
+        public float GetIKWeight() => MoveDirection.sqrMagnitude > 0.01f ? Mathf.Clamp01(RotationSpeed / MaxRotationSpeedForIK) : 0f;
+        public float RotationSpeed { get; private set; } // degrees per second
+        public float TurnDirection { get; private set; } // -1 left, 1 right, 0 none
+        private Quaternion _previousRotation;
+
         [Inject] private readonly AudioManager _audioManager;
         [Inject] private readonly HomingIndicatorManager _indicatorManager;
         [Inject] private readonly ICommandPublisher _commandPublisher;
@@ -273,20 +309,12 @@ namespace JackRussell
 
         public Quaternion GetCurrentRotation()
         {
-            if (_modelRoot != null) return _modelRoot.rotation;
             return transform.rotation;
         }
 
         private void ApplyRotation(Quaternion rot, bool useRigidbody)
         {
-            if (_modelRoot != null)
-            {
-                _modelRoot.rotation = rot;
-            }
-            else
-            {
-                _rb.MoveRotation(rot);
-            }
+            _rb.MoveRotation(rot);
         }
 
         // Input consumption API for states
@@ -360,6 +388,20 @@ namespace JackRussell
             // create state machines
             _locomotionSM = new StateMachine();
             _actionSM = new StateMachine();
+
+            // Store base pelvis position for IK
+            if (_pelvisTarget != null)
+            {
+                _basePelvisPosition = _pelvisTarget.localPosition;
+            }
+            _previousRotation = GetCurrentRotation();
+
+            // Store original model root transform
+            if (_modelRoot != null)
+            {
+                _originalModelRootLocalRot = _modelRoot.localRotation;
+                _originalModelRootLocalPos = _modelRoot.localPosition;
+            }
         }
 
         private void OnEnable()
@@ -438,6 +480,13 @@ namespace JackRussell
             // Logic updates: action first (may request overrides) then locomotion
             _actionSM.LogicUpdate(Time.deltaTime);
             _locomotionSM.LogicUpdate(Time.deltaTime);
+
+            // Update rotation status
+            Quaternion currentRot = GetCurrentRotation();
+            float deltaYaw = Mathf.DeltaAngle(_previousRotation.eulerAngles.y, currentRot.eulerAngles.y);
+            RotationSpeed = Mathf.Abs(deltaYaw) / Time.deltaTime;
+            TurnDirection = Mathf.Sign(deltaYaw);
+            _previousRotation = currentRot;
 
             // Update homing indicators
             UpdateHomingIndicators();
@@ -807,6 +856,44 @@ namespace JackRussell
                 _playerMaterial.SetFloat("_ScrollTextureY", 0f);
 
                 DemoUtils.SetMaterialOpaque(_playerMaterial);
+            }
+        }
+
+        /// <summary>
+        /// Apply all turn adjustments: IK pelvis offset and ModelRoot roll.
+        /// </summary>
+        public void ApplyTurnAdjustments(float weight, float rollMaxDegrees, float pelvisMultiplier = 1f)
+        {
+            // IK: Offset pelvis target
+            if (IK != null && PelvisTarget != null)
+            {
+                Vector3 targetPos;
+                if (weight > 0)
+                {
+                    Vector3 offset = new Vector3(TurnDirection * PelvisOffsetMultiplier * weight * pelvisMultiplier, 0, 0);
+                    targetPos = BasePelvisPosition + offset;
+                }
+                else
+                {
+                    targetPos = BasePelvisPosition;
+                }
+                PelvisTarget.localPosition = Vector3.Lerp(PelvisTarget.localPosition, targetPos, Time.fixedDeltaTime * PelvisLerpSpeed);
+                IK.solver.bodyEffector.positionWeight = Mathf.Lerp(IK.solver.bodyEffector.positionWeight, weight, Time.fixedDeltaTime * 10f);
+            }
+
+            // ModelRoot: Roll based on turn, scaled by player speed
+            if (_modelRoot != null)
+            {
+                float speedFactor = Mathf.Clamp01(_rb.linearVelocity.magnitude / WalkSpeed); // 0 to 1 based on walk speed
+                if (weight > 0)
+                {
+                    Quaternion targetRot = _originalModelRootLocalRot * Quaternion.Euler(0, 0, TurnDirection * rollMaxDegrees * weight * speedFactor);
+                    _modelRoot.localRotation = Quaternion.Lerp(_modelRoot.localRotation, targetRot, Time.fixedDeltaTime * 5f);
+                }
+                else
+                {
+                    _modelRoot.localRotation = Quaternion.Lerp(_modelRoot.localRotation, _originalModelRootLocalRot, Time.fixedDeltaTime * 5f);
+                }
             }
         }
     }
