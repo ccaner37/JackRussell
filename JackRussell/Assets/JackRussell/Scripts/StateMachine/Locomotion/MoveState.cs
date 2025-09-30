@@ -87,11 +87,11 @@ namespace JackRussell.States.Locomotion
             Vector3 force;
             if (currentSpeed < targetSpeed)
             {
-                force = desired.normalized * _player.AccelGround - currentVel * _player.Damping;
+                force = desired.normalized * _player.AccelGround - currentVel * (_player.Damping * 0.5f);
             }
             else
             {
-                force = -currentVel * _player.Damping;
+                force = -currentVel.normalized * _player.Deceleration;
             }
 
             _player.AddGroundForce(force);

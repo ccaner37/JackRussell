@@ -31471,10 +31471,10 @@ MonoBehaviour:
   _runSpeed: 25
   _boostSpeed: 50
   _dashSpeed: 40
-  _accelGround: 20
+  _accelGround: 35
   _accelAir: 0.6
-  _deceleration: 25
-  _damping: 2
+  _deceleration: 80
+  _damping: 4
   _jumpVelocity: 10
   _gravityMultiplier: 1
   _groundCheckRadius: 0.25
@@ -32578,9 +32578,7 @@ MonoBehaviour:
   _pelvisLerpSpeed: 3
   _maxRotationSpeedForIK: 600
   _moveRollMaxDegrees: -15
-  _moveYOffset: 0.2
   _sprintRollMaxDegrees: -15
-  _sprintYOffset: 0.3
   _homingRange: 12
   _homingConeAngle: 90
   _homingSpeed: 20
