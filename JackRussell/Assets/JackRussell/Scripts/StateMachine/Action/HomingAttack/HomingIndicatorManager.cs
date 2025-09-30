@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
 namespace JackRussell.States.Action
 {
@@ -15,11 +16,14 @@ namespace JackRussell.States.Action
         private readonly Dictionary<HomingTarget, HomingIndicator> _activeIndicators = new();
         private Transform _indicatorParent;
 
+        private readonly IObjectResolver _objectResolver;
+
         [Inject]
-        public HomingIndicatorManager(GameObject indicatorPrefab)
+        public HomingIndicatorManager(GameObject indicatorPrefab, IObjectResolver objectResolver)
         {
             _indicatorPrefab = indicatorPrefab;
             _indicatorParent = new GameObject("HomingIndicators").transform;
+            _objectResolver = objectResolver;
         }
 
         /// <summary>
@@ -50,7 +54,7 @@ namespace JackRussell.States.Action
             {
                 if (target.IsActive && !_activeIndicators.ContainsKey(target))
                 {
-                    GameObject indicatorGO = UnityEngine.Object.Instantiate(_indicatorPrefab, _indicatorParent);
+                    GameObject indicatorGO = _objectResolver.Instantiate(_indicatorPrefab, _indicatorParent);
                     HomingIndicator indicator = indicatorGO.GetComponent<HomingIndicator>();
                     if (indicator != null)
                     {

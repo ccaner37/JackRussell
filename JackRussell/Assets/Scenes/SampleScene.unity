@@ -21653,6 +21653,7 @@ MonoBehaviour:
   _soundDatabase: {fileID: 11400000, guid: b780850ec86e47c419cb88571d2a0da3, type: 2}
   _homingIndicatorPrefab: {fileID: 5752295383031805011, guid: 08dab3ac6a14f7145aed77f7626b390d, type: 3}
   _homingExitConfig: {fileID: 11400000, guid: 74405d5aadca6ff4798bba327ca2ecdc, type: 2}
+  _audioManager: {fileID: 878181284}
 --- !u!4 &746607812 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 159818997915371131, guid: 060e31c1d55d38947a72b4399ff90950, type: 3}
@@ -22435,6 +22436,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &878181282
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 878181283}
+  - component: {fileID: 878181284}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &878181283
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 878181282}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &878181284
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 878181282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53669daa8f3057742b86a0627e9e65fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &881404435
 GameObject:
   m_ObjectHideFlags: 0
@@ -32579,8 +32624,8 @@ MonoBehaviour:
   _maxRotationSpeedForIK: 600
   _moveRollMaxDegrees: -30
   _sprintRollMaxDegrees: -45
-  _homingRange: 12
-  _homingConeAngle: 90
+  _homingRange: 14
+  _homingConeAngle: 130
   _homingSpeed: 20
   _homingDuration: 0.8
   _homingHitRadius: 1
@@ -33173,3 +33218,4 @@ SceneRoots:
   - {fileID: 1369462448}
   - {fileID: 1715319528}
   - {fileID: 2088143959}
+  - {fileID: 878181283}

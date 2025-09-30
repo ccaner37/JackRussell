@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using VContainer;
+using JackRussell.Audio;
 
 namespace JackRussell.States.Action
 {
@@ -26,6 +28,8 @@ namespace JackRussell.States.Action
         private Tween _appearTween;
         private Tween _rotationTween;
         private bool _isAppearing;
+
+        [Inject] private readonly AudioManager _audioManager; 
 
         private void Awake()
         {
@@ -88,14 +92,8 @@ namespace JackRussell.States.Action
 
             // Reset initial state
             _parentTransform.localScale = new Vector3(6f, 6f, 6f);
-            if (_canvasGroup != null)
-            {
-                _canvasGroup.alpha = 0f;
-            }
-            if (_rotatingPart != null)
-            {
-                _rotatingPart.localRotation = Quaternion.identity;
-            }
+            _canvasGroup.alpha = 0.1f;
+            _rotatingPart.localRotation = Quaternion.identity;
 
             // Animate scale down and alpha fade
             Sequence sequence = DOTween.Sequence();
@@ -104,6 +102,7 @@ namespace JackRussell.States.Action
             {
                 sequence.Join(_canvasGroup.DOFade(1f, _appearDuration));
             }
+            sequence.InsertCallback(0.03f, () => _audioManager.PlaySound(SoundType.HomingIndicatorAppear));
 
             // Add rotation animation for the rotating part
             if (_rotatingPart != null)

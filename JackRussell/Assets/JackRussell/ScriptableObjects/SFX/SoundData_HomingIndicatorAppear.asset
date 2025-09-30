@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20f33aee7434dad44b071bf1db34737f, type: 3}
-  m_Name: SoundData_Kick
+  m_Name: SoundData_HomingIndicatorAppear
   m_EditorClassIdentifier: 
-  SoundType: 2
+  SoundType: 11
   AudioClips:
-  - {fileID: 8300000, guid: f02cb2857a7e9374b9602679c15f0456, type: 3}
+  - {fileID: 8300000, guid: 43ad68232d48f4f46bf47f9cd6af1f71, type: 3}
   Volume: 1
   Loop: 0
   IsRandomized: 0
   RandomizePitch: 1
-  PitchRandomizationRange: 0.05
+  PitchRandomizationRange: 0.03

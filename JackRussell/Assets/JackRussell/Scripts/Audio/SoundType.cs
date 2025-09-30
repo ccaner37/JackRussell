@@ -13,5 +13,6 @@ namespace JackRussell.Audio
         Spinz808,
         Bell,
         SprintSpeedUp,
+        HomingIndicatorAppear,
     }
 }

@@ -14,12 +14,13 @@ namespace JackRussell.GameScope
         [SerializeField] private SoundDatabase _soundDatabase;
         [SerializeField] private GameObject _homingIndicatorPrefab;
         [SerializeField] private HomingExitAnimationConfig _homingExitConfig;
+        [SerializeField] private AudioManager _audioManager;
 
         protected override void Configure(IContainerBuilder builder)
         {
             //builder.RegisterEntryPoint<RootEntryPoint>();
 
-            builder.Register<AudioManager>(Lifetime.Singleton);
+            builder.RegisterComponent(_audioManager);
 
             builder.RegisterInstance(_soundDatabase);
 

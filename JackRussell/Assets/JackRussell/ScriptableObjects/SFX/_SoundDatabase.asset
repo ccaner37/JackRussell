@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6ef72e2d3c51b6e4ca53c33451306ea9, type: 3}
-  m_Name: SoundDatabase
+  m_Name: _SoundDatabase
   m_EditorClassIdentifier: 
   _allSoundData:
   - {fileID: 11400000, guid: ab0897abb9c2c3c4abb703cbc31ecbcd, type: 2}
@@ -23,3 +23,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 40bed542744acb94a82f9ca133d1227a, type: 2}
   - {fileID: 11400000, guid: c24cfe35599bdb544bbb390c6bff1525, type: 2}
   - {fileID: 11400000, guid: 0fc2ccdca1c8def43b5505411d4a90c9, type: 2}
+  - {fileID: 11400000, guid: 74c6a3a4494326044bb7ee12c6a8486c, type: 2}
