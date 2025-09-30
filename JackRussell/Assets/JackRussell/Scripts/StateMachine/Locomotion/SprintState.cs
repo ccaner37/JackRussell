@@ -65,7 +65,7 @@ namespace JackRussell.States.Locomotion
             _player.OnSprintEnter();
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), true);
             _player.PlaySound(Audio.SoundType.SprintStart);
-            _player.PlaySprintSpeedUp();
+            if (_player.IsGrounded) _player.PlaySprintSpeedUp();
 
             // Find components
             _cameraController = Object.FindObjectOfType<CinemachineCameraController>();
