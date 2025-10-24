@@ -1,6 +1,7 @@
 using UnityEngine;
 using JackRussell;
 using JackRussell.Rails;
+using DG.Tweening;
 
 namespace JackRussell.States.Action
 {
@@ -13,6 +14,10 @@ namespace JackRussell.States.Action
         [Header("Path Launch Settings")]
         [SerializeField] protected SplineRail _launchPath;
         [SerializeField] protected bool _allowCollisionLaunch = true;
+
+        [Header("Easing Settings")]
+        [SerializeField] protected AnimationCurve _speedCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f); // Starts slow, speeds up, slows down
+        [SerializeField] protected float _launchDurationMultiplier = 1f;
 
         /// <summary>
         /// The spline path to launch the player along.
@@ -44,13 +49,16 @@ namespace JackRussell.States.Action
 
         /// <summary>
         /// Called when the player should be launched along the path.
-        /// Default implementation triggers the PathFollowState.
+        /// Default implementation triggers the PathFollowState with easing.
         /// </summary>
         protected virtual void OnPathLaunch(Player player)
         {
             if (_launchPath != null)
             {
-                player.EnterPathFollowState(_launchPath);
+                // Calculate duration based on path length and base speed (25f from PathFollowState)
+                float baseDuration = _launchPath.TotalLength / 25f;
+                float duration = baseDuration * _launchDurationMultiplier;
+                player.EnterPathFollowState(_launchPath, _speedCurve, duration);
             }
             else
             {

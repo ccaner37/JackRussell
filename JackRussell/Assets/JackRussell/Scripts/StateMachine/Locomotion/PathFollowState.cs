@@ -14,6 +14,11 @@ namespace JackRussell.States.Locomotion
         private float _currentDistance;
         private float _pathSpeed;
         private Vector3 _lastPosition;
+        private AnimationCurve _speedCurve;
+        private float _duration;
+        private bool _isTweening;
+        private float _startTime;
+        private float _startDistance;
 
         // Constants
         private const float k_PathSpeed = 25f; // Fixed speed for path following
@@ -22,6 +27,14 @@ namespace JackRussell.States.Locomotion
         public PathFollowState(Player player, StateMachine stateMachine, SplineRail path) : base(player, stateMachine)
         {
             _path = path;
+            _pathSpeed = k_PathSpeed;
+        }
+
+        public PathFollowState(Player player, StateMachine stateMachine, SplineRail path, AnimationCurve speedCurve, float duration) : base(player, stateMachine)
+        {
+            _path = path;
+            _speedCurve = speedCurve;
+            _duration = duration;
             _pathSpeed = k_PathSpeed;
         }
 
@@ -55,6 +68,14 @@ namespace JackRussell.States.Locomotion
                 _lastPosition = startPos;
 
                 Debug.Log($"[PathFollowState] Starting path at distance {_currentDistance:F3}");
+
+                // Start tweening if duration is set
+                _isTweening = _duration > 0;
+                if (_isTweening)
+                {
+                    _startTime = Time.time;
+                    _startDistance = _currentDistance;
+                }
             }
             else
             {
@@ -77,45 +98,75 @@ namespace JackRussell.States.Locomotion
         {
             if (_path == null) return;
 
-            // Calculate movement along path
             float deltaTime = Time.fixedDeltaTime;
-            float distanceDelta = _pathSpeed * deltaTime;
 
-            // Update position along path
-            _currentDistance += distanceDelta;
-            _currentDistance = Mathf.Clamp(_currentDistance, 0f, _path.TotalLength);
-
-            // Get new position
-            if (_path.GetPositionAndTangent(_currentDistance, out Vector3 targetPos, out Vector3 tangent))
+            if (_isTweening)
             {
-                // Move player along path
-                Vector3 currentPos = _player.transform.position;
-                Vector3 newPos = Vector3.Lerp(currentPos, targetPos, deltaTime / k_PositionSmoothTime);
+                // Tweening mode: update distance based on time and curve
+                float elapsed = Time.time - _startTime;
+                float t = Mathf.Clamp01(elapsed / _duration);
+                float easedT = _speedCurve.Evaluate(t);
+                _currentDistance = Mathf.Lerp(_startDistance, _path.TotalLength, easedT);
 
-                // Calculate velocity for physics
-                Vector3 velocity = (newPos - currentPos) / deltaTime;
-                _player.SetVelocityImmediate(velocity);
-
-                // Rotate player to face path direction
-                if (tangent.sqrMagnitude > 0.1f)
+                if (_path.GetPositionAndTangent(_currentDistance, out Vector3 targetPos, out Vector3 tangent))
                 {
-                    _player.RotateTowardsDirection(tangent, deltaTime, isAir: true, instantaneous: false, allow3DRotation: false);
+                    Vector3 currentPos = _player.transform.position;
+                    Vector3 newPos = Vector3.Lerp(currentPos, targetPos, deltaTime / k_PositionSmoothTime);
+                    Vector3 velocity = (newPos - currentPos) / deltaTime;
+                    _player.SetVelocityImmediate(velocity);
+
+                    if (tangent.sqrMagnitude > 0.1f)
+                    {
+                        _player.RotateTowardsDirection(tangent, deltaTime, isAir: true, instantaneous: false, allow3DRotation: false);
+                    }
+
+                    _lastPosition = newPos;
+
+                    // Check if completed
+                    if (t >= 1f)
+                    {
+                        ChangeState(new FallState(_player, _stateMachine));
+                        Debug.Log("[PathFollowState] Path completed with easing, transitioning to fall");
+                    }
                 }
-
-                _lastPosition = newPos;
-
-                // Check if reached end of path
-                if (_currentDistance >= _path.TotalLength - 0.1f)
+                else
                 {
                     ChangeState(new FallState(_player, _stateMachine));
-                    Debug.Log("[PathFollowState] Path completed, transitioning to fall");
+                    Debug.LogError("[PathFollowState] Lost path during tweening");
                 }
             }
             else
             {
-                // Lost path, transition to fall
-                ChangeState(new FallState(_player, _stateMachine));
-                Debug.LogError("[PathFollowState] Lost path during movement");
+                // Linear mode: manual advancement
+                float distanceDelta = _pathSpeed * deltaTime;
+                _currentDistance += distanceDelta;
+                _currentDistance = Mathf.Clamp(_currentDistance, 0f, _path.TotalLength);
+
+                if (_path.GetPositionAndTangent(_currentDistance, out Vector3 targetPos, out Vector3 tangent))
+                {
+                    Vector3 currentPos = _player.transform.position;
+                    Vector3 newPos = Vector3.Lerp(currentPos, targetPos, deltaTime / k_PositionSmoothTime);
+                    Vector3 velocity = (newPos - currentPos) / deltaTime;
+                    _player.SetVelocityImmediate(velocity);
+
+                    if (tangent.sqrMagnitude > 0.1f)
+                    {
+                        _player.RotateTowardsDirection(tangent, deltaTime, isAir: true, instantaneous: false, allow3DRotation: false);
+                    }
+
+                    _lastPosition = newPos;
+
+                    if (_currentDistance >= _path.TotalLength - 0.1f)
+                    {
+                        ChangeState(new FallState(_player, _stateMachine));
+                        Debug.Log("[PathFollowState] Path completed, transitioning to fall");
+                    }
+                }
+                else
+                {
+                    ChangeState(new FallState(_player, _stateMachine));
+                    Debug.LogError("[PathFollowState] Lost path during movement");
+                }
             }
         }
     }

@@ -664,6 +664,18 @@ namespace JackRussell
             }
         }
 
+        /// <summary>
+        /// Force the player into path following state along the specified rail with easing.
+        /// </summary>
+        public void EnterPathFollowState(JackRussell.Rails.SplineRail path, AnimationCurve speedCurve, float duration)
+        {
+            if (path != null)
+            {
+                var pathState = new PathFollowState(this, _locomotionSM, path, speedCurve, duration);
+                _locomotionSM.ChangeState(pathState);
+            }
+        }
+
         public void OnSprintEnter()
         {
             _shockwaveParticle.Play();
