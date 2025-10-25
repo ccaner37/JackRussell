@@ -7,12 +7,12 @@ using UnityEngine.Rendering.Universal;
 using Unity.Cinemachine;
 using DG.Tweening;
 using RootMotion.FinalIK;
+using VitalRouter;
 
 namespace JackRussell.States.Locomotion
 {
     public class SprintState : PlayerStateBase
     {
-        private float _defaultFOV = 60f;
         private float _defaultLensDistortion = 0f;
         private float _defaultChromaticAberration = 0f;
         private float _defaultGlitchAmount = 0f;
@@ -24,8 +24,12 @@ namespace JackRussell.States.Locomotion
         private LensDistortion _lensDistortion;
         private ChromaticAberration _chromaticAberration;
         private RendererController _rendererController;
+        private ICommandPublisher _commandPublisher;
 
-        public SprintState(Player player, StateMachine stateMachine) : base(player, stateMachine) { }
+        public SprintState(Player player, StateMachine stateMachine) : base(player, stateMachine)
+        {
+            _commandPublisher = player.CommandPublisher;
+        }
 
         public override string Name => nameof(SprintState);
 
@@ -69,6 +73,9 @@ namespace JackRussell.States.Locomotion
             _player.PlaySound(Audio.SoundType.SprintStart);
             if (_player.IsGrounded) _player.PlaySprintSpeedUp();
 
+            // Publish camera state update command
+            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(3f, 85f));
+
             // Find components
             _cameraController = Object.FindObjectOfType<CinemachineCameraController>();
             _volume = _cameraController.Volume;
@@ -81,10 +88,6 @@ namespace JackRussell.States.Locomotion
 
             // Store defaults
             _sprintTime = 0f;
-            if (_cameraController != null && _cameraController.GetCinemachineCamera() != null)
-            {
-                _defaultFOV = _cameraController.GetCinemachineCamera().Lens.FieldOfView;
-            }
             if (_lensDistortion != null)
             {
                 _defaultLensDistortion = _lensDistortion.intensity.value;
@@ -107,12 +110,12 @@ namespace JackRussell.States.Locomotion
 
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), false);
             _player.StopSprintSpeedUp();
+            _player.OnSprintExit();
+
+            // Publish camera state update command to revert to default
+            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(2.5f, 70f));
 
             // Revert sprint effects
-            if (_cameraController != null && _cameraController.GetCinemachineCamera() != null)
-            {
-                _cameraController.GetCinemachineCamera().Lens.FieldOfView = _defaultFOV;
-            }
             if (_lensDistortion != null)
             {
                 _lensDistortion.intensity.value = _defaultLensDistortion;
@@ -248,12 +251,6 @@ namespace JackRussell.States.Locomotion
                 effectValue = _player.GlitchCurve.Evaluate(_sprintTime);
             }
 
-            // FOV
-            if (_cameraController != null && _cameraController.GetCinemachineCamera() != null)
-            {
-                float targetFOV = _defaultFOV + (80f - _defaultFOV) * factor;
-                _cameraController.GetCinemachineCamera().Lens.FieldOfView = targetFOV;
-            }
             // Lens Distortion
             if (_lensDistortion != null)
             {

@@ -1,7 +1,9 @@
 using JackRussell;
 using JackRussell.Rails;
+using JackRussell.CameraController;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using VitalRouter;
 
 namespace JackRussell.States.Locomotion
 {
@@ -17,6 +19,7 @@ namespace JackRussell.States.Locomotion
         private float _currentDistance;
         private Vector3 _lastPosition;
         private bool _isAccelerating;
+        private ICommandPublisher _commandPublisher;
 
         // Constants
         private const float k_MinGrindSpeed = 5f;
@@ -36,6 +39,7 @@ namespace JackRussell.States.Locomotion
             {
                 Debug.LogError("GrindState requires a RailDetector component on the player!");
             }
+            _commandPublisher = player.CommandPublisher;
         }
 
         public override string Name => nameof(GrindState);
@@ -66,6 +70,9 @@ namespace JackRussell.States.Locomotion
 
             _player.OnGrindEnter();
 
+            // Publish camera state update command
+            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(3f, 85f));
+
             // Subscribe to jump press
             _player.Actions.Player.Jump.performed += OnJumpPressed;
 
@@ -95,6 +102,9 @@ namespace JackRussell.States.Locomotion
 
         public override void Exit()
         {
+            // Publish camera state update command to revert to default
+            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(2.5f, 70f));
+
             // Unsubscribe
             _player.Actions.Player.Jump.performed -= OnJumpPressed;
 

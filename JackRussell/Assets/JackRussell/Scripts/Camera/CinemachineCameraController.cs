@@ -4,6 +4,9 @@ using UnityEngine.InputSystem;
 using JackRussell.Rails;
 using System;
 using UnityEngine.Rendering;
+using VitalRouter;
+using DG.Tweening;
+using VContainer;
 
 namespace JackRussell.CameraController
 {
@@ -60,7 +63,12 @@ namespace JackRussell.CameraController
         private float _targetRadius;
         private float _radiusVelocity;
 
+        private float _targetFov;
+        private float _defaultFov;
+
         public Volume Volume;
+
+        [Inject] private readonly ICommandSubscribable _commandSubscribable;
 
         private void Awake()
         {
@@ -74,6 +82,8 @@ namespace JackRussell.CameraController
                 {
                     _currentRadius = _orbitalFollow.Radius;
                     _targetRadius = _currentRadius;
+                    _defaultFov = _cinemachineCamera.Lens.FieldOfView;
+                    _targetFov = _defaultFov;
                 }
             }
 
@@ -89,6 +99,9 @@ namespace JackRussell.CameraController
             {
                 _inputAxisController = GetComponent<CinemachineInputAxisController>();
             }
+
+            // Subscribe to camera state update commands
+            _commandSubscribable.Subscribe<CameraStateUpdateCommand>((cmd, ctx) => OnCameraStateUpdate(cmd));
         }
 
         private void OnEnable()
@@ -104,34 +117,27 @@ namespace JackRussell.CameraController
 
         private void LateUpdate()
         {
-            if (_target == null || _orbitalFollow == null) return;
+            // No polling needed - camera updates are event-driven via commands
+        }
 
-            // Check player states
-            bool isSprinting = IsPlayerSprinting();
-            bool isGrinding = IsPlayerGrinding();
+        private void OnCameraStateUpdate(CameraStateUpdateCommand command)
+        {
+            // Update target values
+            _targetRadius = command.TargetDistance;
+            _targetFov = command.TargetFOV;
 
-            // Adjust camera radius based on state
-            if (isSprinting)
+            // Animate camera distance with DOTween
+            if (_orbitalFollow != null)
             {
-                _targetRadius = _sprintDistance;
-            }
-            else if (isGrinding)
-            {
-                _targetRadius = _grindDistance;
-            }
-            else
-            {
-                _targetRadius = _defaultDistance;
+                DOTween.To(() => _orbitalFollow.Radius, x => _orbitalFollow.Radius = x, _targetRadius, command.TransitionDuration)
+                    .SetEase(Ease.OutQuad);
             }
 
-            // Smooth radius transition
-            _currentRadius = Mathf.SmoothDamp(_currentRadius, _targetRadius, ref _radiusVelocity, _distanceSmoothTime);
-            _orbitalFollow.Radius = _currentRadius;
-
-            // Handle grinding camera adjustments
-            if (isGrinding)
+            // Animate FOV with DOTween
+            if (_cinemachineCamera != null)
             {
-                AdjustGrindingCamera();
+                DOTween.To(() => _cinemachineCamera.Lens.FieldOfView, x => _cinemachineCamera.Lens.FieldOfView = x, _targetFov, command.TransitionDuration)
+                    .SetEase(Ease.OutQuad);
             }
         }
 

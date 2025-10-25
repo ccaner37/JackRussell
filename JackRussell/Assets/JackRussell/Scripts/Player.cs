@@ -57,6 +57,7 @@ namespace JackRussell
         [SerializeField] private Material _playerMaterial;
         [SerializeField] private VisualEffect _smokeVisualEffect;
         [SerializeField] private ParticleSystem _shockwaveParticle;
+        [SerializeField] private GameObject _sprintBoostModel;
         [SerializeField] private AnimationCurve _glitchCurve;
 
         [Header("IK")]
@@ -218,6 +219,8 @@ namespace JackRussell
         [Inject] private readonly HomingIndicatorManager _indicatorManager;
         [Inject] private readonly ICommandPublisher _commandPublisher;
         [Inject] private readonly HomingExitAnimationConfig _homingExitConfig;
+
+        public ICommandPublisher CommandPublisher => _commandPublisher;
 
         public HomingExitAnimationConfig HomingExitConfig => _homingExitConfig;
         public int LastHomingExitIndex { get; set; } = -1;
@@ -679,6 +682,12 @@ namespace JackRussell
         public void OnSprintEnter()
         {
             _shockwaveParticle.Play();
+            _sprintBoostModel.SetActive(true);
+        }
+
+        public void OnSprintExit()
+        {
+            _sprintBoostModel.SetActive(false);
         }
 
         public void OnJumpEnter()
