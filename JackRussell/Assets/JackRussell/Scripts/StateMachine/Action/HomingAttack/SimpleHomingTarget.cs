@@ -15,7 +15,7 @@ namespace JackRussell.States.Action
     {
         [SerializeField] private bool _isActive = true;
         [SerializeField] private ParticleSystem _hitEffect;
-        [SerializeField] private MeshRenderer _renderer;
+        [SerializeField] private MeshRenderer[] _hitEffectRenderers;
 
         public override Transform TargetTransform => transform;
 
@@ -29,18 +29,46 @@ namespace JackRussell.States.Action
                 _hitEffect.Play(true);
             }
 
+            // Apply hit material effect
+            OnHitMaterialEffect();
+
             // Example behavior: deactivate the target (could be destroy, apply damage, spring bounce, etc.)
             transform.DOPunchScale(Vector3.one, 0.25f, 10, 1).OnComplete(() => StartCoroutine(EnableBack()));
+        }
+
+        private void OnHitMaterialEffect()
+        {
+            if (_hitEffectRenderers != null)
+            {
+                foreach (var renderer in _hitEffectRenderers)
+                {
+                    if (renderer != null && renderer.material != null)
+                    {
+                        renderer.material.DOFloat(1f, "_HitBlend", 0.1f);
+                    }
+                }
+            }
         }
 
         private IEnumerator EnableBack()
         {
             //yield return new WaitForSeconds(0.1f);
             _isActive = false;
-            _renderer.enabled = false;
+            foreach (var renderer in _hitEffectRenderers)
+            {
+                renderer.enabled = false;
+            }
             yield return new WaitForSeconds(2f);
-            _renderer.enabled = true;
+            foreach (var renderer in _hitEffectRenderers)
+            {
+                renderer.enabled = true;
+            }
             _isActive = true;
+
+            foreach (var renderer in _hitEffectRenderers)
+            {
+                renderer.material.SetFloat("_HitBlend", 0);
+            }
         }
 
 #if UNITY_EDITOR

@@ -71,7 +71,7 @@ namespace JackRussell.States.Locomotion
             _player.OnSprintEnter();
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), true);
             _player.PlaySound(Audio.SoundType.SprintStart);
-            if (_player.IsGrounded) _player.PlaySprintSpeedUp();
+            if (_player.IsGrounded) _player.PlaySprintSpeedUpSound();
 
             // Publish camera state update command
             _commandPublisher.PublishAsync(new CameraStateUpdateCommand(3f, 85f));
@@ -113,7 +113,7 @@ namespace JackRussell.States.Locomotion
             _player.OnSprintExit();
 
             // Publish camera state update command to revert to default
-            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(2.5f, 70f));
+            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(2.6f, 70f));
 
             // Revert sprint effects
             if (_lensDistortion != null)

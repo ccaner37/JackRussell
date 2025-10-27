@@ -137,6 +137,17 @@ namespace JackRussell.States.Action
                 // camera shake and sounds
                 UnityEngine.Object.FindAnyObjectByType<CinemachineCameraController>().ShakeCamera(1.2f, 2f);
                 _player.PlaySound(Audio.SoundType.Kick);
+
+                // play foot kick particle at right foot position
+                var footParticle = _player.FootKickParticle;
+                var leftFoot = _player.LeftFootTransform;
+                if (footParticle != null && leftFoot != null)
+                {
+                    footParticle.transform.SetParent(leftFoot);
+                    footParticle.transform.localPosition = Vector3.zero;
+                    footParticle.Play();
+                }
+
                 _effectTriggered = true;
             }
 

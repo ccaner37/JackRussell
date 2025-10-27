@@ -54,11 +54,15 @@ namespace JackRussell
         [SerializeField] private float _dashCooldown = 0.5f;
 
         [Header("Effects")]
-        [SerializeField] private Material _playerMaterial;
+        [SerializeField] private Material _playerMaterial, _playerHomingAttackMaterial;
         [SerializeField] private VisualEffect _smokeVisualEffect;
         [SerializeField] private ParticleSystem _shockwaveParticle;
         [SerializeField] private GameObject _sprintBoostModel;
         [SerializeField] private AnimationCurve _glitchCurve;
+        [SerializeField] private ParticleSystem _footKickParticle;
+        [SerializeField] private SkinnedMeshRenderer[] _playerRenderers;
+        private Material[] _originalPlayerMaterials;
+        [SerializeField] private GameObject[] _footSprintParticles;
 
         [Header("IK")]
         [SerializeField] private FullBodyBipedIK _ik;
@@ -226,6 +230,10 @@ namespace JackRussell
         public int LastHomingExitIndex { get; set; } = -1;
         [SerializeField] private AudioSource _audioSource;
         [SerializeField] private AudioSource _sprintAudioSource;
+
+        // Foot kick particle accessor
+        public ParticleSystem FootKickParticle => _footKickParticle;
+        public Transform LeftFootTransform => _animator != null ? _animator.GetBoneTransform(HumanBodyBones.LeftFoot) : null;
 
         /// <summary>
         /// Request a temporary rotation override. If exclusive=true locomotion rotation is suspended.
@@ -683,11 +691,19 @@ namespace JackRussell
         {
             _shockwaveParticle.Play();
             _sprintBoostModel.SetActive(true);
+            foreach (var footParticle in _footSprintParticles)
+            {
+                footParticle.gameObject.SetActive(true);
+            }
         }
 
         public void OnSprintExit()
         {
             _sprintBoostModel.SetActive(false);
+            foreach (var footParticle in _footSprintParticles)
+            {
+                footParticle.gameObject.SetActive(false);
+            }
         }
 
         public void OnJumpEnter()
@@ -747,7 +763,7 @@ namespace JackRussell
             _audioManager.StopLoopedSound(soundType, fadeOutDuration);
         }
 
-        public void PlaySprintSpeedUp()
+        public void PlaySprintSpeedUpSound()
         {
             if (_sprintAudioSource != null)
             {
@@ -777,69 +793,89 @@ namespace JackRussell
         {
             Animator.ResetTrigger("HomingAttackReach");
             Animator.Play("HomingAttack");
-            _smokeVisualEffect.Play();
+
+            //_smokeVisualEffect.Play();
+
+            // Store original materials before changing
+            _originalPlayerMaterials = new Material[_playerRenderers.Length];
+            for (int i = 0; i < _playerRenderers.Length; i++)
+            {
+                _originalPlayerMaterials[i] = _playerRenderers[i].material;
+                _playerRenderers[i].material = _playerHomingAttackMaterial;
+            }
+
 
             // Implement player material effects
-            if (_playerMaterial != null)
-            {
-                DemoUtils.SetMaterialTransparent(_playerMaterial);
+            // if (_playerMaterial != null)
+            // {
+            //     DemoUtils.SetMaterialTransparent(_playerMaterial);
 
-                _playerMaterial.DOKill();
+            //     _playerMaterial.DOKill();
 
-                // Enable keywords and set properties
-                _playerMaterial.SetFloat("_FadeOn", 1f);
-                _playerMaterial.EnableKeyword("_FADE_ON");
+            //     // Enable keywords and set properties
+            //     _playerMaterial.SetFloat("_FadeOn", 1f);
+            //     _playerMaterial.EnableKeyword("_FADE_ON");
 
-                // _playerMaterial.SetFloat("_IntersectionFadeOn", 1f);
-                // _playerMaterial.EnableKeyword("_INTERSECTION_FADE_ON");
+            //     // _playerMaterial.SetFloat("_IntersectionFadeOn", 1f);
+            //     // _playerMaterial.EnableKeyword("_INTERSECTION_FADE_ON");
 
-                _playerMaterial.SetFloat("_VertexDistortionOn", 1f);
-                _playerMaterial.EnableKeyword("_VERTEX_DISTORTION_ON");
+            //     _playerMaterial.SetFloat("_VertexDistortionOn", 1f);
+            //     _playerMaterial.EnableKeyword("_VERTEX_DISTORTION_ON");
 
-                _playerMaterial.SetFloat("_ScrollTextureOn", 1f);
-                _playerMaterial.EnableKeyword("_SCROLL_TEXTURE_ON");
+            //     _playerMaterial.SetFloat("_ScrollTextureOn", 1f);
+            //     _playerMaterial.EnableKeyword("_SCROLL_TEXTURE_ON");
 
-                // Animate float properties to target values
-                _playerMaterial.DOFloat(0.25f, "_FadeAmount", 0.1f);
-                // _playerMaterial.DOFloat(0.7f, "_IntersectionFadeFactor", 0.1f);
-                _playerMaterial.DOFloat(0.2f, "_VertexDistortionAmount", 0.1f);
-                _playerMaterial.DOFloat(20f, "_ScrollTextureY", 0.1f);
-            }
+            //     // Animate float properties to target values
+            //     _playerMaterial.DOFloat(0.25f, "_FadeAmount", 0.1f);
+            //     // _playerMaterial.DOFloat(0.7f, "_IntersectionFadeFactor", 0.1f);
+            //     _playerMaterial.DOFloat(0.2f, "_VertexDistortionAmount", 0.1f);
+            //     _playerMaterial.DOFloat(20f, "_ScrollTextureY", 0.1f);
+            // }
         }
 
         public void OnHomingAttackReach()
         {
             Animator.SetTrigger("HomingAttackReach");
-            _smokeVisualEffect.Stop();
+
+            //_smokeVisualEffect.Stop();
+
+            // Restore original materials
+            if (_originalPlayerMaterials != null && _originalPlayerMaterials.Length == _playerRenderers.Length)
+            {
+                for (int i = 0; i < _playerRenderers.Length; i++)
+                {
+                    _playerRenderers[i].material = _originalPlayerMaterials[i];
+                }
+            }
 
             // Implement player material effects revert
-            if (_playerMaterial != null)
-            {
-                _playerMaterial.DOKill();
+            // if (_playerMaterial != null)
+            // {
+            //     _playerMaterial.DOKill();
 
-                // Animate float properties to 0, then disable keywords
-                Sequence seq = DOTween.Sequence();
-                seq.Append(_playerMaterial.DOFloat(0f, "_FadeAmount", 0.8f));
-                // seq.Join(_playerMaterial.DOFloat(0.1f, "_IntersectionFadeFactor", 0.3f));
-                seq.Join(_playerMaterial.DOFloat(0f, "_VertexDistortionAmount", 0.8f));
-                seq.Join(_playerMaterial.DOFloat(0f, "_ScrollTextureY", 0.8f));
-                seq.OnComplete(() =>
-                {
-                    DemoUtils.SetMaterialOpaque(_playerMaterial);
+            //     // Animate float properties to 0, then disable keywords
+            //     Sequence seq = DOTween.Sequence();
+            //     seq.Append(_playerMaterial.DOFloat(0f, "_FadeAmount", 0.8f));
+            //     // seq.Join(_playerMaterial.DOFloat(0.1f, "_IntersectionFadeFactor", 0.3f));
+            //     seq.Join(_playerMaterial.DOFloat(0f, "_VertexDistortionAmount", 0.8f));
+            //     seq.Join(_playerMaterial.DOFloat(0f, "_ScrollTextureY", 0.8f));
+            //     seq.OnComplete(() =>
+            //     {
+            //         DemoUtils.SetMaterialOpaque(_playerMaterial);
 
-                    _playerMaterial.SetFloat("_FadeOn", 0f);
-                    _playerMaterial.DisableKeyword("_FADE_ON");
+            //         _playerMaterial.SetFloat("_FadeOn", 0f);
+            //         _playerMaterial.DisableKeyword("_FADE_ON");
 
-                    // _playerMaterial.SetFloat("_IntersectionFadeOn", 0f);
-                    // _playerMaterial.DisableKeyword("_INTERSECTION_FADE_ON");
+            //         // _playerMaterial.SetFloat("_IntersectionFadeOn", 0f);
+            //         // _playerMaterial.DisableKeyword("_INTERSECTION_FADE_ON");
 
-                    _playerMaterial.SetFloat("_VertexDistortionOn", 0f);
-                    _playerMaterial.DisableKeyword("_VERTEX_DISTORTION_ON");
+            //         _playerMaterial.SetFloat("_VertexDistortionOn", 0f);
+            //         _playerMaterial.DisableKeyword("_VERTEX_DISTORTION_ON");
 
-                    _playerMaterial.SetFloat("_ScrollTextureOn", 0f);
-                    _playerMaterial.DisableKeyword("_SCROLL_TEXTURE_ON");
-                });
-            }
+            //         _playerMaterial.SetFloat("_ScrollTextureOn", 0f);
+            //         _playerMaterial.DisableKeyword("_SCROLL_TEXTURE_ON");
+            //     });
+            // }
         }
 
         // Instant versions for editor testing
@@ -862,7 +898,7 @@ namespace JackRussell
 
                 _playerMaterial.SetFloat("_FadeAmount", 0.25f);
                 // _playerMaterial.SetFloat("_IntersectionFadeFactor", 0.7f);
-                _playerMaterial.SetFloat("_VertexDistortionAmount", 0.2f);
+                _playerMaterial.SetFloat("_VertexDistortionAmount", 0.1f);
                 _playerMaterial.SetFloat("_ScrollTextureY", 20f);
 
                 DemoUtils.SetMaterialTransparent(_playerMaterial);
