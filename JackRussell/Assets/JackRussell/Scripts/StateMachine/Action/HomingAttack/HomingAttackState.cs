@@ -59,6 +59,9 @@ namespace JackRussell.States.Action
 
             _player.OnHomingAttackEnter();
 
+            // Enable smoke effects
+            _player.EnableSmokeEffects();
+
             // initialize homing attack variables
             Vector3 toTarget = (_target.TargetTransform.position - _player.transform.position);
             _initialDistance = toTarget.magnitude;
@@ -85,6 +88,9 @@ namespace JackRussell.States.Action
         {
             _player.ClearMovementOverride();
             _player.HideHomingIndicators();
+
+            // Disable smoke effects with delay
+            _player.DisableSmokeEffects();
 
             // Reset vertical rotation to horizontal
             Quaternion currentRot = _player.transform.rotation;

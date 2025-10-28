@@ -13,6 +13,7 @@ using UnityEngine.VFX;
 using DG.Tweening;
 using AllIn13DShader;
 using RootMotion.FinalIK;
+using System.Collections;
 
 namespace JackRussell
 {
@@ -55,7 +56,6 @@ namespace JackRussell
 
         [Header("Effects")]
         [SerializeField] private Material _playerMaterial, _playerHomingAttackMaterial;
-        [SerializeField] private VisualEffect _smokeVisualEffect;
         [SerializeField] private ParticleSystem _shockwaveParticle;
         [SerializeField] private GameObject _sprintBoostModel;
         [SerializeField] private AnimationCurve _glitchCurve;
@@ -63,6 +63,8 @@ namespace JackRussell
         [SerializeField] private SkinnedMeshRenderer[] _playerRenderers;
         private Material[] _originalPlayerMaterials;
         [SerializeField] private GameObject[] _footSprintParticles;
+        [SerializeField] private VisualEffect[] _smokeVisualEffects;
+        [SerializeField] private TrailRenderer[] _smokeTrailRenderers;
 
         [Header("IK")]
         [SerializeField] private FullBodyBipedIK _ik;
@@ -120,6 +122,10 @@ namespace JackRussell
         private bool _isGrounded;
         private bool _wasGrounded;
         private Vector3 _groundNormal = Vector3.up;
+
+        // Smoke effects state
+        private bool _smokeEffectsActive;
+        private Coroutine _smokeEffectsCoroutine;
 
         // Animator parameter hashes (dummy names)
         private static readonly int ANIM_SPEED = Animator.StringToHash("Speed");
@@ -789,12 +795,103 @@ namespace JackRussell
             _indicatorManager?.HideAllIndicators();
         }
 
+        /// <summary>
+        /// Enables smoke effects (VisualEffects and TrailRenderers) immediately.
+        /// </summary>
+        public void EnableSmokeEffects()
+        {
+            if (_smokeEffectsActive) return;
+
+            _smokeEffectsActive = true;
+
+            // Stop any existing coroutine
+            if (_smokeEffectsCoroutine != null)
+            {
+                StopCoroutine(_smokeEffectsCoroutine);
+                _smokeEffectsCoroutine = null;
+            }
+
+            // Enable VisualEffects
+            if (_smokeVisualEffects != null)
+            {
+                foreach (var vfx in _smokeVisualEffects)
+                {
+                    if (vfx != null)
+                    {
+                        vfx.enabled = true;
+                        vfx.Play();
+                    }
+                }
+            }
+
+            // Enable TrailRenderers
+            if (_smokeTrailRenderers != null)
+            {
+                foreach (var trail in _smokeTrailRenderers)
+                {
+                    if (trail != null)
+                    {
+                        trail.enabled = true;
+                        trail.emitting = true;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Disables smoke effects after a delay, allowing existing particles to fade naturally.
+        /// </summary>
+        public void DisableSmokeEffects(float delay = 0.5f)
+        {
+            if (!_smokeEffectsActive) return;
+
+            _smokeEffectsActive = false;
+
+            // Stop any existing coroutine
+            if (_smokeEffectsCoroutine != null)
+            {
+                StopCoroutine(_smokeEffectsCoroutine);
+            }
+
+            // Start coroutine to disable after delay
+            _smokeEffectsCoroutine = StartCoroutine(DisableSmokeEffectsAfterDelay(delay));
+        }
+
+        private IEnumerator DisableSmokeEffectsAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+
+            // Disable VisualEffects (stop emitting but let existing particles finish)
+            if (_smokeVisualEffects != null)
+            {
+                foreach (var vfx in _smokeVisualEffects)
+                {
+                    if (vfx != null)
+                    {
+                        vfx.Stop();
+                    }
+                }
+            }
+
+            // Disable TrailRenderers (stop emitting but keep existing trails)
+            if (_smokeTrailRenderers != null)
+            {
+                foreach (var trail in _smokeTrailRenderers)
+                {
+                    if (trail != null)
+                    {
+                        trail.emitting = false;
+                    }
+                }
+            }
+
+            _smokeEffectsCoroutine = null;
+        }
+
         public void OnHomingAttackEnter()
         {
             Animator.ResetTrigger("HomingAttackReach");
             Animator.Play("HomingAttack");
-
-            //_smokeVisualEffect.Play();
 
             // Store original materials before changing
             _originalPlayerMaterials = new Material[_playerRenderers.Length];
@@ -836,8 +933,6 @@ namespace JackRussell
         public void OnHomingAttackReach()
         {
             Animator.SetTrigger("HomingAttackReach");
-
-            //_smokeVisualEffect.Stop();
 
             // Restore original materials
             if (_originalPlayerMaterials != null && _originalPlayerMaterials.Length == _playerRenderers.Length)

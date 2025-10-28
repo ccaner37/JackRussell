@@ -73,6 +73,9 @@ namespace JackRussell.States.Locomotion
             _player.PlaySound(Audio.SoundType.SprintStart);
             if (_player.IsGrounded) _player.PlaySprintSpeedUpSound();
 
+            // Enable smoke effects
+            _player.EnableSmokeEffects();
+
             // Publish camera state update command
             _commandPublisher.PublishAsync(new CameraStateUpdateCommand(3f, 85f));
 
@@ -111,6 +114,9 @@ namespace JackRussell.States.Locomotion
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), false);
             _player.StopSprintSpeedUp();
             _player.OnSprintExit();
+
+            // Disable smoke effects with delay
+            _player.DisableSmokeEffects();
 
             // Publish camera state update command to revert to default
             _commandPublisher.PublishAsync(new CameraStateUpdateCommand(2.6f, 70f));
