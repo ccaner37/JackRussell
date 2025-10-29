@@ -71,7 +71,7 @@ namespace JackRussell.States.Locomotion
             _player.OnGrindEnter();
 
             // Publish camera state update command
-            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(3f, 85f));
+            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(3.2f, 90f));
 
             // Subscribe to jump press
             _player.Actions.Player.Jump.performed += OnJumpPressed;
@@ -103,7 +103,7 @@ namespace JackRussell.States.Locomotion
         public override void Exit()
         {
             // Publish camera state update command to revert to default
-            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(2.6f, 70f));
+            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(2.65f, 75f));
 
             // Unsubscribe
             _player.Actions.Player.Jump.performed -= OnJumpPressed;
