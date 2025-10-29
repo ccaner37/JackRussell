@@ -43,6 +43,29 @@ MonoBehaviour:
       restoreCamera: 1
       offset: {x: 0, y: 0, z: 0, w: 0}
       cameraFieldOfView: 60
+--- !u!114 &-4538872020470697860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78f7016d61a2a4645ae5012f68f7f882, type: 3}
+  m_Name: RadialBlurRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  radialBlurMaterial: {fileID: 2100000, guid: e91a990e425cc3143a7dfd7d18de5fd0, type: 2}
+  samples: 24
+  decay: 0.88
+  density: 0.3
+  weight: 0.05
+  centerX: 0.5
+  centerY: 0.5
+  blurStrength: 0.85
+  effectIntensity: 0
+  renderPassEvent: 600
 --- !u!114 &-2572896121660252506
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96,7 +119,8 @@ MonoBehaviour:
   - {fileID: -6076035065493464683}
   - {fileID: 6202913557589794039}
   - {fileID: -2572896121660252506}
-  m_RendererFeatureMap: ad6b866f10d7b46cdadc1692f178122f00000000000000000000000000000000a6de75f09b3c4bdc
+  - {fileID: -4538872020470697860}
+  m_RendererFeatureMap: ad6b866f10d7b46cdadc1692f178122f95d971d64c96adabf71c9824042d1556a6de75f09b3c4bdc7c70e202f2af02c1
   m_UseNativeRenderPass: 1
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}

@@ -138,6 +138,7 @@ namespace JackRussell.States.Locomotion
             if (_rendererController != null)
             {
                 _rendererController.SetSpeedLinesIntensity(0f);
+                _rendererController.SetRadialBlurIntensity(0f);
             }
         }
 
@@ -277,6 +278,7 @@ namespace JackRussell.States.Locomotion
             if (_rendererController != null)
             {
                 _rendererController.SetSpeedLinesIntensity(factor);
+                _rendererController.SetRadialBlurIntensity(factor * 0.4f); // Slightly less intense than speed lines
             }
         }
 

@@ -39928,6 +39928,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _speedLinesFeature: {fileID: -2572896121660252506, guid: f288ae1f4751b564a96ac7587541f7a2, type: 2}
+  _radialBlurFeature: {fileID: -4538872020470697860, guid: f288ae1f4751b564a96ac7587541f7a2, type: 2}
 --- !u!4 &1715319528
 Transform:
   m_ObjectHideFlags: 0
