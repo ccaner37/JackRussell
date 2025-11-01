@@ -10,6 +10,7 @@ Shader "Blit/RadialBlur"
         _CenterY ("Center Y", Float) = 0.5
         _BlurStrength ("Blur Strength", Float) = 1.0
         _EffectIntensity ("Effect Intensity", Float) = 0.0
+        _Brightness ("Brightness", Float) = 1.0
     }
 
     SubShader
@@ -36,6 +37,7 @@ Shader "Blit/RadialBlur"
             float _CenterY;
             float _BlurStrength;
             float _EffectIntensity;
+            float _Brightness;
             CBUFFER_END
 
             // 2x1 hash. Used to jitter the samples.
@@ -43,6 +45,7 @@ Shader "Blit/RadialBlur"
             {
                 return frac(sin(dot(p, float2(41, 289))) * 45758.5453);
             }
+
 
             // Out frag function takes as input a struct that contains the screen space coordinate we are going to use to sample our texture. It also writes to SV_Target0, this has to match the index set in the UseTextureFragment(sourceTexture, 0, …) we defined in our render pass script.
             float4 Frag(Varyings input) : SV_Target0
@@ -88,10 +91,11 @@ Shader "Blit/RadialBlur"
                 // Multiplying the final color with a spotlight centered on the focal point
                 col *= (1. - dot(tuv, tuv) * 0.75);
 
-                // Smoothstepping the final color and applying gamma correction
-                col = sqrt(smoothstep(0., 1., col));
+                // Apply brightness control to the gamma correction
+                float brightnessFactor = lerp(1.0, 0.5, 1.0 - _Brightness); // 1.0 = full brightness, 0.5 = more natural
+                col = pow(smoothstep(0., 1., col), brightnessFactor);
 
-                // Apply blur strength and blend with original based on effect intensity
+                // Apply blur strength
                 half4 blurredCol = col * _BlurStrength;
                 return lerp(originalCol, blurredCol, _EffectIntensity);
             }

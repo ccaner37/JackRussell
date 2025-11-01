@@ -22,8 +22,9 @@ public class RadialBlurPass : ScriptableRenderPass
     static readonly int CenterYID = Shader.PropertyToID("_CenterY");
     static readonly int BlurStrengthID = Shader.PropertyToID("_BlurStrength");
     static readonly int EffectIntensityID = Shader.PropertyToID("_EffectIntensity");
+    static readonly int BrightnessID = Shader.PropertyToID("_Brightness");
 
-    public void Setup(Material material, float samples, float decay, float density, float weight, float centerX, float centerY, float blurStrength, float effectIntensity)
+    public void Setup(Material material, float samples, float decay, float density, float weight, float centerX, float centerY, float blurStrength, float effectIntensity, float brightness)
     {
         m_RadialBlurMaterial = material;
 
@@ -38,6 +39,7 @@ public class RadialBlurPass : ScriptableRenderPass
             m_RadialBlurMaterial.SetFloat(CenterYID, centerY);
             m_RadialBlurMaterial.SetFloat(BlurStrengthID, blurStrength);
             m_RadialBlurMaterial.SetFloat(EffectIntensityID, effectIntensity);
+            m_RadialBlurMaterial.SetFloat(BrightnessID, brightness);
         }
 
         // We need an intermediate texture since we're sampling the current color buffer
@@ -113,6 +115,11 @@ public class RadialBlurRendererFeature : ScriptableRendererFeature
     [Range(0f, 1f)]
     public float effectIntensity = 0.0f;
 
+    [Tooltip("Brightness control (1.0 = full blur effect, 0.0 = more natural/original look)")]
+    [Range(0f, 1f)]
+    public float brightness = 1.0f;
+
+
     [Header("Injection Point")]
     [Tooltip("When to inject the radial blur pass")]
     public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
@@ -135,7 +142,7 @@ public class RadialBlurRendererFeature : ScriptableRendererFeature
         }
 
         // Setup and enqueue the pass
-        m_Pass.Setup(radialBlurMaterial, samples, decay, density, weight, centerX, centerY, blurStrength, effectIntensity);
+        m_Pass.Setup(radialBlurMaterial, samples, decay, density, weight, centerX, centerY, blurStrength, effectIntensity, brightness);
         renderer.EnqueuePass(m_Pass);
     }
 

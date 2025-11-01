@@ -58,13 +58,14 @@ MonoBehaviour:
   m_Active: 1
   radialBlurMaterial: {fileID: 2100000, guid: e91a990e425cc3143a7dfd7d18de5fd0, type: 2}
   samples: 24
-  decay: 0.88
-  density: 0.3
-  weight: 0.05
+  decay: 0.95
+  density: 0.66
+  weight: 0.032
   centerX: 0.5
   centerY: 0.5
-  blurStrength: 0.85
+  blurStrength: 0.9
   effectIntensity: 0
+  brightness: 0.885
   renderPassEvent: 600
 --- !u!114 &-2572896121660252506
 MonoBehaviour:
