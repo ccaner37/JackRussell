@@ -133,6 +133,9 @@ namespace JackRussell
         private int _currentCharges;
         private float[] _chargeTimers;
 
+        // Star collection
+        private int _collectedStars;
+
         // Smoke effects state
         private bool _smokeEffectsActive;
         private Coroutine _smokeEffectsCoroutine;
@@ -203,6 +206,9 @@ namespace JackRussell
         // Dash charges accessors
         public int CurrentCharges => _currentCharges;
         public float[] ChargeTimers => _chargeTimers;
+
+        // Star collection accessors
+        public int CollectedStars => _collectedStars;
 
         // Expose raw move input and animator speed (reads the same parameter the player writes)
         public Vector2 MoveInput => _moveInput;
@@ -425,6 +431,9 @@ namespace JackRussell
             // Initialize dash charges
             _currentCharges = _maxCharges;
             _chargeTimers = new float[_maxCharges];
+
+            // Initialize star collection
+            _collectedStars = 0;
 
             // Store base pelvis position for IK
             if (_pelvisTarget != null)
@@ -1138,6 +1147,14 @@ namespace JackRussell
             {
                 _commandPublisher.PublishAsync(new DashChargesUpdateCommand(_currentCharges));
             }
+        }
+
+        // Star collection methods
+        public void CollectStar()
+        {
+            _collectedStars++;
+            _commandPublisher.PublishAsync(new StarCollectedUpdateCommand(_collectedStars));
+            PlaySound(SoundType.StarCollect);
         }
 
         public void DisableFootIK()

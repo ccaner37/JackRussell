@@ -15,5 +15,6 @@ namespace JackRussell.Audio
         SprintSpeedUp,
         HomingIndicatorAppear,
         Dash,
+        StarCollect,
     }
 }
