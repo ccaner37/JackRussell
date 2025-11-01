@@ -179,13 +179,6 @@ namespace JackRussell.States.Locomotion
             }
 
             // Jump handled by event subscription
-
-            // Attack => boost
-            if (_player.ConsumeAttackRequest())
-            {
-                ChangeState(new BoostState(_player, _stateMachine));
-                return;
-            }
         }
 
         public override void PhysicsUpdate()

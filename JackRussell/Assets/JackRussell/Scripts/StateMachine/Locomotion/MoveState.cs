@@ -50,17 +50,6 @@ namespace JackRussell.States.Locomotion
             // Rotate player toward move direction
             _player.RotateTowardsDirection(_player.MoveDirection, Time.deltaTime, isAir: false);
 
-            // Dash/Boost transition: use attack input (dash if not sprinting, boost if sprinting)
-            if (_player.ConsumeAttackRequest())
-            {
-                if (_player.SprintRequested)
-                    ChangeState(new BoostState(_player, _stateMachine));
-                else
-                    ChangeState(new DashState(_player, _stateMachine));
-
-                return;
-            }
-
             // If no input, go to WalkStop if moving fast enough
             if (_player.MoveDirection.sqrMagnitude < k_InputDeadzone)
             {
