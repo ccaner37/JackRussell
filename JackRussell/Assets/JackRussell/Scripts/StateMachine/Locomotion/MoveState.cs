@@ -23,6 +23,8 @@ namespace JackRussell.States.Locomotion
             _player.Actions.Player.Jump.performed += OnJumpPressed;
             // Subscribe to sprint press
             _player.Actions.Player.Sprint.performed += OnSprintPressed;
+            // Subscribe to dash press
+            _player.Actions.Player.Dash.performed += OnDashPressed;
         }
 
         public override void Exit()
@@ -30,6 +32,7 @@ namespace JackRussell.States.Locomotion
             // Unsubscribe
             _player.Actions.Player.Jump.performed -= OnJumpPressed;
             _player.Actions.Player.Sprint.performed -= OnSprintPressed;
+            _player.Actions.Player.Dash.performed -= OnDashPressed;
         }
 
         private void OnJumpPressed(InputAction.CallbackContext context)
@@ -43,6 +46,15 @@ namespace JackRussell.States.Locomotion
         private void OnSprintPressed(InputAction.CallbackContext context)
         {
             ChangeState(new SprintState(_player, _stateMachine));
+        }
+
+        private void OnDashPressed(InputAction.CallbackContext context)
+        {
+            if (_player.CanDash())
+            {
+                Vector3 dashDir = _player.GetDashDirection();
+                ChangeState(new DashState(_player, _stateMachine, dashDir, this));
+            }
         }
 
         public override void LogicUpdate()

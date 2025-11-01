@@ -66,6 +66,8 @@ namespace JackRussell.States.Locomotion
 
             // Subscribe to jump press
             _player.Actions.Player.Jump.performed += OnJumpPressed;
+            // Subscribe to dash press
+            _player.Actions.Player.Dash.performed += OnDashPressed;
 
             // Set animator sprint flag if desired
             _player.OnSprintEnter();
@@ -110,6 +112,7 @@ namespace JackRussell.States.Locomotion
         {
             // Unsubscribe
             _player.Actions.Player.Jump.performed -= OnJumpPressed;
+            _player.Actions.Player.Dash.performed -= OnDashPressed;
 
             _player.Animator.SetBool(Animator.StringToHash("IsSprinting"), false);
             _player.StopSprintSpeedUp();
@@ -280,6 +283,15 @@ namespace JackRussell.States.Locomotion
             if (_player.IsGrounded)
             {
                 ChangeState(new JumpState(_player, _stateMachine));
+            }
+        }
+
+        private void OnDashPressed(InputAction.CallbackContext context)
+        {
+            if (_player.CanDash())
+            {
+                Vector3 dashDir = _player.GetDashDirection();
+                ChangeState(new DashState(_player, _stateMachine, dashDir, this));
             }
         }
     }

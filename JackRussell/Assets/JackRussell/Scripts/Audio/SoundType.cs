@@ -14,5 +14,6 @@ namespace JackRussell.Audio
         Bell,
         SprintSpeedUp,
         HomingIndicatorAppear,
+        Dash,
     }
 }

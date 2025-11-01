@@ -14,6 +14,7 @@ using DG.Tweening;
 using AllIn13DShader;
 using RootMotion.FinalIK;
 using System.Collections;
+using HoaxGames;
 
 namespace JackRussell
 {
@@ -54,12 +55,16 @@ namespace JackRussell
         [SerializeField] private float _boostDuration = 0.6f;
         [SerializeField] private float _dashCooldown = 0.5f;
 
+        [Header("Dash Charges")]
+        [SerializeField] private int _maxCharges = 2;
+        [SerializeField] private float _chargeRegenTime = 3f;
+
         [Header("Effects")]
         [SerializeField] private Material _playerMaterial, _playerHomingAttackMaterial;
         [SerializeField] private ParticleSystem _shockwaveParticle;
         [SerializeField] private GameObject _sprintBoostModel;
         [SerializeField] private AnimationCurve _glitchCurve;
-        [SerializeField] private ParticleSystem _footKickParticle;
+        [SerializeField] private ParticleSystem _footKickParticle, _dashParticle;
         [SerializeField] private SkinnedMeshRenderer[] _playerRenderers;
         private Material[] _originalPlayerMaterials;
         [SerializeField] private GameObject[] _footSprintParticles;
@@ -67,6 +72,7 @@ namespace JackRussell
         [SerializeField] private TrailRenderer[] _smokeTrailRenderers;
 
         [Header("IK")]
+        [SerializeField] private FootIK _footIK;
         [SerializeField] private FullBodyBipedIK _ik;
         [SerializeField] private Transform _pelvisTarget;
         [SerializeField] private float _pelvisOffsetMultiplier = 0.1f;
@@ -122,6 +128,10 @@ namespace JackRussell
         private bool _isGrounded;
         private bool _wasGrounded;
         private Vector3 _groundNormal = Vector3.up;
+
+        // Dash charges
+        private int _currentCharges;
+        private float[] _chargeTimers;
 
         // Smoke effects state
         private bool _smokeEffectsActive;
@@ -189,6 +199,10 @@ namespace JackRussell
         public float MovementOverrideTimeRemaining => _overrideTimer;
 
         public float RotationOverrideTimeRemaining => _rotationOverrideTimer;
+
+        // Dash charges accessors
+        public int CurrentCharges => _currentCharges;
+        public float[] ChargeTimers => _chargeTimers;
 
         // Expose raw move input and animator speed (reads the same parameter the player writes)
         public Vector2 MoveInput => _moveInput;
@@ -408,6 +422,10 @@ namespace JackRussell
             _locomotionSM = new StateMachine();
             _actionSM = new StateMachine();
 
+            // Initialize dash charges
+            _currentCharges = _maxCharges;
+            _chargeTimers = new float[_maxCharges];
+
             // Store base pelvis position for IK
             if (_pelvisTarget != null)
             {
@@ -483,6 +501,9 @@ namespace JackRussell
                 _rotationOverrideTimer -= Time.deltaTime;
                 if (_rotationOverrideTimer <= 0f) ClearRotationOverride();
             }
+
+            // Update dash charge regeneration
+            UpdateDashCharges();
 
             // Check for rail attachment if not already grinding
             if (_railDetector != null && _locomotionSM.Current != null &&
@@ -1062,6 +1083,77 @@ namespace JackRussell
                     _modelRoot.localRotation = Quaternion.Lerp(_modelRoot.localRotation, _originalModelRootLocalRot, Time.fixedDeltaTime * 5f);
                 }
             }
+        }
+
+        // Dash charge methods
+        public bool CanDash() => _currentCharges > 0;
+
+        public void ConsumeCharge()
+        {
+            if (_currentCharges > 0)
+            {
+                _currentCharges--;
+                _commandPublisher.PublishAsync(new DashChargesUpdateCommand(_currentCharges));
+            }
+        }
+
+        public Vector3 GetDashDirection()
+        {
+            Vector3 dashDir = MoveDirection;
+            if (dashDir.sqrMagnitude < 0.001f)
+            {
+                // Fallback to camera-relative forward
+                var cam = Camera.main;
+                if (cam != null)
+                {
+                    dashDir = cam.transform.forward;
+                    dashDir.y = 0f;
+                    dashDir.Normalize();
+                }
+                else
+                {
+                    dashDir = Vector3.forward;
+                }
+            }
+            return dashDir;
+        }
+
+        private void UpdateDashCharges()
+        {
+            bool chargesChanged = false;
+            for (int i = _maxCharges - _currentCharges - 1; i >= 0; i--)
+            {
+                if (i < _chargeTimers.Length)
+                {
+                    _chargeTimers[i] += Time.deltaTime;
+                    if (_chargeTimers[i] >= _chargeRegenTime)
+                    {
+                        _currentCharges++;
+                        _chargeTimers[i] = 0f;
+                        chargesChanged = true;
+                    }
+                }
+            }
+            if (chargesChanged)
+            {
+                _commandPublisher.PublishAsync(new DashChargesUpdateCommand(_currentCharges));
+            }
+        }
+
+        public void DisableFootIK()
+        {
+            _footIK.enabled = false;
+        }
+        
+        public void EnableFootIK()
+        {
+            _footIK.enabled = true;
+        }
+
+        public void OnDashEnter()
+        {
+            DisableFootIK();
+            _dashParticle.Play();
         }
     }
 }
