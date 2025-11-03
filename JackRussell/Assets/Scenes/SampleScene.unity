@@ -8441,6 +8441,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1001 &309938368
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8832,6 +8835,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1 &348807565
 GameObject:
   m_ObjectHideFlags: 0
@@ -29227,6 +29233,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1 &627385330
 GameObject:
   m_ObjectHideFlags: 0
@@ -29991,6 +30000,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!4 &694495521
 Transform:
   m_ObjectHideFlags: 0
@@ -31167,7 +31179,7 @@ MonoBehaviour:
       m_ColorSpace: -1
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
-    m_ColorMin: {r: -20194454, g: 6.9e-43, b: 2.869142e-39, a: 6.91e-43}
+    m_ColorMin: {r: 1456.5717, g: 8e-43, b: 2.1766256e+29, a: 8e-43}
     m_ColorMax: {r: 1, g: 1, b: 1, a: 1}
   isBurst: 1
   minNumberOfParticles: 2
@@ -36767,6 +36779,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1001 &871424205
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -37041,6 +37056,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1 &878181282
 GameObject:
   m_ObjectHideFlags: 0
@@ -37184,6 +37202,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1 &953250742
 GameObject:
   m_ObjectHideFlags: 0
@@ -38587,6 +38608,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!4 &1009790565
 Transform:
   m_ObjectHideFlags: 0
@@ -40196,6 +40220,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1 &1035491104
 GameObject:
   m_ObjectHideFlags: 0
@@ -40332,6 +40359,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!4 &1050412011 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -7014695879038130001, guid: 060e31c1d55d38947a72b4399ff90950, type: 3}
@@ -41927,6 +41957,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1 &1183026411
 GameObject:
   m_ObjectHideFlags: 0
@@ -42441,6 +42474,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!4 &1225912995
 Transform:
   m_ObjectHideFlags: 0
@@ -44007,6 +44043,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1001 &1319198363
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -46418,6 +46457,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1 &1466878754
 GameObject:
   m_ObjectHideFlags: 0
@@ -48531,6 +48573,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1001 &1602417055
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -48982,6 +49027,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!4 &1628689844 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 563605486685927007, guid: c94f3a3205bf4364ea8b9530104fc5bb, type: 3}
@@ -49847,6 +49895,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1 &1663370215
 GameObject:
   m_ObjectHideFlags: 0
@@ -51263,6 +51314,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1001 &1718586699
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -52741,6 +52795,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1001 &1836705217
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -53000,7 +53057,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -62.869995, y: 0}
+  m_AnchoredPosition: {x: -62.870117, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1849558979
@@ -53083,6 +53140,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!43 &1852135934
 Mesh:
   m_ObjectHideFlags: 0
@@ -53811,6 +53871,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!4 &1968269831
 Transform:
   m_ObjectHideFlags: 0
@@ -54218,6 +54281,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1 &2009624463
 GameObject:
   m_ObjectHideFlags: 0
@@ -54348,6 +54414,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!4 &2016624962 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8285478522635473676, guid: 060e31c1d55d38947a72b4399ff90950, type: 3}
@@ -54420,6 +54489,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!1 &2017298783
 GameObject:
   m_ObjectHideFlags: 0
@@ -55425,7 +55497,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -53.400024, y: 105}
+  m_AnchoredPosition: {x: -53.399902, y: 105}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2060275535
@@ -57190,6 +57262,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eed6b5624975e44a979628ceed764cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _hoverHeight: 0.5
+  _hoverDuration: 2
+  _rotationSpeed: 90
 --- !u!65 &2142159948
 BoxCollider:
   m_ObjectHideFlags: 0
