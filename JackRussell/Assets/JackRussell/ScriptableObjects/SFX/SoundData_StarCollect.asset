@@ -18,5 +18,5 @@ MonoBehaviour:
   Volume: 1
   Loop: 0
   IsRandomized: 0
-  RandomizePitch: 1
-  PitchRandomizationRange: 0.05
+  RandomizePitch: 0
+  PitchRandomizationRange: 0.01
