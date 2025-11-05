@@ -454,8 +454,8 @@ namespace JackRussell
         {
             // TODO: This will be moved to game manager or something. And InputManager will be created.
             _audioManager.Initialize();
-            //Cursor.lockState = CursorLockMode.Locked;
-            //Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
 
             _actions.Player.Enable();
             _actions.Player.Jump.performed += ctx => _jumpRequested = true;
