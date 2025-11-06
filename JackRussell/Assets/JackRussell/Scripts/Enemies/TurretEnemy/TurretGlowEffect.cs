@@ -92,8 +92,9 @@ namespace JackRussell.Enemies
         {
             if (_glowMaterial != null)
             {
-                float clampedValue = Mathf.Clamp01(value);
-                _glowMaterial.SetFloat(_glowPropertyName, clampedValue * _maxGlowValue);
+                //float clampedValue = Mathf.Clamp01(value);
+                var glowCurveValue = _glowCurve.Evaluate(value);
+                _glowMaterial.SetFloat(_glowPropertyName, glowCurveValue  * _maxGlowValue);
             }
         }
         
@@ -109,7 +110,7 @@ namespace JackRussell.Enemies
             
             // Create a new tween that animates the glow value
             _glowTween = DOTween.To(() => 0f, SetGlowValue, 1f, _preparationTime)
-                .SetEase(Ease.InSine)
+                //.SetEase(Ease.InSine)
                 .OnComplete(() =>
                 {
                     // Keep glowing at max value until stopped

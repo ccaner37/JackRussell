@@ -1,5 +1,6 @@
 using JackRussell.States;
 using UnityEngine;
+using System.Collections;
 
 namespace JackRussell.Enemies
 {
@@ -26,6 +27,9 @@ namespace JackRussell.Enemies
             
             // Enable charging visual effects
             _turret.EnableChargingEffects();
+            
+            // Start parry window coroutine
+            _turret.StartCoroutine(ParryWindowSequence());
         }
         
         public override void Exit()
@@ -35,6 +39,9 @@ namespace JackRussell.Enemies
             
             // Disable charging effects
             _turret.DisableChargingEffects();
+            
+            // Close parry window
+            _turret.OnParryWindowClose();
         }
         
         public override void LogicUpdate()
@@ -59,6 +66,28 @@ namespace JackRussell.Enemies
         {
             // Continue tracking player during preparation
             TrackPlayer();
+        }
+        
+        private IEnumerator ParryWindowSequence()
+        {
+            // Wait until 0.35s before preparation ends
+            float parryWindowStartTime = _turret.PreparationTime - 0.35f;
+            yield return new WaitForSeconds(parryWindowStartTime);
+            
+            // Open parry window
+            _turret.OnParryWindowOpen();
+            
+            // Play parry window sound
+            _turret.PlayParryWindowSound();
+            
+            // Enable parry window visual effects
+            _turret.EnableParryWindowEffects();
+            
+            // Wait until preparation ends
+            yield return new WaitForSeconds(0.35f);
+            
+            // Close parry window (will also be called in Exit())
+            // _turret.OnParryWindowClose(); // Called in Exit()
         }
     }
 }

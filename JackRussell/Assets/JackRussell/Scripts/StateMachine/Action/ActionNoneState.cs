@@ -1,5 +1,7 @@
 using JackRussell;
+using JackRussell.Enemies;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace JackRussell.States.Action
 {
@@ -15,10 +17,15 @@ namespace JackRussell.States.Action
         public override void Enter()
         {
             // Clear any action-specific animator flags if necessary
+            
+            // Subscribe to attack input
+            _player.Actions.Player.Attack.performed += OnAttackPressed;
         }
 
         public override void Exit()
         {
+            // Unsubscribe from attack input
+            _player.Actions.Player.Attack.performed -= OnAttackPressed;
         }
 
         public override void LogicUpdate()
@@ -29,24 +36,58 @@ namespace JackRussell.States.Action
                 return;
             }
 
-            // Consume attack input here or let other systems create transitions.
-                // For now, do nothing; other action states will be implemented later.
-                if (_player.ConsumeAttackRequest())
-                {
-                    // If player is airborne, start homing attack (if a target exists)
-                    if (!_player.IsGrounded)
-                    {
-                        ChangeState(new HomingAttackState(_player, _stateMachine));
-                        return;
-                    }
-
-                    // Ground attack fallback: keep as no-op for now (could start a ground attack state)
-                }
+            // Attack input is now handled by event subscription in Enter/Exit methods
         }
 
         public override void PhysicsUpdate()
         {
             // No physics behavior for the idle action state.
+        }
+
+        private void OnAttackPressed(InputAction.CallbackContext context)
+        {
+            // Check for parry opportunity first
+            if (TryParryAttack())
+            {
+                return;
+            }
+
+            // If player is airborne, start homing attack (if a target exists)
+            if (!_player.IsGrounded)
+            {
+                ChangeState(new HomingAttackState(_player, _stateMachine));
+                return;
+            }
+
+            // Ground attack fallback: keep as no-op for now (could start a ground attack state)
+        }
+
+        private bool TryParryAttack()
+        {
+            // Find all parryable enemies in range
+            Collider[] cols = Physics.OverlapSphere(_player.transform.position, 15f, _player.HomingMask);
+            if (cols == null || cols.Length == 0) return false;
+
+            foreach (var col in cols)
+            {
+                if (col == null) continue;
+                
+                // Try to get IParryable from collider or parent
+                var parryable = col.GetComponent<IParryable>();
+                if (parryable == null)
+                {
+                    parryable = col.GetComponentInParent<IParryable>();
+                }
+                
+                if (parryable != null && parryable.IsInParryWindow)
+                {
+                    // Found a parryable enemy in parry window, initiate parry attack
+                    ChangeState(new ParryAttackState(_player, _stateMachine));
+                    return true;
+                }
+            }
+            
+            return false;
         }
     }
 }

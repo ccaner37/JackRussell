@@ -1,5 +1,6 @@
 using UnityEngine;
 using JackRussell.States.Action;
+using System.Collections;
 
 namespace JackRussell.Enemies
 {
@@ -7,7 +8,7 @@ namespace JackRussell.Enemies
     /// Base class for all enemy entities.
     /// Inherits from GameEntity and implements HomingTarget to be targetable by player homing attacks.
     /// </summary>
-    public abstract class Enemy : GameEntity, IHomingTarget
+    public abstract class Enemy : GameEntity, IHomingTarget, IParryable
     {
         [Header("Enemy Settings")]
         [SerializeField] protected bool _isActive = true;
@@ -16,6 +17,27 @@ namespace JackRussell.Enemies
         [SerializeField] protected float _deathEffectDuration = 2f;
         
         protected bool IsEnemyActive => _isActive;
+        
+        // IParryable implementation
+        public bool IsInParryWindow { get; protected set; }
+        
+        public virtual Transform ParryTargetTransform => transform;
+        
+        public virtual void OnParried(Player player)
+        {
+            // Default behavior: take lethal damage
+            TakeDamage(CurrentHealth);
+        }
+        
+        public virtual void OnParryWindowOpen()
+        {
+            IsInParryWindow = true;
+        }
+        
+        public virtual void OnParryWindowClose()
+        {
+            IsInParryWindow = false;
+        }
         
         /// <summary>
         /// The transform that should be used as the homing attack target.

@@ -16,5 +16,11 @@ namespace JackRussell.Audio
         HomingIndicatorAppear,
         Dash,
         StarCollect,
+        ParryIndicator,
+        TurretLaserFire,
+        EnemyAlerted,
+        ParryAttackSuccess,
+        Teleport,
+        HeavyPunch,
     }
 }

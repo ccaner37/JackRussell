@@ -2,15 +2,16 @@ using UnityEngine;
 using JackRussell.States;
 using JackRussell.Audio;
 using VContainer;
+using System.Collections;
 
 namespace JackRussell.Enemies
 {
     /// <summary>
     /// Turret enemy that detects player, tracks them, and fires laser projectiles.
     /// Uses a state machine to manage behavior phases: Idle -> Detecting -> Targeting -> Preparing -> Firing -> Cooldown.
-    /// Can be destroyed by player homing attacks.
+    /// Can be destroyed by player homing attacks and parry attacks.
     /// </summary>
-    public class TurretEnemy : Enemy
+    public class TurretEnemy : Enemy, IParryable
     {
         [Header("Turret Components")]
         [SerializeField] private Transform _headTransform;
@@ -46,6 +47,9 @@ namespace JackRussell.Enemies
         [SerializeField] private SoundType _firingSound = SoundType.None;
         [SerializeField] private SoundType _deathSound = SoundType.None;
         
+        [Header("Parry Settings")]
+        [SerializeField] private GameObject _parryWindowEffectPrefab;
+        
         private StateMachine _stateMachine;
         private Player _targetedPlayer;
         private GameObject _detectionEffectInstance;
@@ -68,6 +72,28 @@ namespace JackRussell.Enemies
         public override Transform TargetTransform => _headTransform;
         
         public override bool IsActive => IsEnemyActive;
+        
+        // IParryable implementation
+        public bool IsInParryWindow { get; private set; }
+        
+        public Transform ParryTargetTransform => _headTransform;
+        
+        public void OnParried(Player player)
+        {
+            // Handle instant death from parry
+            TakeDamage(float.MaxValue); // Instant kill
+            _isActive = false;
+        }
+        
+        public void OnParryWindowOpen()
+        {
+            IsInParryWindow = true;
+        }
+        
+        public void OnParryWindowClose()
+        {
+            IsInParryWindow = false;
+        }
         
         private void Awake()
         {
@@ -197,6 +223,23 @@ namespace JackRussell.Enemies
         public void PlayChargingSound() => PlaySound(_chargingSound);
         public void PlayFiringSound() => PlaySound(_firingSound);
         public void PlayCooldownSound() => PlaySound(_deathSound);
+        
+        public void PlayParryWindowSound()
+        {
+            _audioManager.PlaySound(SoundType.ParryIndicator, _audioSource);
+        }
+        
+        public void EnableParryWindowEffects()
+        {
+            if (_parryWindowEffectPrefab != null)
+            {
+                GameObject effect = Instantiate(_parryWindowEffectPrefab, transform.position, transform.rotation);
+                if (_deathEffectDuration > 0f)
+                {
+                    Destroy(effect, 0.25f); // Match parry window duration
+                }
+            }
+        }
         
         private void PlaySound(SoundType soundType)
         {

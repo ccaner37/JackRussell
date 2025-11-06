@@ -110,6 +110,7 @@ namespace JackRussell
         private bool _crouchInput;
         private bool _jumpRequested;
         private bool _attackRequested;
+        private bool _parryRequested;
 
         // Computed
         private Vector3 _moveDirection = Vector3.zero;
@@ -189,6 +190,7 @@ namespace JackRussell
         public bool SprintRequested => _sprintInput;
         public bool InhaleRequested => _inhaleInput;
         public bool CrouchRequested => _crouchInput;
+        public bool ParryRequested => _parryRequested;
 
         // Debug / read-only state info for on-screen debug overlay
         // These expose internal state machine/current-state info and override timers in a non-invasive, read-only way.
@@ -370,6 +372,13 @@ namespace JackRussell
             _attackRequested = false;
             return true;
         }
+        
+        public bool ConsumeParryRequest()
+        {
+            if (!_parryRequested) return false;
+            _parryRequested = false;
+            return true;
+        }
 
         // Movement override API (action states call this)
         public void RequestMovementOverride(Vector3 velocity, float duration, bool exclusive = true)
@@ -461,6 +470,7 @@ namespace JackRussell
             _actions.Player.Jump.performed += ctx => _jumpRequested = true;
             _actions.Player.Attack.performed += ctx => _attackRequested = true;
             _actions.Player.Sprint.performed += ctx => _sprintInput = true;
+            // Note: Using same Attack input for parry - will be handled in action state logic
             _actions.Player.Sprint.canceled += ctx => _sprintInput = false;
             _actions.Player.Inhale.performed += ctx => _inhaleInput = true;
             _actions.Player.Inhale.canceled += ctx => _inhaleInput = false;
@@ -480,6 +490,7 @@ namespace JackRussell
             _actions.Player.Jump.performed -= ctx => _jumpRequested = true;
             _actions.Player.Attack.performed -= ctx => _attackRequested = true;
             _actions.Player.Sprint.performed -= ctx => _sprintInput = true;
+            // Note: Using same Attack input for parry - will be handled in action state logic
             _actions.Player.Sprint.canceled -= ctx => _sprintInput = false;
             _actions.Player.Inhale.performed -= ctx => _inhaleInput = true;
             _actions.Player.Inhale.canceled -= ctx => _inhaleInput = false;
