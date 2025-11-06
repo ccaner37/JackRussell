@@ -4,28 +4,33 @@ using JackRussell;
 namespace JackRussell.States.Action
 {
     /// <summary>
-    /// Abstract base class for objects that can be targeted by the player's homing attack.
+    /// Interface for objects that can be targeted by the player's homing attack.
     /// Implement on enemies, springs or any object that should react to a homing hit.
     /// </summary>
-    public abstract class HomingTarget : MonoBehaviour
+    public interface IHomingTarget
     {
         /// <summary>
         /// The transform to use as the homing target position.
         /// </summary>
-        public abstract Transform TargetTransform { get; }
+        Transform TargetTransform { get; }
 
         /// <summary>
         /// Whether this target is currently valid (active) for homing.
         /// If false the homing logic should skip this target.
         /// </summary>
-        public abstract bool IsActive { get; }
+        bool IsActive { get; }
 
         /// <summary>
         /// Called when the player successfully hits this target with a homing attack.
         /// Implementations should handle effects / destruction / damage here.
         /// </summary>
         /// <param name="player">Player that hit the target.</param>
-        public abstract void OnHomingHit(Player player);
-        public virtual void OnHitStopEnd(Player player) {}
+        void OnHomingHit(Player player);
+        
+        /// <summary>
+        /// Called when the hit stop animation ends (after homing attack impact).
+        /// </summary>
+        /// <param name="player">Player that hit the target.</param>
+        void OnHitStopEnd(Player player);
     }
 }

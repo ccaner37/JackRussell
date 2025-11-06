@@ -11,17 +11,17 @@ namespace JackRussell.States.Action
     /// This example will disable the GameObject on hit; replace with damage/response logic as needed.
     /// </summary>
     [RequireComponent(typeof(Collider))]
-    public class SimpleHomingTarget : HomingTarget
+    public class SimpleHomingTarget : MonoBehaviour, IHomingTarget
     {
         [SerializeField] private bool _isActive = true;
         [SerializeField] private ParticleSystem _hitEffect;
         [SerializeField] private MeshRenderer[] _hitEffectRenderers;
 
-        public override Transform TargetTransform => transform;
+        public Transform TargetTransform => transform;
 
-        public override bool IsActive => _isActive;
+        public bool IsActive => _isActive;
 
-        public override void OnHomingHit(Player player)
+        public void OnHomingHit(Player player)
         {
             // Play an optional hit effect
             if (_hitEffect != null)
@@ -48,6 +48,12 @@ namespace JackRussell.States.Action
                     }
                 }
             }
+        }
+        
+        public void OnHitStopEnd(Player player)
+        {
+            // Default implementation does nothing
+            // Override for custom behaviors
         }
 
         private IEnumerator EnableBack()

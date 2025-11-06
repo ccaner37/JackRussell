@@ -9,7 +9,7 @@ namespace JackRussell.States.Action
     /// Abstract base class for objects that launch the player along a predefined spline path.
     /// Extends HomingTarget to provide path-following functionality for spring pads, launchers, etc.
     /// </summary>
-    public abstract class PathLauncherTarget : HomingTarget
+    public abstract class PathLauncherTarget : MonoBehaviour, IHomingTarget
     {
         [Header("Path Launch Settings")]
         [SerializeField] protected SplineRail _launchPath;
@@ -18,6 +18,21 @@ namespace JackRussell.States.Action
         [Header("Easing Settings")]
         [SerializeField] protected AnimationCurve _speedCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f); // Starts slow, speeds up, slows down
         [SerializeField] protected float _launchDurationMultiplier = 1f;
+
+        /// <summary>
+        /// The transform to use as the homing target position.
+        /// </summary>
+        public abstract Transform TargetTransform { get; }
+
+        /// <summary>
+        /// Whether this target is currently valid (active) for homing.
+        /// </summary>
+        public abstract bool IsActive { get; }
+
+        /// <summary>
+        /// Called when the player successfully hits this target with a homing attack.
+        /// </summary>
+        public abstract void OnHomingHit(Player player);
 
         /// <summary>
         /// The spline path to launch the player along.
@@ -66,7 +81,7 @@ namespace JackRussell.States.Action
             }
         }
 
-        public override void OnHitStopEnd(Player player)
+        public virtual void OnHitStopEnd(Player player)
         {
             // Call base implementation if needed, then launch
             OnPathLaunch(player);

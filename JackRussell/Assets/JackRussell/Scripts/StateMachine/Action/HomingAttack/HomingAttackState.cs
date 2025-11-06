@@ -16,7 +16,7 @@ namespace JackRussell.States.Action
         private readonly float _speed;
         private readonly float _hitRadius;
 
-        private HomingTarget _target;
+        private IHomingTarget _target;
         private float _timer;
         private float _initialDistance;
         private bool _reachTriggered;

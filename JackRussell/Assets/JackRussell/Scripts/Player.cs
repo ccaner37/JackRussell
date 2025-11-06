@@ -634,7 +634,7 @@ namespace JackRussell
                 var target = FindBestHomingTarget(_homingRange, _homingConeAngle, _homingMask);
                 if (target != null)
                 {
-                    _indicatorManager.ShowIndicators(new List<HomingTarget> { target });
+                    _indicatorManager.ShowIndicators(new List<IHomingTarget> { target });
                 }
                 else
                 {
@@ -651,7 +651,7 @@ namespace JackRussell
         /// Find the best IHomingTarget within range and cone in front of the player.
         /// Returns null if none found.
         /// </summary>
-        public HomingTarget FindBestHomingTarget(float range, float coneAngleDeg, LayerMask mask)
+        public IHomingTarget FindBestHomingTarget(float range, float coneAngleDeg, LayerMask mask)
         {
             // Use OverlapSphere to find candidate colliders
             Collider[] cols = Physics.OverlapSphere(transform.position, range, mask, QueryTriggerInteraction.Collide);
@@ -659,17 +659,17 @@ namespace JackRussell
 
             Vector3 forward = GetCurrentRotation() * Vector3.forward;
             float bestSqr = float.MaxValue;
-            HomingTarget bestTarget = null;
+            IHomingTarget bestTarget = null;
 
             foreach (var c in cols)
             {
                 if (c == null) continue;
 
                 // try to get IHomingTarget from the collider's GameObject or parents
-                var target = c.GetComponent<HomingTarget>();
+                var target = c.GetComponent<IHomingTarget>();
                 if (target == null)
                 {
-                    target = c.GetComponentInParent<HomingTarget>();
+                    target = c.GetComponentInParent<IHomingTarget>();
                     if (target == null) continue;
                 }
 

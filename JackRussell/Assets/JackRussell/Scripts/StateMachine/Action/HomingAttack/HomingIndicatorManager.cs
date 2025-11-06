@@ -13,7 +13,7 @@ namespace JackRussell.States.Action
     {
         [SerializeField] private GameObject _indicatorPrefab;
 
-        private readonly Dictionary<HomingTarget, HomingIndicator> _activeIndicators = new();
+        private readonly Dictionary<IHomingTarget, HomingIndicator> _activeIndicators = new();
         private Transform _indicatorParent;
 
         private readonly IObjectResolver _objectResolver;
@@ -30,12 +30,12 @@ namespace JackRussell.States.Action
         /// Shows indicators on the specified targets.
         /// Hides indicators on targets not in the list.
         /// </summary>
-        public void ShowIndicators(IEnumerable<HomingTarget> targets)
+        public void ShowIndicators(IEnumerable<IHomingTarget> targets)
         {
-            HashSet<HomingTarget> currentTargets = new HashSet<HomingTarget>(targets);
+            HashSet<IHomingTarget> currentTargets = new HashSet<IHomingTarget>(targets);
 
             // Hide indicators for targets no longer valid
-            List<HomingTarget> toRemove = new List<HomingTarget>();
+            List<IHomingTarget> toRemove = new List<IHomingTarget>();
             foreach (var kvp in _activeIndicators)
             {
                 if (!currentTargets.Contains(kvp.Key) || !kvp.Key.IsActive)
@@ -85,7 +85,7 @@ namespace JackRussell.States.Action
         /// <summary>
         /// Hides the indicator for a specific target.
         /// </summary>
-        public void HideIndicator(HomingTarget target)
+        public void HideIndicator(IHomingTarget target)
         {
             if (_activeIndicators.TryGetValue(target, out var indicator))
             {
