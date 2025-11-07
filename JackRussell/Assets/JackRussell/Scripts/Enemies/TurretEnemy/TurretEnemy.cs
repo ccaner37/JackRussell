@@ -48,6 +48,7 @@ namespace JackRussell.Enemies
         [SerializeField] private SoundType _deathSound = SoundType.None;
         
         [Header("Parry Settings")]
+        [SerializeField] private float _parryTime = 0.65f; // Time before preparation ends when parry window opens
         [SerializeField] private GameObject _parryWindowEffectPrefab;
         
         private StateMachine _stateMachine;
@@ -64,6 +65,7 @@ namespace JackRussell.Enemies
         public Transform FirePoint => _firePoint;
         public float RotationSpeed => _rotationSpeed;
         public float PreparationTime => _preparationTime;
+        public float ParryTime => _parryTime;
         public float CooldownTime => _cooldownTime;
         public float LaserDamage => _laserDamage;
         public float LaserSpeed => _laserSpeed;
@@ -309,7 +311,7 @@ namespace JackRussell.Enemies
         {
             if (_glowEffect != null)
             {
-                _glowEffect.StartGlow(_preparationTime);
+                _glowEffect.StartGlow(_preparationTime, _parryTime);
             }
         }
         

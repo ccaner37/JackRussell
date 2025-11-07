@@ -21,6 +21,7 @@ namespace JackRussell.Enemies
         private Material[] _originalMaterials;
         private bool _isGlowing = false;
         private float _preparationTime;
+        private float _parryTime; // Store parry time for phase calculations
         private float _elapsedTime;
         private Tween _glowTween;
         
@@ -46,19 +47,20 @@ namespace JackRussell.Enemies
         /// Start the glow effect for the specified preparation time
         /// </summary>
         /// <param name="preparationTime">Time to reach maximum glow</param>
-        public void StartGlow(float preparationTime)
+        public void StartGlow(float preparationTime, float parryTime = 0.65f)
         {
             if (_isGlowing || preparationTime <= 0f) return;
             
             _preparationTime = preparationTime;
+            _parryTime = parryTime; // Store parry time for phase calculations
             _elapsedTime = 0f;
             _isGlowing = true;
             
             // Apply glow material to renderers
             ApplyGlowMaterial();
             
-            // Start the glow animation
-            StartGlowAnimation();
+            // Start the two-phase glow animation
+            StartTwoPhaseGlowAnimation();
         }
         
         /// <summary>
@@ -92,13 +94,12 @@ namespace JackRussell.Enemies
         {
             if (_glowMaterial != null)
             {
-                //float clampedValue = Mathf.Clamp01(value);
-                var glowCurveValue = _glowCurve.Evaluate(value);
-                _glowMaterial.SetFloat(_glowPropertyName, glowCurveValue  * _maxGlowValue);
+                float clampedValue = Mathf.Clamp01(value);
+                _glowMaterial.SetFloat(_glowPropertyName, clampedValue * _maxGlowValue);
             }
         }
         
-        private void StartGlowAnimation()
+        private void StartTwoPhaseGlowAnimation()
         {
             if (_glowMaterial == null) return;
             
@@ -108,13 +109,28 @@ namespace JackRussell.Enemies
                 _glowTween.Kill();
             }
             
-            // Create a new tween that animates the glow value
-            _glowTween = DOTween.To(() => 0f, SetGlowValue, 1f, _preparationTime)
-                //.SetEase(Ease.InSine)
+            // Calculate timing based on actual parry time
+            // Phase 1: Slow glow to 5% during (preparationTime - parryTime + 0.05f)
+            // Phase 2: Fast glow to 100% during last 0.05f seconds
+            float earlyGlowTime = _preparationTime - _parryTime + 0.05f;
+            float rapidGlowTime = 0.05f;
+            
+            // Ensure we don't have negative or zero time for phase 1
+            earlyGlowTime = Mathf.Max(earlyGlowTime, 0.1f); // Minimum 0.1s for phase 1
+            
+            // Phase 1: Slow increase to 5%
+            _glowTween = DOTween.To(() => 0f, SetGlowValue, 0.05f, earlyGlowTime)
+                .SetEase(Ease.InSine)
                 .OnComplete(() =>
                 {
-                    // Keep glowing at max value until stopped
-                    SetGlowValue(1f);
+                    // Phase 2: Fast increase to 100% in remaining time
+                    _glowTween = DOTween.To(() => 0.05f, SetGlowValue, 1f, rapidGlowTime)
+                        .SetEase(Ease.OutQuad)
+                        .OnComplete(() =>
+                        {
+                            // Keep glowing at max value until stopped
+                            SetGlowValue(1f);
+                        });
                 });
         }
         

@@ -70,8 +70,8 @@ namespace JackRussell.Enemies
         
         private IEnumerator ParryWindowSequence()
         {
-            // Wait until 0.35s before preparation ends
-            float parryWindowStartTime = _turret.PreparationTime - 0.65f;
+            // Wait until parry time before preparation ends
+            float parryWindowStartTime = _turret.PreparationTime - _turret.ParryTime;
             yield return new WaitForSeconds(parryWindowStartTime);
             
             // Open parry window
@@ -84,10 +84,9 @@ namespace JackRussell.Enemies
             _turret.EnableParryWindowEffects();
             
             // Wait until preparation ends
-            yield return new WaitForSeconds(0.65f);
+            yield return new WaitForSeconds(_turret.ParryTime);
             
             // Close parry window (will also be called in Exit())
-            // _turret.OnParryWindowClose(); // Called in Exit()
         }
     }
 }
