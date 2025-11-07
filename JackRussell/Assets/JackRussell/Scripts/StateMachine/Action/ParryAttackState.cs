@@ -31,7 +31,7 @@ namespace JackRussell.States.Action
         public override void Enter()
         {
             // Find nearest parryable enemy
-            _target = FindNearestParryableEnemy();
+            _target = ParryUtility.FindNearestParryableEnemy(_player);
 
             if (_target == null || !_target.IsInParryWindow)
             {
@@ -139,38 +139,6 @@ namespace JackRussell.States.Action
             ChangeState(new ParryExitState(_player, _stateMachine));
         }
         
-        private IParryable FindNearestParryableEnemy()
-        {
-            // Find all parryable enemies in range
-            Collider[] cols = Physics.OverlapSphere(_player.transform.position, 15f, _player.HomingMask);
-            if (cols == null || cols.Length == 0) return null;
-            
-            IParryable bestTarget = null;
-            float bestDistance = float.MaxValue;
-            
-            foreach (var col in cols)
-            {
-                if (col == null) continue;
-                
-                // Try to get IParryable from collider or parent
-                var parryable = col.GetComponent<IParryable>();
-                if (parryable == null)
-                {
-                    parryable = col.GetComponentInParent<IParryable>();
-                }
-                
-                if (parryable == null || !parryable.IsInParryWindow) continue;
-                
-                float distance = Vector3.Distance(_player.transform.position, parryable.ParryTargetTransform.position);
-                if (distance < bestDistance)
-                {
-                    bestDistance = distance;
-                    bestTarget = parryable;
-                }
-            }
-            
-            return bestTarget;
-        }
         
         private void PlayParrySuccessEffects()
         {

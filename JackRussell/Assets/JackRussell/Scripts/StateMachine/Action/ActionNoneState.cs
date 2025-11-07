@@ -64,27 +64,14 @@ namespace JackRussell.States.Action
 
         private bool TryParryAttack()
         {
-            // Find all parryable enemies in range
-            Collider[] cols = Physics.OverlapSphere(_player.transform.position, 50f, _player.HomingMask);
-            if (cols == null || cols.Length == 0) return false;
-
-            foreach (var col in cols)
+            // Find nearest parryable enemy using shared utility
+            var parryable = ParryUtility.FindNearestParryableEnemy(_player);
+            
+            if (parryable != null && parryable.IsInParryWindow)
             {
-                if (col == null) continue;
-                
-                // Try to get IParryable from collider or parent
-                var parryable = col.GetComponent<IParryable>();
-                if (parryable == null)
-                {
-                    parryable = col.GetComponentInParent<IParryable>();
-                }
-                
-                if (parryable != null && parryable.IsInParryWindow)
-                {
-                    // Found a parryable enemy in parry window, initiate parry attack
-                    ChangeState(new ParryAttackState(_player, _stateMachine));
-                    return true;
-                }
+                // Found a parryable enemy in parry window, initiate parry attack
+                ChangeState(new ParryAttackState(_player, _stateMachine));
+                return true;
             }
             
             return false;
