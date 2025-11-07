@@ -110,21 +110,21 @@ namespace JackRussell.Enemies
             }
             
             // Calculate timing based on actual parry time
-            // Phase 1: Slow glow to 5% during (preparationTime - parryTime + 0.05f)
-            // Phase 2: Fast glow to 100% during last 0.05f seconds
-            float earlyGlowTime = _preparationTime - _parryTime + 0.05f;
-            float rapidGlowTime = 0.05f;
+            // Phase 1: Slow glow to 8% during 
+            // Phase 2: Fast glow to 100% during last 0.1f seconds
+            float earlyGlowTime = _preparationTime - _parryTime - 0.1f;
+            float rapidGlowTime = 0.1f;
             
             // Ensure we don't have negative or zero time for phase 1
             earlyGlowTime = Mathf.Max(earlyGlowTime, 0.1f); // Minimum 0.1s for phase 1
             
-            // Phase 1: Slow increase to 5%
-            _glowTween = DOTween.To(() => 0f, SetGlowValue, 0.05f, earlyGlowTime)
+            // Phase 1: Slow increase to 8%
+            _glowTween = DOTween.To(() => 0f, SetGlowValue, 0.1f, earlyGlowTime)
                 .SetEase(Ease.InSine)
                 .OnComplete(() =>
                 {
                     // Phase 2: Fast increase to 100% in remaining time
-                    _glowTween = DOTween.To(() => 0.05f, SetGlowValue, 1f, rapidGlowTime)
+                    _glowTween = DOTween.To(() => 0.1f, SetGlowValue, 1f, rapidGlowTime)
                         .SetEase(Ease.OutQuad)
                         .OnComplete(() =>
                         {
