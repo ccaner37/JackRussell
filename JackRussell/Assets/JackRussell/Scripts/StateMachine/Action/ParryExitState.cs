@@ -12,7 +12,7 @@ namespace JackRussell.States.Action
     /// </summary>
     public class ParryExitState : PlayerActionStateBase
     {
-        private readonly float _recoveryDuration = 0.2f;
+        private readonly float _recoveryDuration = 0.15f;
         private float _timer;
         private bool _recoveryComplete;
         
@@ -55,12 +55,14 @@ namespace JackRussell.States.Action
 
             if (_player.IsGrounded)
             {
-                _player.Animator.CrossFade("Grounded", 0.1f);
+                _player.Animator.CrossFade("Grounded", 0.15f);
             }
             else
             {
-                _player.Animator.CrossFade("Ungrounded", 0.1f);
+                _player.Animator.CrossFade("Ungrounded", 0.15f);
             }
+
+            _player.PunchEffect.SetActive(false);
         }
         
         public override void LogicUpdate()

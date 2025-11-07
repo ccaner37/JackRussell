@@ -71,6 +71,8 @@ namespace JackRussell
         [SerializeField] private GameObject[] _footSprintParticles;
         [SerializeField] private VisualEffect[] _smokeVisualEffects;
         [SerializeField] private TrailRenderer[] _smokeTrailRenderers;
+        [SerializeField] private GameObject _punchEffect;
+        [SerializeField] private ParticleSystem _punchParticle;
         [Inject] private readonly PostProcessingController _postProcessingController;
 
         [Header("IK")]
@@ -187,6 +189,8 @@ namespace JackRussell
         public float HomingHitRadius => _homingHitRadius;
         public LayerMask HomingMask => _homingMask;
         public ParticleSystem HomingHitParticle => _homingHitParticle;
+        public ParticleSystem PunchParticle => _punchParticle;
+        public GameObject PunchEffect => _punchEffect;
 
         // Input accessor
         public bool SprintRequested => _sprintInput;

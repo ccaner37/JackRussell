@@ -109,10 +109,15 @@ namespace JackRussell.States.Action
 
                 // Instant teleport to target
                 //_player.transform.position = _targetPosition;
-                _player.Rigidbody.position = Vector3.Lerp(_startPosition, _targetPosition, 0.8f);
+                float stopDistance = 3f; // always stay 3 meters away from target
+                // Calculate final position
+                Vector3 finalPos = _targetPosition - direction * stopDistance;
+                _player.Rigidbody.position = finalPos;
 
                 // Apply post-processing effect
                 _player.PostProcessingController?.ParryAttackEffect();
+
+                _player.PunchEffect.SetActive(true);
 
                 yield return new WaitForSeconds(0.35f);
                 _player.Animator.Play("3001_1_stapla_06_Quickdraw_03_ht");
@@ -121,8 +126,10 @@ namespace JackRussell.States.Action
 
                 // Trigger parry on enemy
                 _target.OnParried(_player);
-                
+
                 _player.PlaySound(SoundType.HeavyPunch);
+
+                _player.PunchParticle.Play();
                 
                 // Play parry success effects
                 PlayParrySuccessEffects();
