@@ -14,10 +14,7 @@ namespace JackRussell.States.Action
     /// </summary>
     public class ParryAttackState : PlayerActionStateBase
     {
-        //private readonly float _teleportDuration = 1.2f;
-        //private readonly float _teleportSpeed = 50f;
         private IParryable _target;
-        //private float _timer;
         private bool _hasTeleported;
         private Vector3 _startPosition;
         private Vector3 _targetPosition;
@@ -25,6 +22,11 @@ namespace JackRussell.States.Action
         public ParryAttackState(Player player, StateMachine stateMachine) : base(player, stateMachine) { }
         
         public override string Name => nameof(ParryAttackState);
+        
+        /// <summary>
+        /// ParryAttack blocks all locomotion to prevent interruption during the teleportation and attack sequence.
+        /// </summary>
+        public override LocomotionType BlocksLocomotion => LocomotionType.All;
         
         public override void Enter()
         {

@@ -14,8 +14,13 @@ namespace JackRussell.States.Action
         private bool _transitionedToJumpDown;
 
         public HomingExitState(Player player, StateMachine stateMachine) : base(player, stateMachine) { }
-
+        
         public override string Name => nameof(HomingExitState);
+        
+        /// <summary>
+        /// HomingExit blocks all locomotion to prevent interruption during the exit animation sequence.
+        /// </summary>
+        public override LocomotionType BlocksLocomotion => LocomotionType.All;
 
         public override void Enter()
         {

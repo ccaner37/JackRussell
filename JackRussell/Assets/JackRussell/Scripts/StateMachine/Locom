@@ -1,0 +1,194 @@
+# Locomotion Permission System Implementation Guide
+
+## Overview
+
+This system prevents locomotion states (Move, Sprint, Jump, etc.) from interrupting specific action states like HomingAttack and ParryAttack. It's designed to be **future-proof** and **robust** for your game.
+
+## Problem Solved
+
+**Before**: During HomingAttack or ParryAttack, the player could still trigger locomotion states that would interrupt the carefully choreographed action sequences.
+
+**After**: Action states can now block specific locomotion types to ensure clean, uninterrupted action execution.
+
+## System Architecture
+
+### 1. Core Components
+
+#### `LocomotionType.cs` - Flag-based Enum
+```csharp
+[Flags]
+public enum LocomotionType
+{
+    None = 0,
+    Move = 1 << 0,
+    Sprint = 1 << 1,
+    Jump = 1 << 2,
+    FastFall = 1 << 3,
+    Dash = 1 << 4,
+    Grind = 1 << 5,
+    Crouch = 1 << 6,
+    
+    // Convenient combinations
+    All = Move | Sprint | Jump | FastFall | Dash | Grind | Crouch,
+    Movement = Move | Sprint | Jump | FastFall | Dash,
+    AirControl = Jump | FastFall | Dash
+}
+```
+
+#### `IBlocksLocomotion.cs` - Interface
+```csharp
+public interface IBlocksLocomotion
+{
+    LocomotionType BlocksLocomotion { get; }
+    bool IsBlockingLocomotion { get; }
+}
+```
+
+#### `PlayerActionStateBase.cs` - Base Implementation
+- All action states inherit from this base class
+- Implements `IBlocksLocomotion` with default `LocomotionType.None` (no blocking)
+- Action states can override `BlocksLocomotion` to block specific locomotion types
+
+#### `Player.cs` - Permission Checking API
+- `IsLocomotionAllowed(LocomotionType locomotionType)` - Check if specific locomotion is allowed
+- `IsAnyLocomotionBlocked()` - Check if any locomotion is currently blocked
+- `GetBlockedLocomotionTypes()` - Get which locomotion types are blocked
+
+### 2. Implementation Examples
+
+#### Complete Blocking (for major actions)
+```csharp
+public class HomingAttackState : PlayerActionStateBase
+{
+    public override LocomotionType BlocksLocomotion => LocomotionType.All;
+}
+```
+
+#### Selective Blocking (for flexible actions)
+```csharp
+public class SpecialActionState : PlayerActionStateBase
+{
+    public override LocomotionType BlocksLocomotion => LocomotionType.Move | LocomotionType.Jump;
+    // This allows Dash, Sprint, etc. during the action
+}
+```
+
+#### No Blocking (default behavior)
+```csharp
+public class ActionNoneState : PlayerActionStateBase
+{
+    // Inherits BlocksLocomotion => LocomotionType.None
+}
+```
+
+### 3. Currently Implemented Action States
+
+| Action State | Blocks Locomotion | Reason |
+|-------------|------------------|---------|
+| `HomingAttackState` | `LocomotionType.All` | Prevent interruption during attack sequence |
+| `HomingExitState` | `LocomotionType.All` | Prevent interruption during exit animations |
+| `ParryAttackState` | `LocomotionType.All` | Prevent interruption during teleportation |
+| `ParryExitState` | `LocomotionType.All` | Prevent interruption during recovery |
+
+## Usage Examples
+
+### In Action States
+```csharp
+public override void LogicUpdate()
+{
+    // Check if dash is allowed during this action
+    if (_player.IsLocomotionAllowed(LocomotionType.Dash))
+    {
+        // Allow dash input processing
+        HandleDashInput();
+    }
+    
+    // Check if movement input should be ignored
+    if (!_player.IsLocomotionAllowed(LocomotionType.Move))
+    {
+        // Ignore movement input to prevent interruption
+        return;
+    }
+    
+    // Normal movement processing
+    ProcessMovementInput();
+}
+```
+
+### In Locomotion States (Optional Enhancement)
+```csharp
+public override void LogicUpdate()
+{
+    // Check if this locomotion is blocked by current action
+    if (!_player.IsLocomotionAllowed(LocomotionType.Sprint))
+    {
+        // Don't enter sprint state if blocked
+        ChangeState(new MoveState(_player, _stateMachine));
+        return;
+    }
+    
+    // Normal sprint logic
+    ProcessSprintLogic();
+}
+```
+
+## Future Extensibility
+
+### Adding New Locomotion Types
+1. Add new flag to `LocomotionType` enum
+2. Update convenience combinations as needed
+3. Action states automatically inherit the new type
+
+### Adding New Action States
+1. Inherit from `PlayerActionStateBase`
+2. Override `BlocksLocomotion` property if needed
+3. System automatically enforces the blocking
+
+### Custom Blocking Combinations
+```csharp
+// Block only air-related locomotion
+public override LocomotionType BlocksLocomotion => LocomotionType.AirControl;
+
+// Block everything except dash (for emergency escapes)
+public override LocomotionType BlocksLocomotion => LocomotionType.All & ~LocomotionType.Dash;
+
+// Block specific combination
+public override LocomotionType BlocksLocomotion => LocomotionType.Move | LocomotionType.Sprint | LocomotionType.Jump;
+```
+
+## Testing Checklist
+
+- [ ] HomingAttack cannot be interrupted by movement input
+- [ ] HomingAttack cannot be interrupted by sprint input
+- [ ] HomingAttack cannot be interrupted by jump input
+- [ ] ParryAttack cannot be interrupted by any locomotion
+- [ ] Recovery states properly block locomotion
+- [ ] Normal movement works when no action is active
+- [ ] Selective blocking works correctly (if implemented)
+- [ ] System doesn't break existing locomotion functionality
+
+## Performance Notes
+
+- **Minimal overhead**: Only checks current action state type
+- **Flag-based efficiency**: Bit operations are very fast
+- **No allocations**: Pure value type operations
+- **Caching friendly**: Results can be cached if needed
+
+## Benefits of This Approach
+
+1. **Future-proof**: Easy to add new locomotion types and action states
+2. **Flexible**: Each action state can block different combinations
+3. **Maintainable**: Single source of truth for locomotion permissions
+4. **Type-safe**: Compile-time checking of locomotion combinations
+5. **Performant**: Minimal runtime overhead
+6. **Non-intrusive**: Doesn't break existing code patterns
+7. **Self-documenting**: Clear intent through property names and XML comments
+
+## Next Steps (Optional Enhancements)
+
+1. **Add locomotion checks to locomotion state transitions** for additional safety
+2. **Add debug visualization** to see which locomotion types are blocked
+3. **Add animation integration** to synchronize with blocked states
+4. **Add input buffering** to queue blocked inputs for later execution
+
+This system provides a solid foundation for preventing locomotion interruptions while maintaining flexibility for future game design decisions.

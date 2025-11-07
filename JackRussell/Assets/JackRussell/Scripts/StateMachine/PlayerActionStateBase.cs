@@ -7,7 +7,7 @@ namespace JackRussell.States
     /// Base class for action/combat states (parallel to locomotion).
     /// Action states can manipulate the Player via its public API and request locomotion overrides.
     /// </summary>
-    public abstract class PlayerActionStateBase : IState
+    public abstract class PlayerActionStateBase : IState, IBlocksLocomotion
     {
         protected readonly Player _player;
         protected readonly StateMachine _stateMachine;
@@ -19,6 +19,14 @@ namespace JackRussell.States
         }
 
         public abstract string Name { get; }
+
+        /// <summary>
+        /// Default: action states don't block locomotion unless explicitly overridden.
+        /// Override this property in derived action states to block specific locomotion types.
+        /// </summary>
+        public virtual LocomotionType BlocksLocomotion => LocomotionType.None;
+        
+        public virtual bool IsBlockingLocomotion => BlocksLocomotion != LocomotionType.None;
 
         public virtual void Enter() { }
 

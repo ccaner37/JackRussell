@@ -19,6 +19,11 @@ namespace JackRussell.States.Action
         
         public override string Name => nameof(ParryExitState);
         
+        /// <summary>
+        /// ParryExit blocks all locomotion to prevent interruption during the recovery sequence.
+        /// </summary>
+        public override LocomotionType BlocksLocomotion => LocomotionType.All;
+        
         public override void Enter()
         {
             _timer = _recoveryDuration;

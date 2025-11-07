@@ -399,6 +399,46 @@ namespace JackRussell
         public Vector3 GetOverrideVelocity() => _overrideVelocity;
         public bool IsOverrideExclusive() => _overrideExclusive;
 
+        // Locomotion permission checking system
+        /// <summary>
+        /// Check if the specified locomotion type is currently allowed based on active action state.
+        /// </summary>
+        public bool IsLocomotionAllowed(LocomotionType locomotionType)
+        {
+            // If current action state blocks this locomotion type, deny permission
+            if (_actionSM?.Current is IBlocksLocomotion blockingState)
+            {
+                if (blockingState.IsBlockingLocomotion &&
+                    (blockingState.BlocksLocomotion & locomotionType) != 0)
+                {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        /// <summary>
+        /// Check if any locomotion is currently blocked by the active action state.
+        /// </summary>
+        public bool IsAnyLocomotionBlocked()
+        {
+            return _actionSM?.Current is IBlocksLocomotion blockingState &&
+                   blockingState.IsBlockingLocomotion;
+        }
+        
+        /// <summary>
+        /// Get which locomotion types are currently blocked (returns LocomotionType.None if none blocked).
+        /// </summary>
+        public LocomotionType GetBlockedLocomotionTypes()
+        {
+            if (_actionSM?.Current is IBlocksLocomotion blockingState)
+            {
+                return blockingState.IsBlockingLocomotion ? blockingState.BlocksLocomotion : LocomotionType.None;
+            }
+            return LocomotionType.None;
+        }
+
         // Simple physics helpers states will use
         public void SetVelocityImmediate(Vector3 v)
         {

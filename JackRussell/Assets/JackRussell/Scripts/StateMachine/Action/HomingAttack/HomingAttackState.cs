@@ -15,7 +15,6 @@ namespace JackRussell.States.Action
         private readonly float _maxDuration;
         private readonly float _speed;
         private readonly float _hitRadius;
-
         private IHomingTarget _target;
         private float _timer;
         private float _initialDistance;
@@ -32,6 +31,11 @@ namespace JackRussell.States.Action
         }
 
         public override string Name => nameof(HomingAttackState);
+        
+        /// <summary>
+        /// HomingAttack blocks all locomotion to prevent interruption during the attack sequence.
+        /// </summary>
+        public override LocomotionType BlocksLocomotion => LocomotionType.All;
 
         public override void Enter()
         {
