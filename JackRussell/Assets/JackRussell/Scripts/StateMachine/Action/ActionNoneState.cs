@@ -65,7 +65,7 @@ namespace JackRussell.States.Action
         private bool TryParryAttack()
         {
             // Find all parryable enemies in range
-            Collider[] cols = Physics.OverlapSphere(_player.transform.position, 15f, _player.HomingMask);
+            Collider[] cols = Physics.OverlapSphere(_player.transform.position, 50f, _player.HomingMask);
             if (cols == null || cols.Length == 0) return false;
 
             foreach (var col in cols)

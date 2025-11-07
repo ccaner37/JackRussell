@@ -1223,5 +1223,11 @@ namespace JackRussell
             DisableFootIK();
             _dashParticle.Play();
         }
+
+        public void ResetLocomotionState()
+        {
+            _locomotionSM.ChangeState(new IdleState(this, _locomotionSM));
+            SetVelocityImmediate(Vector3.zero);
+        }
     }
 }

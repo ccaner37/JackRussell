@@ -15,6 +15,7 @@ Material:
   - _CAST_SHADOWS_ON
   - _FOG_ON
   - _GREYSCALESTAGE_BEFORELIGHTING
+  - _HIT_ON
   - _LIGHTMODEL_TOON
   - _MATCAPBLENDMODE_MULTIPLY
   - _OUTLINETYPE_SIMPLE
@@ -220,8 +221,8 @@ Material:
     - _HighlightSmoothness: 0.5
     - _Highlights: 0
     - _HighlightsStrength: 1
-    - _Hit: 0
-    - _HitBlend: 1
+    - _Hit: 1
+    - _HitBlend: 0
     - _HitGlow: 5
     - _Hologram: 0
     - _HologramAccentAlpha: 0.5

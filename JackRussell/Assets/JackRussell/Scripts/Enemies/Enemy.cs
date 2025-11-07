@@ -1,6 +1,7 @@
 using UnityEngine;
 using JackRussell.States.Action;
 using System.Collections;
+using DG.Tweening;
 
 namespace JackRussell.Enemies
 {
@@ -16,7 +17,50 @@ namespace JackRussell.Enemies
         [SerializeField] protected GameObject _deathEffectPrefab;
         [SerializeField] protected float _deathEffectDuration = 2f;
         
+        [Header("Hit Effects")]
+        [SerializeField] private ParticleSystem _hitEffect;
+        [SerializeField] private MeshRenderer[] _hitEffectRenderers;
+        
         protected bool IsEnemyActive => _isActive;
+        
+        private void OnHitMaterialEffect()
+        {
+            if (_hitEffectRenderers != null)
+            {
+                foreach (var renderer in _hitEffectRenderers)
+                {
+                    if (renderer != null && renderer.material != null)
+                    {
+                        renderer.material.DOFloat(1f, "_HitBlend", 0.1f);
+                    }
+                }
+            }
+        }
+        
+        private IEnumerator TestingEnableBack()
+        {
+            _isActive = false;
+            foreach (var renderer in _hitEffectRenderers)
+            {
+                if (renderer != null)
+                    renderer.enabled = false;
+            }
+            yield return new WaitForSeconds(2f);
+            foreach (var renderer in _hitEffectRenderers)
+            {
+                if (renderer != null)
+                    renderer.enabled = true;
+            }
+            _isActive = true;
+            
+            foreach (var renderer in _hitEffectRenderers)
+            {
+                if (renderer != null && renderer.material != null)
+                {
+                    renderer.material.SetFloat("_HitBlend", 0);
+                }
+            }
+        }
         
         // IParryable implementation
         public bool IsInParryWindow { get; protected set; }
@@ -27,6 +71,21 @@ namespace JackRussell.Enemies
         {
             // Default behavior: take lethal damage
             TakeDamage(CurrentHealth);
+            
+            // Play hit effects
+            PlayHomingHitEffects();
+            
+            // Play optional hit effect
+            if (_hitEffect != null)
+            {
+                _hitEffect.Play(true);
+            }
+            
+            // Apply hit material effect
+            OnHitMaterialEffect();
+            
+            // Start testing enable back coroutine with punch scale effect
+            transform.DOPunchScale(Vector3.one, 0.25f, 10, 1).OnComplete(() => StartCoroutine(TestingEnableBack()));
         }
         
         public virtual void OnParryWindowOpen()
@@ -57,6 +116,18 @@ namespace JackRussell.Enemies
             
             // Play hit effects
             PlayHomingHitEffects();
+            
+            // Play optional hit effect
+            if (_hitEffect != null)
+            {
+                _hitEffect.Play(true);
+            }
+            
+            // Apply hit material effect
+            OnHitMaterialEffect();
+            
+            // Start testing enable back coroutine with punch scale effect
+            transform.DOPunchScale(Vector3.one, 0.25f, 10, 1).OnComplete(() => StartCoroutine(TestingEnableBack()));
         }
         
         /// <summary>
@@ -82,15 +153,15 @@ namespace JackRussell.Enemies
             PlayDeathEffects();
             
             // Handle destruction
-            if (_destroyOnDeath)
-            {
-                Destroy(gameObject);
-            }
-            else
-            {
-                // Just disable instead of destroy
-                gameObject.SetActive(false);
-            }
+            // if (_destroyOnDeath)
+            // {
+            //     Destroy(gameObject);
+            // }
+            // else
+            // {
+            //     // Just disable instead of destroy
+            //     gameObject.SetActive(false);
+            // }
         }
         
         /// <summary>

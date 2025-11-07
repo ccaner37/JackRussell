@@ -33,7 +33,7 @@ namespace JackRussell.States.Action
             OnHitMaterialEffect();
 
             // Example behavior: deactivate the target (could be destroy, apply damage, spring bounce, etc.)
-            transform.DOPunchScale(Vector3.one, 0.25f, 10, 1).OnComplete(() => StartCoroutine(EnableBack()));
+            transform.DOPunchScale(Vector3.one, 0.25f, 10, 1).OnComplete(() => StartCoroutine(TestingEnableBack()));
         }
 
         private void OnHitMaterialEffect()
@@ -56,7 +56,7 @@ namespace JackRussell.States.Action
             // Override for custom behaviors
         }
 
-        private IEnumerator EnableBack()
+        private IEnumerator TestingEnableBack()
         {
             //yield return new WaitForSeconds(0.1f);
             _isActive = false;

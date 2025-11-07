@@ -11,7 +11,7 @@ namespace JackRussell.States.Action
     /// </summary>
     public class ParryExitState : PlayerActionStateBase
     {
-        private readonly float _recoveryDuration = 0.4f;
+        private readonly float _recoveryDuration = 0.2f;
         private float _timer;
         private bool _recoveryComplete;
         
@@ -37,7 +37,7 @@ namespace JackRussell.States.Action
             // _player.SetVelocityImmediate(recoveryVelocity);
             
             // Play recovery sound
-            _player.PlaySound(Audio.SoundType.Jump);
+            //_player.PlaySound(Audio.SoundType.Jump);
         }
         
         public override void Exit()

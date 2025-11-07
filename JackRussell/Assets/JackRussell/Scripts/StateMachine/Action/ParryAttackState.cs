@@ -32,13 +32,15 @@ namespace JackRussell.States.Action
         {
             // Find nearest parryable enemy
             _target = FindNearestParryableEnemy();
-            
+
             if (_target == null || !_target.IsInParryWindow)
             {
                 // No valid target, exit immediately
                 ChangeState(new ActionNoneState(_player, _stateMachine));
                 return;
             }
+
+            _player.ResetLocomotionState();
             
             // Initialize teleportation
             _startPosition = _player.transform.position;
@@ -49,7 +51,7 @@ namespace JackRussell.States.Action
             // Play parry start sound
             _player.PlaySound(SoundType.ParryAttackSuccess);
 
-            _player.Animator.CrossFade("3001_1_stapla_06_Quickdraw_02_in", 0.65f);
+            _player.Animator.CrossFade("3001_1_stapla_06_Quickdraw_02_in", 0.35f);
             
             // Enable parry visual effects
             _player.EnableSmokeEffects();
@@ -95,7 +97,7 @@ namespace JackRussell.States.Action
             //_player.RequestMovementOverride(dashVelocity, _teleportDuration * 0.5f, true);
             _player.RotateTowardsDirection(direction, Time.fixedDeltaTime, isAir: true, instantaneous: true);
 
-            yield return new WaitForSeconds(0.5f); // _teleportDuration * 0.5f
+            yield return new WaitForSeconds(0.3f); // _teleportDuration * 0.5f
             
             _player.PlaySound(SoundType.Teleport);
             
@@ -111,7 +113,7 @@ namespace JackRussell.States.Action
                 yield return new WaitForSeconds(0.35f);
                 _player.Animator.Play("3001_1_stapla_06_Quickdraw_03_ht");
 
-                yield return new WaitForSeconds(0.07f);
+                yield return new WaitForSeconds(0.1f);
 
                 // Trigger parry on enemy
                 _target.OnParried(_player);
@@ -133,7 +135,7 @@ namespace JackRussell.States.Action
                 // _player.SetVelocityImmediate(new Vector3(bounceBack.x, _player.JumpVelocity * 0.3f, bounceBack.z));
             }
 
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.2f);
             ChangeState(new ParryExitState(_player, _stateMachine));
         }
         

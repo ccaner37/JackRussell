@@ -78,13 +78,6 @@ namespace JackRussell.Enemies
         
         public override Transform ParryTargetTransform => transform;
         
-        public void OnParried(Player player)
-        {
-            // Handle instant death from parry
-            TakeDamage(float.MaxValue); // Instant kill
-            _isActive = false;
-        }
-        
         public void OnParryWindowOpen()
         {
             IsInParryWindow = true;
