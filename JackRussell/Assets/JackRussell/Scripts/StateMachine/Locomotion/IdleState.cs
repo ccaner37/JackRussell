@@ -69,7 +69,6 @@ namespace JackRussell.States.Locomotion
                 }
                 // If it's a blend override, we will let normal locomotion run and the override can bias it.
             }
-
             // Basic ground movement physics: gentle acceleration toward desired velocity
             Vector3 desired = _player.MoveDirection;
             if (desired.sqrMagnitude < k_InputDeadzone)

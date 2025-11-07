@@ -108,7 +108,7 @@ namespace JackRussell.States.Action
 
                 // Instant teleport to target
                 //_player.transform.position = _targetPosition;
-                _player.transform.position = Vector3.Lerp(_startPosition, _targetPosition, 0.9f);
+                _player.Rigidbody.position = Vector3.Lerp(_startPosition, _targetPosition, 0.8f);
 
                 yield return new WaitForSeconds(0.35f);
                 _player.Animator.Play("3001_1_stapla_06_Quickdraw_03_ht");

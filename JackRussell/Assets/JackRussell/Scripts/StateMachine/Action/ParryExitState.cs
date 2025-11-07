@@ -53,6 +53,7 @@ namespace JackRussell.States.Action
             {
                 _player.Animator.CrossFade("Grounded", 0.1f);
             }
+            else
             {
                 _player.Animator.CrossFade("Ungrounded", 0.1f);
             }
