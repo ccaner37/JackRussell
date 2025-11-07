@@ -105,12 +105,13 @@ namespace JackRussell.States.Action
                 _hasTeleported = true;
 
                 // Instant teleport to target
-                _player.transform.position = _targetPosition;
+                //_player.transform.position = _targetPosition;
+                _player.transform.position = Vector3.Lerp(_startPosition, _targetPosition, 0.9f);
 
                 yield return new WaitForSeconds(0.35f);
                 _player.Animator.Play("3001_1_stapla_06_Quickdraw_03_ht");
 
-                yield return new WaitForSeconds(0.05f);
+                yield return new WaitForSeconds(0.07f);
 
                 // Trigger parry on enemy
                 _target.OnParried(_player);
@@ -128,11 +129,11 @@ namespace JackRussell.States.Action
                 }
                 
                 // Apply small bounce back
-                Vector3 bounceBack = -direction * _player.JumpVelocity * 0.5f;
-                _player.SetVelocityImmediate(new Vector3(bounceBack.x, _player.JumpVelocity * 0.7f, bounceBack.z));
+                // Vector3 bounceBack = -direction * _player.JumpVelocity * 0.5f;
+                // _player.SetVelocityImmediate(new Vector3(bounceBack.x, _player.JumpVelocity * 0.3f, bounceBack.z));
             }
 
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.3f);
             ChangeState(new ParryExitState(_player, _stateMachine));
         }
         

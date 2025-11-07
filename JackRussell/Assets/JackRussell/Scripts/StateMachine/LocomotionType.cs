@@ -16,10 +16,13 @@ namespace JackRussell.States
         Dash = 1 << 4,
         Grind = 1 << 5,
         Crouch = 1 << 6,
-        
+        Fall = 1 << 7,
+        Land = 1 << 8,
+        PathFollow = 1 << 9,
+
         // Combinations for convenience
-        All = Move | Sprint | Jump | FastFall | Dash | Grind | Crouch,
+        All = Move | Sprint | Jump | FastFall | Dash | Grind | Crouch | Fall | Land | PathFollow,
         Movement = Move | Sprint | Jump | FastFall | Dash,
-        AirControl = Jump | FastFall | Dash
+        AirControl = Jump | FastFall | Dash | Fall
     }
 }

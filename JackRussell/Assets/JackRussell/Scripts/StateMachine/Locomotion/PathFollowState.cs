@@ -40,6 +40,8 @@ namespace JackRussell.States.Locomotion
 
         public override string Name => nameof(PathFollowState);
 
+        public override LocomotionType LocomotionType => LocomotionType.PathFollow;
+
         public override void Enter()
         {
             if (_path == null)

@@ -15,6 +15,8 @@ namespace JackRussell.States.Locomotion
 
         public override string Name => nameof(SprintStopState);
 
+        public override LocomotionType LocomotionType => LocomotionType.Sprint;
+
         public override void Enter()
         {
             _timer = _stopDuration;

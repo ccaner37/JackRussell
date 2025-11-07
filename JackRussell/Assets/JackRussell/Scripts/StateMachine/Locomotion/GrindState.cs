@@ -43,6 +43,8 @@ namespace JackRussell.States.Locomotion
         }
 
         public override string Name => nameof(GrindState);
+        
+        public override LocomotionType LocomotionType => LocomotionType.Grind;
 
         public override void Enter()
         {

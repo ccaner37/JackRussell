@@ -19,6 +19,8 @@ namespace JackRussell.States.Locomotion
 
         public override string Name => nameof(IdleState);
 
+        public override LocomotionType LocomotionType => LocomotionType.None;
+
         public override void Enter()
         {
             // Subscribe to jump press
@@ -35,12 +37,6 @@ namespace JackRussell.States.Locomotion
         {
             if (_player.IsGrounded)
             {
-                // simple jump handling here; a dedicated JumpState can replace this later
-                Vector3 v = _player.Rigidbody.linearVelocity;
-                v.y = _player.JumpVelocity;
-                _player.SetVelocityImmediate(v);
-                _player.Animator.SetTrigger(Animator.StringToHash("JumpTrigger"));
-                // switch to JumpState so proper jump state logic runs
                 ChangeState(new JumpState(_player, _stateMachine));
             }
         }
@@ -88,18 +84,18 @@ namespace JackRussell.States.Locomotion
                 return;
             }
 
-            float targetSpeed = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
-            Vector3 desiredVel = desired * targetSpeed;
+            // float targetSpeed = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
+            // Vector3 desiredVel = desired * targetSpeed;
 
-            Vector3 horizontalVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
-            Vector3 velocityDiff = desiredVel - horizontalVel;
+            // Vector3 horizontalVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
+            // Vector3 velocityDiff = desiredVel - horizontalVel;
 
-            // apply ground acceleration
-            _player.AddGroundForce(velocityDiff * _player.AccelGround);
+            // // apply ground acceleration
+            // _player.AddGroundForce(velocityDiff * _player.AccelGround);
 
-            // clamp to the appropriate top speed
-            float clampTo = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
-            _player.ClampHorizontalSpeed(clampTo);
+            // // clamp to the appropriate top speed
+            // float clampTo = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
+            // _player.ClampHorizontalSpeed(clampTo);
         }
     }
 }

@@ -27,6 +27,8 @@ namespace JackRussell.States.Locomotion
 
         public override string Name => nameof(DashState);
 
+        public override LocomotionType LocomotionType => LocomotionType.Dash;
+
         public override void Enter()
         {
             _player.OnDashEnter();

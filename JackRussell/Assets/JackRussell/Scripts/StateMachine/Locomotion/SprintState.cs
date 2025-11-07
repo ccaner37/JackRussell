@@ -32,6 +32,8 @@ namespace JackRussell.States.Locomotion
         }
 
         public override string Name => nameof(SprintState);
+        
+        public override LocomotionType LocomotionType => LocomotionType.Sprint;
 
         public override void Enter()
         {

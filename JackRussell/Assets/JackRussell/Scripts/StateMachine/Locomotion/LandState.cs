@@ -16,6 +16,8 @@ namespace JackRussell.States.Locomotion
 
         public override string Name => nameof(LandState);
 
+        public override LocomotionType LocomotionType => LocomotionType.Land;
+
         public override void Enter()
         {
             _timer = 0.02f; // adjust to animation length

@@ -16,6 +16,8 @@ namespace JackRussell.States.Locomotion
         public MoveState(Player player, StateMachine stateMachine) : base(player, stateMachine) { }
 
         public override string Name => nameof(MoveState);
+        
+        public override LocomotionType LocomotionType => LocomotionType.Move;
 
         public override void Enter()
         {

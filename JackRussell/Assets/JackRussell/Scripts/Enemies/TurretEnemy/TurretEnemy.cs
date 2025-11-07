@@ -76,7 +76,7 @@ namespace JackRussell.Enemies
         // IParryable implementation
         public bool IsInParryWindow { get; private set; }
         
-        public Transform ParryTargetTransform => _headTransform;
+        public override Transform ParryTargetTransform => transform;
         
         public void OnParried(Player player)
         {

@@ -33,8 +33,8 @@ namespace JackRussell.States.Action
             _player.EnableSmokeEffects();
             
             // Apply small upward velocity for recovery
-            Vector3 recoveryVelocity = new Vector3(0f, _player.JumpVelocity * 0.3f, 0f);
-            _player.SetVelocityImmediate(recoveryVelocity);
+            // Vector3 recoveryVelocity = new Vector3(0f, _player.JumpVelocity * 0.3f, 0f);
+            // _player.SetVelocityImmediate(recoveryVelocity);
             
             // Play recovery sound
             _player.PlaySound(Audio.SoundType.Jump);
@@ -51,10 +51,10 @@ namespace JackRussell.States.Action
 
             if (_player.IsGrounded)
             {
-                _player.Animator.Play("Grounded");
+                _player.Animator.CrossFade("Grounded", 0.1f);
             }
             {
-                _player.Animator.Play("Ungrounded");
+                _player.Animator.CrossFade("Ungrounded", 0.1f);
             }
         }
         
@@ -74,13 +74,13 @@ namespace JackRussell.States.Action
         public override void PhysicsUpdate()
         {
             // Apply gentle deceleration during recovery
-            Vector3 currentVel = _player.Rigidbody.linearVelocity;
-            Vector3 deceleratedVel = new Vector3(
-                currentVel.x * 0.9f,
-                currentVel.y,
-                currentVel.z * 0.9f
-            );
-            _player.SetVelocityImmediate(deceleratedVel);
+            // Vector3 currentVel = _player.Rigidbody.linearVelocity;
+            // Vector3 deceleratedVel = new Vector3(
+            //     currentVel.x * 0.9f,
+            //     currentVel.y,
+            //     currentVel.z * 0.9f
+            // );
+            // _player.SetVelocityImmediate(deceleratedVel);
         }
     }
 }

@@ -15,6 +15,8 @@ namespace JackRussell.States.Locomotion
 
         public override string Name => nameof(CrouchState);
 
+        public override LocomotionType LocomotionType => LocomotionType.Crouch;
+
         public override void Enter()
         {
             _player.Animator.SetBool(Animator.StringToHash("IsCrouching"), true);

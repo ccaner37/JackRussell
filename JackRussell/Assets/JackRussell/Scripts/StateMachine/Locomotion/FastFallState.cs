@@ -16,6 +16,8 @@ namespace JackRussell.States.Locomotion
 
         public override string Name => nameof(FastFallState);
 
+        public override LocomotionType LocomotionType => LocomotionType.FastFall;
+
         public override void Enter()
         {
             // Cancel all velocity to immediately start fast falling straight down
