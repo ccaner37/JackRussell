@@ -1,5 +1,6 @@
 using UnityEngine;
 using JackRussell.CameraController;
+using JackRussell.GamePostProcessing;
 using DG.Tweening;
 using System.Collections;
 
@@ -44,6 +45,9 @@ namespace JackRussell.States.Action
         {
             // Disable recovery effects
             _player.DisableSmokeEffects();
+            
+            // Restore default post-processing values
+            _player.PostProcessingController?.RestoreDefaultValues();
             
             // Clear any movement overrides
             _player.ClearMovementOverride();

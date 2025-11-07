@@ -1,6 +1,7 @@
 using UnityEngine;
 using JackRussell.CameraController;
 using JackRussell.Enemies;
+using JackRussell.GamePostProcessing;
 using DG.Tweening;
 using System.Collections;
 using JackRussell.Audio;
@@ -52,7 +53,7 @@ namespace JackRussell.States.Action
             _player.PlaySound(SoundType.ParryAttackSuccess);
 
             _player.Animator.CrossFade("3001_1_stapla_06_Quickdraw_02_in", 0.35f);
-            
+
             // Enable parry visual effects
             _player.EnableSmokeEffects();
             
@@ -109,6 +110,9 @@ namespace JackRussell.States.Action
                 // Instant teleport to target
                 //_player.transform.position = _targetPosition;
                 _player.Rigidbody.position = Vector3.Lerp(_startPosition, _targetPosition, 0.8f);
+
+                // Apply post-processing effect
+                _player.PostProcessingController?.ParryAttackEffect();
 
                 yield return new WaitForSeconds(0.35f);
                 _player.Animator.Play("3001_1_stapla_06_Quickdraw_03_ht");

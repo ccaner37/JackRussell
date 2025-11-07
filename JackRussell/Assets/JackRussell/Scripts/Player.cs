@@ -15,6 +15,7 @@ using AllIn13DShader;
 using RootMotion.FinalIK;
 using System.Collections;
 using HoaxGames;
+using JackRussell.GamePostProcessing;
 
 namespace JackRussell
 {
@@ -70,6 +71,7 @@ namespace JackRussell
         [SerializeField] private GameObject[] _footSprintParticles;
         [SerializeField] private VisualEffect[] _smokeVisualEffects;
         [SerializeField] private TrailRenderer[] _smokeTrailRenderers;
+        [Inject] private readonly PostProcessingController _postProcessingController;
 
         [Header("IK")]
         [SerializeField] private FootIK _footIK;
@@ -237,7 +239,8 @@ namespace JackRussell
         public Quaternion OriginalModelRootLocalRot => _originalModelRootLocalRot;
         public Vector3 OriginalModelRootLocalPos => _originalModelRootLocalPos;
         public float MoveRollMaxDegrees => _moveRollMaxDegrees;
-        public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
+public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
+        public PostProcessingController PostProcessingController => _postProcessingController;
 
         /// <summary>
         /// Get the IK weight based on movement and rotation speed.

@@ -6,6 +6,7 @@ using VContainer;
 using VContainer.Unity;
 using VitalRouter.VContainer;
 using JackRussell;
+using JackRussell.GamePostProcessing;
 
 namespace JackRussell.GameScope
 {
@@ -15,12 +16,15 @@ namespace JackRussell.GameScope
         [SerializeField] private GameObject _homingIndicatorPrefab;
         [SerializeField] private HomingExitAnimationConfig _homingExitConfig;
         [SerializeField] private AudioManager _audioManager;
+        [SerializeField] private PostProcessingController _postProcessingController;
 
         protected override void Configure(IContainerBuilder builder)
         {
             //builder.RegisterEntryPoint<RootEntryPoint>();
 
             builder.RegisterComponent(_audioManager);
+
+            builder.RegisterComponent(_postProcessingController);
 
             builder.RegisterInstance(_soundDatabase);
 
@@ -33,9 +37,6 @@ namespace JackRussell.GameScope
 
             // Register UI components
             builder.RegisterComponentInHierarchy<PressureBarUI>();
-
-            // Register renderer controller
-            builder.RegisterComponentInHierarchy<RendererController>();
 
             // Vital Router //
             builder.RegisterVitalRouter(routing =>

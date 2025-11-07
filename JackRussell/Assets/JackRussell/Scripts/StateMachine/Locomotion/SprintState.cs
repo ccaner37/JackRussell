@@ -8,6 +8,7 @@ using Unity.Cinemachine;
 using DG.Tweening;
 using RootMotion.FinalIK;
 using VitalRouter;
+using JackRussell.GamePostProcessing;
 
 namespace JackRussell.States.Locomotion
 {
@@ -19,11 +20,9 @@ namespace JackRussell.States.Locomotion
         private float _sprintTime = 0f;
         private float _airSprintTimer = 0f;
         private bool _enteredFromAir;
-        private CinemachineCameraController _cameraController;
-        private Volume _volume;
         private LensDistortion _lensDistortion;
         private ChromaticAberration _chromaticAberration;
-        private RendererController _rendererController;
+        private PostProcessingController _postProcessingController;
         private ICommandPublisher _commandPublisher;
 
         public SprintState(Player player, StateMachine stateMachine) : base(player, stateMachine)
@@ -84,14 +83,9 @@ namespace JackRussell.States.Locomotion
             _commandPublisher.PublishAsync(new CameraStateUpdateCommand(3.2f, 90f));
 
             // Find components
-            _cameraController = Object.FindObjectOfType<CinemachineCameraController>();
-            _volume = _cameraController.Volume;
-            _rendererController = Object.FindObjectOfType<RendererController>();
-            if (_volume != null && _volume.profile != null)
-            {
-                _volume.profile.TryGet<LensDistortion>(out _lensDistortion);
-                _volume.profile.TryGet<ChromaticAberration>(out _chromaticAberration);
-            }
+            _postProcessingController = Object.FindObjectOfType<PostProcessingController>();
+            _postProcessingController.Volume.profile.TryGet<LensDistortion>(out _lensDistortion);
+            _postProcessingController.Volume.profile.TryGet<ChromaticAberration>(out _chromaticAberration);
 
             // Store defaults
             _sprintTime = 0f;
@@ -140,10 +134,10 @@ namespace JackRussell.States.Locomotion
                 _player.PlayerMaterial.SetFloat("_GlitchAmount", _defaultGlitchAmount);
                 _player.PlayerMaterial.DisableKeyword("_GLITCH_ON");
             }
-            if (_rendererController != null)
+            if (_postProcessingController != null)
             {
-                _rendererController.SetSpeedLinesIntensity(0f);
-                _rendererController.SetRadialBlurIntensity(0f);
+                _postProcessingController.SetSpeedLinesIntensity(0f);
+                _postProcessingController.SetRadialBlurIntensity(0f);
             }
         }
 
@@ -273,10 +267,10 @@ namespace JackRussell.States.Locomotion
                 _player.PlayerMaterial.SetFloat("_GlitchAmount", glitchValue);
             }
             // Speed Lines
-            if (_rendererController != null)
+            if (_postProcessingController != null)
             {
-                _rendererController.SetSpeedLinesIntensity(factor);
-                _rendererController.SetRadialBlurIntensity(factor * 0.4f); // Slightly less intense than speed lines
+                _postProcessingController.SetSpeedLinesIntensity(factor);
+                _postProcessingController.SetRadialBlurIntensity(factor * 0.4f); // Slightly less intense than speed lines
             }
         }
 
