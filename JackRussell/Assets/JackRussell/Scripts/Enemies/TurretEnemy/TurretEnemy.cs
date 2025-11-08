@@ -322,22 +322,28 @@ namespace JackRussell.Enemies
                 _glowEffect.StopGlow();
             }
         }
-        
+
         // Override homing hit behavior
         public override void OnHomingHit(Player player)
         {
             // Play hit effects
             base.OnHomingHit(player);
-            
-            // Create explosion effect
-            if (_deathEffectPrefab != null)
-            {
-                GameObject effect = Instantiate(_deathEffectPrefab, transform.position, transform.rotation);
-                Destroy(effect, 2f);
-            }
-            
+
+            // // Create explosion effect
+            // if (_deathEffectPrefab != null)
+            // {
+            //     GameObject effect = Instantiate(_deathEffectPrefab, transform.position, transform.rotation);
+            //     Destroy(effect, 2f);
+            // }
+
             // Play death sound
-            PlaySound(_deathSound);
+            //PlaySound(_deathSound);
+        }
+
+        public override void OnDeath()
+        {
+            base.OnDeath();
+            _stateMachine.ChangeState(new TurretCooldownState(this, _stateMachine));
         }
         
         private float NormalizeAngle(float angle)

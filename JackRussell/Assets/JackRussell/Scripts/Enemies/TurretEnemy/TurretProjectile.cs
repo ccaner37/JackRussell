@@ -34,6 +34,7 @@ namespace JackRussell.Enemies
         public void Initialize(Vector3 direction, float damage = -1f)
         {
             _direction = direction.normalized;
+            _direction.y *= 0.5f;
             if (damage > 0f)
             {
                 _damage = damage;

@@ -23,7 +23,7 @@ namespace JackRussell.Enemies
         
         protected bool IsEnemyActive => _isActive;
         
-        private void OnHitMaterialEffect()
+        private IEnumerator OnHitMaterialEffect()
         {
             if (_hitEffectRenderers != null)
             {
@@ -34,11 +34,22 @@ namespace JackRussell.Enemies
                         renderer.material.DOFloat(1f, "_HitBlend", 0.1f);
                     }
                 }
+
+                yield return new WaitForSeconds(0.2f);
+
+                foreach (var renderer in _hitEffectRenderers)
+                {
+                    if (renderer != null && renderer.material != null)
+                    {
+                        renderer.material.DOFloat(0f, "_HitBlend", 0.1f);
+                    }
+                }
             }
         }
         
         private IEnumerator TestingEnableBack()
         {
+            yield return new WaitForSeconds(0.25f);
             _isActive = false;
             foreach (var renderer in _hitEffectRenderers)
             {
@@ -52,14 +63,7 @@ namespace JackRussell.Enemies
                     renderer.enabled = true;
             }
             _isActive = true;
-            
-            foreach (var renderer in _hitEffectRenderers)
-            {
-                if (renderer != null && renderer.material != null)
-                {
-                    renderer.material.SetFloat("_HitBlend", 0);
-                }
-            }
+            CurrentHealth = _maxHealth;
         }
         
         // IParryable implementation
@@ -82,10 +86,10 @@ namespace JackRussell.Enemies
             }
             
             // Apply hit material effect
-            OnHitMaterialEffect();
+            StartCoroutine(OnHitMaterialEffect());
             
             // Start testing enable back coroutine with punch scale effect
-            transform.DOPunchScale(Vector3.one, 0.25f, 10, 1).OnComplete(() => StartCoroutine(TestingEnableBack()));
+            transform.DOPunchScale(Vector3.one, 0.25f, 10, 1);
         }
         
         public virtual void OnParryWindowOpen()
@@ -112,7 +116,7 @@ namespace JackRussell.Enemies
         public virtual void OnHomingHit(Player player)
         {
             // Default behavior: homing attack is lethal
-            TakeDamage(CurrentHealth);
+            TakeDamage(MaxHealth * 0.5f);
             
             // Play hit effects
             PlayHomingHitEffects();
@@ -124,10 +128,10 @@ namespace JackRussell.Enemies
             }
             
             // Apply hit material effect
-            OnHitMaterialEffect();
-            
+            StartCoroutine(OnHitMaterialEffect());
+
             // Start testing enable back coroutine with punch scale effect
-            transform.DOPunchScale(Vector3.one, 0.25f, 10, 1).OnComplete(() => StartCoroutine(TestingEnableBack()));
+            transform.DOPunchScale(Vector3.one, 0.25f, 10, 1);
         }
         
         /// <summary>
@@ -147,7 +151,8 @@ namespace JackRussell.Enemies
         /// </summary>
         public override void OnDeath()
         {
-            _isActive = false;
+            //_isActive = false;
+            StartCoroutine(TestingEnableBack());
             
             // Play death effects
             PlayDeathEffects();
