@@ -86,6 +86,8 @@ namespace JackRussell.States.Action
             }
 
             _player.PlaySound(Audio.SoundType.HomingAttackStart);
+
+            _player.CommandPublisher.PublishAsync(new CameraStateUpdateCommand(3.3f, 100f));
         }
 
         public override void Exit()

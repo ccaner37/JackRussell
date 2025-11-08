@@ -3,6 +3,7 @@ using JackRussell.CameraController;
 using JackRussell.GamePostProcessing;
 using DG.Tweening;
 using System.Collections;
+using VitalRouter;
 
 namespace JackRussell.States.Action
 {
@@ -15,8 +16,12 @@ namespace JackRussell.States.Action
         private readonly float _recoveryDuration = 0.15f;
         private float _timer;
         private bool _recoveryComplete;
+        private ICommandPublisher _commandPublisher;
         
-        public ParryExitState(Player player, StateMachine stateMachine) : base(player, stateMachine) { }
+        public ParryExitState(Player player, StateMachine stateMachine) : base(player, stateMachine)
+        {
+            _commandPublisher = player.CommandPublisher;
+        }
         
         public override string Name => nameof(ParryExitState);
         
@@ -29,6 +34,9 @@ namespace JackRussell.States.Action
         {
             _timer = _recoveryDuration;
             _recoveryComplete = false;
+            
+            // Restore camera target offset to default values with cinematic timing
+            _commandPublisher.PublishAsync(CameraStateUpdateCommand.WithTargetOffset(null, 0.6f));
             
             // Apply recovery animation or effects
             _player.EnableSmokeEffects();

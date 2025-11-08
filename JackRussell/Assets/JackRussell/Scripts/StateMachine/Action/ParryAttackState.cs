@@ -5,6 +5,7 @@ using JackRussell.GamePostProcessing;
 using DG.Tweening;
 using System.Collections;
 using JackRussell.Audio;
+using VitalRouter;
 
 namespace JackRussell.States.Action
 {
@@ -19,8 +20,12 @@ namespace JackRussell.States.Action
         private bool _hasTeleported;
         private Vector3 _startPosition;
         private Vector3 _targetPosition;
+        private ICommandPublisher _commandPublisher;
         
-        public ParryAttackState(Player player, StateMachine stateMachine) : base(player, stateMachine) { }
+        public ParryAttackState(Player player, StateMachine stateMachine) : base(player, stateMachine)
+        {
+            _commandPublisher = player.CommandPublisher;
+        }
         
         public override string Name => nameof(ParryAttackState);
         
@@ -101,6 +106,9 @@ namespace JackRussell.States.Action
             yield return new WaitForSeconds(0.3f); // _teleportDuration * 0.5f
             
             _player.PlaySound(SoundType.Teleport);
+            
+            // Apply camera target offset for cinematic effect during teleport
+            _commandPublisher.PublishAsync(CameraStateUpdateCommand.WithTargetOffset(new Vector3(2f, 1.3f, 4f), 0.4f));
             
             // Phase 2: Teleport to target
             if (!_hasTeleported && _target != null)

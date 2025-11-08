@@ -1,6 +1,7 @@
 using UnityEngine;
 using JackRussell;
 using JackRussell.States.Action;
+using JackRussell.CameraController;
 
 namespace JackRussell.States.Action
 {
@@ -52,6 +53,8 @@ namespace JackRussell.States.Action
             _player.Animator.CrossFade(_selectedExitData.animationName, _selectedExitData.transitionDuration, 0, _selectedExitData.enterOffset);
 
             _transitionedToJumpDown = false;
+
+            _player.CommandPublisher.PublishAsync(new CameraStateUpdateCommand(transitionDuration: 0.3f));
         }
 
         public override void LogicUpdate()

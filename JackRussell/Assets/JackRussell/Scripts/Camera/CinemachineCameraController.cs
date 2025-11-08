@@ -62,6 +62,15 @@ namespace JackRussell.CameraController
         private float _currentRadius;
         private float _targetRadius;
         private float _radiusVelocity;
+        private float _defaultRadius;
+
+        private Vector3 _defaultTargetOffset;
+        private Vector3 _targetOffset;
+
+        // DOTween references
+        private Tween _radiusTween;
+        private Tween _fovTween;
+        private Tween _offsetTween;
 
         private float _targetFov;
         private float _defaultFov;
@@ -81,7 +90,10 @@ namespace JackRussell.CameraController
                 if (_orbitalFollow != null)
                 {
                     _currentRadius = _orbitalFollow.Radius;
+                    _defaultRadius = _currentRadius;
                     _targetRadius = _currentRadius;
+                    _defaultTargetOffset = _orbitalFollow.TargetOffset;
+                    _targetOffset = _defaultTargetOffset;
                     _defaultFov = _cinemachineCamera.Lens.FieldOfView;
                     _targetFov = _defaultFov;
                 }
@@ -122,21 +134,30 @@ namespace JackRussell.CameraController
 
         private void OnCameraStateUpdate(CameraStateUpdateCommand command)
         {
-            // Update target values
-            _targetRadius = command.TargetDistance;
-            _targetFov = command.TargetFOV;
-
-            // Animate camera distance with DOTween
-            if (_orbitalFollow != null)
+            // Animate camera distance
+            _targetRadius = command.TargetDistance ?? _defaultRadius;
+            if (Mathf.Abs(_orbitalFollow.Radius - _targetRadius) > 0.01f)
             {
-                DOTween.To(() => _orbitalFollow.Radius, x => _orbitalFollow.Radius = x, _targetRadius, command.TransitionDuration)
+                _radiusTween?.Kill();
+                _radiusTween = DOTween.To(() => _orbitalFollow.Radius, x => _orbitalFollow.Radius = x, _targetRadius, command.TransitionDuration)
                     .SetEase(Ease.OutQuad);
             }
 
-            // Animate FOV with DOTween
-            if (_cinemachineCamera != null)
+            // Animate FOV
+            _targetFov = command.TargetFOV ?? _defaultFov;
+            if (Mathf.Abs(_cinemachineCamera.Lens.FieldOfView - _targetFov) > 0.01f)
             {
-                DOTween.To(() => _cinemachineCamera.Lens.FieldOfView, x => _cinemachineCamera.Lens.FieldOfView = x, _targetFov, command.TransitionDuration)
+                _fovTween?.Kill();
+                _fovTween = DOTween.To(() => _cinemachineCamera.Lens.FieldOfView, x => _cinemachineCamera.Lens.FieldOfView = x, _targetFov, command.TransitionDuration)
+                    .SetEase(Ease.OutQuad);
+            }
+            
+            // Animate target offset
+            _targetOffset = command.TargetOffset ?? _defaultTargetOffset;
+            if ((_orbitalFollow.TargetOffset - _targetOffset).sqrMagnitude > 0.01f)
+            {
+                _offsetTween?.Kill();
+                _offsetTween = DOTween.To(() => _orbitalFollow.TargetOffset, x => _orbitalFollow.TargetOffset = x, _targetOffset, command.TransitionDuration)
                     .SetEase(Ease.OutQuad);
             }
         }

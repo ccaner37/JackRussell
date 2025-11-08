@@ -105,7 +105,7 @@ namespace JackRussell.States.Locomotion
         public override void Exit()
         {
             // Publish camera state update command to revert to default
-            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(2.9f, 75f));
+            _commandPublisher.PublishAsync(new CameraStateUpdateCommand());
 
             // Unsubscribe
             _player.Actions.Player.Jump.performed -= OnJumpPressed;
