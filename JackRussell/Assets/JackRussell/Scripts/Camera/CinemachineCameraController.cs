@@ -205,7 +205,10 @@ namespace JackRussell.CameraController
         /// <param name="transitionDuration">Transition duration (0 for instant)</param>
         public void SwitchToCamera(CameraType cameraType, float transitionDuration = 0.3f)
         {
-            // First, disable all cameras
+            // First, reset any position composer tweening on all cameras
+            ResetAllCameraTweens();
+            
+            // Then disable all cameras
             DisableAllCameras();
             
             // Then activate the target camera
@@ -213,6 +216,29 @@ namespace JackRussell.CameraController
             if (targetCamera != null && targetCamera.IsValid)
             {
                 targetCamera.SetActive(true);
+                
+                // Apply special tweening for punch camera
+                if (cameraType == CameraType.Punch)
+                {
+                    // Use the configurable tweening system
+                    targetCamera.TweenComposerOffset();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Resets all camera position composer tweens
+        /// </summary>
+        private void ResetAllCameraTweens()
+        {
+            if (_cameraDefinitions == null) return;
+            
+            foreach (var camera in _cameraDefinitions)
+            {
+                if (camera != null && camera.IsValid)
+                {
+                    camera.ResetComposerOffset();
+                }
             }
         }
 
