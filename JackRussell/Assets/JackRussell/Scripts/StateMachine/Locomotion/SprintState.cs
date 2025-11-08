@@ -80,7 +80,7 @@ namespace JackRussell.States.Locomotion
             _player.EnableSmokeEffects();
 
             // Publish camera state update command
-            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(3.2f, 90f));
+            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(3.3f, 100f));
 
             // Find components
             _postProcessingController = Object.FindObjectOfType<PostProcessingController>();
@@ -118,7 +118,7 @@ namespace JackRussell.States.Locomotion
             _player.DisableSmokeEffects();
 
             // Publish camera state update command to revert to default
-            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(2.65f, 75f));
+            _commandPublisher.PublishAsync(new CameraStateUpdateCommand(2.9f, 75f));
 
             // Revert sprint effects
             if (_lensDistortion != null)
