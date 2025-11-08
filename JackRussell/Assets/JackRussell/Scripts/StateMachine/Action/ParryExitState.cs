@@ -35,8 +35,8 @@ namespace JackRussell.States.Action
             _timer = _recoveryDuration;
             _recoveryComplete = false;
             
-            // Restore camera target offset to default values with cinematic timing
-            _commandPublisher.PublishAsync(CameraStateUpdateCommand.WithTargetOffset(null, 0.6f));
+            // Switch back to main camera with smooth transition using command publishing
+            _commandPublisher.PublishAsync(new CameraSwitchCommand(JackRussell.CameraController.CameraType.Main, 0.6f));
             
             // Apply recovery animation or effects
             _player.EnableSmokeEffects();

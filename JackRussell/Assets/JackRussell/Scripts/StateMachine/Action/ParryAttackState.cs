@@ -107,8 +107,8 @@ namespace JackRussell.States.Action
             
             _player.PlaySound(SoundType.Teleport);
             
-            // Apply camera target offset for cinematic effect during teleport
-            _commandPublisher.PublishAsync(CameraStateUpdateCommand.WithTargetOffset(new Vector3(2f, 1.3f, 4f), 0.4f));
+            // Switch to punch camera for cinematic effect during teleport
+            _commandPublisher.PublishAsync(new CameraSwitchCommand(JackRussell.CameraController.CameraType.Punch, 0.3f));
             
             // Phase 2: Teleport to target
             if (!_hasTeleported && _target != null)
@@ -139,15 +139,8 @@ namespace JackRussell.States.Action
 
                 _player.PunchParticle.Play();
                 
-                // Play parry success effects
-                PlayParrySuccessEffects();
-                
                 // Camera shake for impact
-                var cameraController = Object.FindAnyObjectByType<CinemachineCameraController>();
-                if (cameraController != null)
-                {
-                    cameraController.ShakeCamera(2f, 0.5f);
-                }
+                _commandPublisher.PublishAsync(new CameraShakeCommand(2f, 0.5f));
                 
                 // Apply small bounce back
                 // Vector3 bounceBack = -direction * _player.JumpVelocity * 0.5f;

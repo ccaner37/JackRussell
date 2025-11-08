@@ -7,12 +7,13 @@ using UnityEngine.Rendering;
 using VitalRouter;
 using DG.Tweening;
 using VContainer;
+using JackRussell.CameraController;
 
 namespace JackRussell.CameraController
 {
     /// <summary>
     /// Cinemachine-based orbital camera controller with collision detection and state-based adjustments.
-    /// Requires manually set up Cinemachine components in the scene.
+    /// Includes robust camera priority management system for multiple camera types.
     /// </summary>
     [DisallowMultipleComponent]
     public class CinemachineCameraController : MonoBehaviour
@@ -54,6 +55,10 @@ namespace JackRussell.CameraController
         [Tooltip("Shake frequency")]
         [SerializeField] private float _shakeFrequency = 10f;
 
+        [Header("Camera Management")]
+        [Tooltip("List of camera definitions for different camera types")]
+        [SerializeField] private CameraDefinition[] _cameraDefinitions;
+
         // Input actions
         private InputSystem_Actions _actions;
 
@@ -64,13 +69,9 @@ namespace JackRussell.CameraController
         private float _radiusVelocity;
         private float _defaultRadius;
 
-        private Vector3 _defaultTargetOffset;
-        private Vector3 _targetOffset;
-
         // DOTween references
         private Tween _radiusTween;
         private Tween _fovTween;
-        private Tween _offsetTween;
 
         private float _targetFov;
         private float _defaultFov;
@@ -83,6 +84,9 @@ namespace JackRussell.CameraController
         {
             _actions = new InputSystem_Actions();
 
+            // Initialize camera definitions
+            InitializeCameraDefinitions();
+
             // Get the OrbitalFollow component
             if (_cinemachineCamera != null)
             {
@@ -92,8 +96,6 @@ namespace JackRussell.CameraController
                     _currentRadius = _orbitalFollow.Radius;
                     _defaultRadius = _currentRadius;
                     _targetRadius = _currentRadius;
-                    _defaultTargetOffset = _orbitalFollow.TargetOffset;
-                    _targetOffset = _defaultTargetOffset;
                     _defaultFov = _cinemachineCamera.Lens.FieldOfView;
                     _targetFov = _defaultFov;
                 }
@@ -114,6 +116,12 @@ namespace JackRussell.CameraController
 
             // Subscribe to camera state update commands
             _commandSubscribable.Subscribe<CameraStateUpdateCommand>((cmd, ctx) => OnCameraStateUpdate(cmd));
+            
+            // Subscribe to camera switch commands
+            _commandSubscribable.Subscribe<CameraSwitchCommand>((cmd, ctx) => OnCameraSwitch(cmd));
+            
+            // Subscribe to camera shake commands
+            _commandSubscribable.Subscribe<CameraShakeCommand>((cmd, ctx) => OnCameraShake(cmd));
         }
 
         private void OnEnable()
@@ -151,15 +159,22 @@ namespace JackRussell.CameraController
                 _fovTween = DOTween.To(() => _cinemachineCamera.Lens.FieldOfView, x => _cinemachineCamera.Lens.FieldOfView = x, _targetFov, command.TransitionDuration)
                     .SetEase(Ease.OutQuad);
             }
-            
-            // Animate target offset
-            _targetOffset = command.TargetOffset ?? _defaultTargetOffset;
-            if ((_orbitalFollow.TargetOffset - _targetOffset).sqrMagnitude > 0.01f)
-            {
-                _offsetTween?.Kill();
-                _offsetTween = DOTween.To(() => _orbitalFollow.TargetOffset, x => _orbitalFollow.TargetOffset = x, _targetOffset, command.TransitionDuration)
-                    .SetEase(Ease.OutQuad);
-            }
+        }
+
+        /// <summary>
+        /// Handles camera switch commands
+        /// </summary>
+        private void OnCameraSwitch(CameraSwitchCommand command)
+        {
+            SwitchToCamera(command.TargetCamera, command.TransitionDuration);
+        }
+
+        /// <summary>
+        /// Handles camera shake commands
+        /// </summary>
+        private void OnCameraShake(CameraShakeCommand command)
+        {
+            ShakeCamera(command.Intensity, command.Duration);
         }
 
         /// <summary>
@@ -181,6 +196,87 @@ namespace JackRussell.CameraController
             );
 
             impulseSource.GenerateImpulseWithVelocity(impulseVelocity);
+        }
+
+        /// <summary>
+        /// Switches to a specific camera type with smooth transition
+        /// </summary>
+        /// <param name="cameraType">The camera type to switch to</param>
+        /// <param name="transitionDuration">Transition duration (0 for instant)</param>
+        public void SwitchToCamera(CameraType cameraType, float transitionDuration = 0.3f)
+        {
+            // First, disable all cameras
+            DisableAllCameras();
+            
+            // Then activate the target camera
+            var targetCamera = GetCamera(cameraType);
+            if (targetCamera != null && targetCamera.IsValid)
+            {
+                targetCamera.SetActive(true);
+            }
+        }
+
+        /// <summary>
+        /// Disables all cameras by setting their priority to 0
+        /// </summary>
+        private void DisableAllCameras()
+        {
+            if (_cameraDefinitions == null) return;
+            
+            foreach (var camera in _cameraDefinitions)
+            {
+                if (camera != null && camera.IsValid)
+                {
+                    camera.SetActive(false);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets a camera definition by type
+        /// </summary>
+        public CameraDefinition GetCamera(CameraType cameraType)
+        {
+            if (_cameraDefinitions == null) return null;
+            
+            foreach (var camera in _cameraDefinitions)
+            {
+                if (camera != null && camera.Type == cameraType)
+                    return camera;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Sets a specific camera type active or inactive
+        /// </summary>
+        public void SetCameraActive(CameraType cameraType, bool isActive)
+        {
+            var camera = GetCamera(cameraType);
+            if (camera != null && camera.IsValid)
+            {
+                camera.SetActive(isActive);
+            }
+        }
+
+        /// <summary>
+        /// Initializes camera definitions and sets up initial state
+        /// </summary>
+        private void InitializeCameraDefinitions()
+        {
+            if (_cameraDefinitions == null) return;
+
+            // First, disable all cameras
+            DisableAllCameras();
+
+            // Then enable the ones that should be active at start
+            foreach (var camera in _cameraDefinitions)
+            {
+                if (camera != null && camera.IsValid && camera.EnabledAtStart)
+                {
+                    camera.SetActive(true);
+                }
+            }
         }
 
         /// <summary>
