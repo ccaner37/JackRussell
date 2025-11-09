@@ -179,8 +179,8 @@ namespace JackRussell.DebugTools
 
             // Draw timescale slider
             Rect sliderRect = new Rect(x, y, boxRect.width - _padding.x, 20);
-            _timeScale = GUI.HorizontalSlider(sliderRect, _timeScale, 0.1f, 2.0f);
-            Time.timeScale = _timeScale;
+            //_timeScale = GUI.HorizontalSlider(sliderRect, _timeScale, 0.1f, 2.0f);
+            //Time.timeScale = _timeScale;
         }
     }
 

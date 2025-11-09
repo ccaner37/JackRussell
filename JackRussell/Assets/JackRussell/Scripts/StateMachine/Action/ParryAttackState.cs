@@ -127,7 +127,29 @@ namespace JackRussell.States.Action
 
                 _player.PunchEffect.SetActive(true);
 
-                yield return new WaitForSeconds(0.35f);
+                // Start slow motion effect (tweening timescale from 1.0 to 0.1)
+                // This affects both Update() timing and WaitForSeconds() in coroutines
+                DOTween.To(() => Time.timeScale, x => Time.timeScale = x, 0.2f, 0.3f)
+                    .SetEase(Ease.OutQuad)
+                    .OnComplete(() =>
+                    {
+                        // Ensure timescale is exactly 0.1f at the end
+                        Time.timeScale = 0.2f;
+                    });
+
+                yield return new WaitForSeconds(0.15f);
+
+                // Stop slow motion effect (tweening timescale back to 1.0)
+                DOTween.To(() => Time.timeScale, x => Time.timeScale = x, 1.0f, 0.15f)
+                    .SetEase(Ease.InQuad)
+                    .OnComplete(() =>
+                    {
+                        // Ensure timescale is exactly 1.0f at the end
+                        Time.timeScale = 1.0f;
+                    });
+
+                yield return new WaitForSeconds(0.20f);
+
                 _player.Animator.Play("3001_1_stapla_06_Quickdraw_03_ht");
 
                 yield return new WaitForSeconds(0.1f);

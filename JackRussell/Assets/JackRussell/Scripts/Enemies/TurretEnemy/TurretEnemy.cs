@@ -90,6 +90,29 @@ namespace JackRussell.Enemies
             IsInParryWindow = false;
         }
         
+        /// <summary>
+        /// Called when turret is parried by player - cancels shot if in preparing state
+        /// </summary>
+        public override void OnParried(Player player)
+        {
+            base.OnParried(player);
+
+            if (!IsInParryWindow) return;
+            
+            // If we're in the preparing state, cancel the shot
+            if (_stateMachine != null && _stateMachine.Current is TurretPreparingState)
+            {
+                // Stop glow effect immediately when parried
+                //StopGlowEffect();
+                
+                // Close parry window
+                //OnParryWindowClose();
+                
+                // Cancel preparation and go to cooldown instead of firing
+                _stateMachine.ChangeState(new TurretCooldownState(this, _stateMachine));
+            }
+        }
+        
         private void Awake()
         {
             // Initialize state machine
