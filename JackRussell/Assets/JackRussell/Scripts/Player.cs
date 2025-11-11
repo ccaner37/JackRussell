@@ -73,6 +73,7 @@ namespace JackRussell
         [SerializeField] private TrailRenderer[] _smokeTrailRenderers;
         [SerializeField] private GameObject _punchEffect;
         [SerializeField] private ParticleSystem _punchParticle;
+        [SerializeField] private ParticleSystem _railGrindParticle;
         [Inject] private readonly PostProcessingController _postProcessingController;
 
         [Header("IK")]
@@ -510,8 +511,8 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
         {
             // TODO: This will be moved to game manager or something. And InputManager will be created.
             _audioManager.Initialize();
-            // Cursor.lockState = CursorLockMode.Locked;
-            // Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
 
             _actions.Player.Enable();
             _actions.Player.Jump.performed += ctx => _jumpRequested = true;
@@ -687,7 +688,7 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
         {
             if (_indicatorManager == null) return;
 
-            if (!_isGrounded)
+            if (CanHomingAttack())
             {
                 var target = FindBestHomingTarget(_homingRange, _homingConeAngle, _homingMask);
                 if (target != null)
@@ -703,6 +704,11 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
             {
                 _indicatorManager.HideAllIndicators();
             }
+        }
+
+        public bool CanHomingAttack()
+        {
+            return !_isGrounded && ((PlayerStateBase)_locomotionSM.Current).LocomotionType != LocomotionType.Grind;
         }
 
         /// <summary>

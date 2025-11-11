@@ -53,7 +53,7 @@ namespace JackRussell.States.Action
             }
 
             // If player is airborne, start homing attack (if a target exists)
-            if (!_player.IsGrounded)
+            if (_player.CanHomingAttack())
             {
                 ChangeState(new HomingAttackState(_player, _stateMachine));
                 return;
