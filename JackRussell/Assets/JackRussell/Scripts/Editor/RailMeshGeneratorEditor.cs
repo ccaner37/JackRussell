@@ -13,7 +13,7 @@ public class RailMeshGeneratorEditor : Editor
 
         if (GUILayout.Button("Generate Rail Mesh"))
         {
-            generator.GenerateRailMesh();
+            generator.GenerateDeformedMesh();
         }
     }
 }

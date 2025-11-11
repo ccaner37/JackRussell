@@ -164,6 +164,8 @@ namespace JackRussell.States.Locomotion
                 return;
             }
 
+            targetPos.y += 0.2f;
+
             // Move player along rail
             Vector3 currentPos = _player.transform.position;
             Vector3 newPos = Vector3.Lerp(currentPos, targetPos, deltaTime / k_PositionSmoothTime);

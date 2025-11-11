@@ -811,12 +811,14 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
             Animator.SetBool("IsGrinding", true);
             PlaySound(SoundType.RailStart);
             StartLoopedSound(SoundType.RailLoop);
+            _railGrindParticle.Play();
         }
 
         public void OnGrindExit()
         {
             Animator.SetBool("IsGrinding", false);
             StopLoopedSound(SoundType.RailLoop);
+            _railGrindParticle.Stop();
         }
 
         public void SetPressure(float pressure)
