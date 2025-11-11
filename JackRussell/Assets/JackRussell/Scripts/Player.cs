@@ -29,6 +29,7 @@ namespace JackRussell
         [SerializeField] private Transform _groundCheck;
         [SerializeField] private LayerMask _groundMask;
         [SerializeField] private RailDetector _railDetector;
+        [SerializeField] private SprintController _sprintController;
 
         [Header("Speeds")]
         [SerializeField] private float _walkSpeed = 6f;
@@ -132,6 +133,8 @@ namespace JackRussell
 
         // Runtime flags
         private bool _isGrounded;
+        private bool _isRailGrinding;
+        private bool _isSprinting;
         private bool _wasGrounded;
         private Vector3 _groundNormal = Vector3.up;
 
@@ -167,7 +170,10 @@ namespace JackRussell
         public Vector3 MoveDirection => _moveDirection;
         public Rigidbody Rigidbody => _rb;
         public Animator Animator => _animator;
+        public SprintController SprintController => _sprintController;
         public bool IsGrounded => _isGrounded;
+        public bool IsRailGrinding => _isRailGrinding;
+        public bool IsSprinting => _isSprinting;
         public Vector3 GroundNormal => _groundNormal;
         public float WalkSpeed => _walkSpeed;
         public float RunSpeed => _runSpeed;
@@ -511,8 +517,8 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
         {
             // TODO: This will be moved to game manager or something. And InputManager will be created.
             _audioManager.Initialize();
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            // Cursor.lockState = CursorLockMode.Locked;
+            // Cursor.visible = false;
 
             _actions.Player.Enable();
             _actions.Player.Jump.performed += ctx => _jumpRequested = true;
@@ -708,7 +714,7 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
 
         public bool CanHomingAttack()
         {
-            return !_isGrounded && ((PlayerStateBase)_locomotionSM.Current).LocomotionType != LocomotionType.Grind;
+            return !_isGrounded && !_isRailGrinding;
         }
 
         /// <summary>
@@ -795,6 +801,7 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
             {
                 footParticle.gameObject.SetActive(true);
             }
+            _isSprinting = true;
         }
 
         public void OnSprintExit()
@@ -804,6 +811,7 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
             {
                 footParticle.gameObject.SetActive(false);
             }
+            _isSprinting = false;
         }
 
         public void OnJumpEnter()
@@ -818,6 +826,7 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
             PlaySound(SoundType.RailStart);
             StartLoopedSound(SoundType.RailLoop);
             _railGrindParticle.Play();
+            _isRailGrinding = true;
         }
 
         public void OnGrindExit()
@@ -825,6 +834,7 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
             Animator.SetBool("IsGrinding", false);
             StopLoopedSound(SoundType.RailLoop);
             _railGrindParticle.Stop();
+            _isRailGrinding = false;
         }
 
         public void SetPressure(float pressure)
@@ -874,7 +884,7 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
             _audioManager.PlaySound(SoundType.SprintSpeedUp, _sprintAudioSource);
         }
 
-        public void StopSprintSpeedUp(float fadeDuration = 0.5f)
+        public void StopSprintSpeedUpSound(float fadeDuration = 0.5f)
         {
             if (_sprintAudioSource != null && _sprintAudioSource.isPlaying)
             {

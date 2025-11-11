@@ -3,6 +3,7 @@ using JackRussell.Rails;
 using JackRussell.CameraController;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Cinemachine;
 using VitalRouter;
 
 namespace JackRussell.States.Locomotion
@@ -10,6 +11,7 @@ namespace JackRussell.States.Locomotion
     /// <summary>
     /// Grind state: handles player movement along rails.
     /// Manages attachment, movement, and dismounting from rails.
+    /// Uses shared SprintController for sprint functionality.
     /// </summary>
     public class GrindState : PlayerStateBase
     {
@@ -19,6 +21,7 @@ namespace JackRussell.States.Locomotion
         private float _currentDistance;
         private Vector3 _lastPosition;
         private bool _isAccelerating;
+        private SprintController _sprintController;
         private ICommandPublisher _commandPublisher;
 
         // Constants
@@ -39,6 +42,13 @@ namespace JackRussell.States.Locomotion
             {
                 Debug.LogError("GrindState requires a RailDetector component on the player!");
             }
+
+            _sprintController = player.SprintController;
+            if (_sprintController == null)
+            {
+                Debug.LogError("GrindState requires a SprintController component on the player!");
+            }
+            
             _commandPublisher = player.CommandPublisher;
         }
 
@@ -77,6 +87,8 @@ namespace JackRussell.States.Locomotion
 
             // Subscribe to jump press
             _player.Actions.Player.Jump.performed += OnJumpPressed;
+            _player.Actions.Player.Sprint.performed += OnSprintPressed;
+            _player.Actions.Player.Sprint.canceled += OnSprintCanceled;
 
             // Set initial position on rail
             if (_railDetector.GetCurrentRailPosition(out Vector3 railPos, out Vector3 tangent))
@@ -109,10 +121,13 @@ namespace JackRussell.States.Locomotion
 
             // Unsubscribe
             _player.Actions.Player.Jump.performed -= OnJumpPressed;
+            _player.Actions.Player.Sprint.performed -= OnSprintPressed;
+            _player.Actions.Player.Sprint.canceled -= OnSprintCanceled;
 
             _railDetector.DetachFromRail();
             _currentRail = null;
             _player.OnGrindExit();
+            if (_player.IsSprinting) _sprintController.StopSprint();
         }
 
         public override void LogicUpdate()
@@ -199,6 +214,17 @@ namespace JackRussell.States.Locomotion
         {
             float targetSpeed = _currentRail.BaseSpeed;
 
+            // Apply sprint speed boost
+            if (_sprintController != null && _sprintController.IsSprinting)
+            {
+                targetSpeed *= 1.5f;
+                //_sprintController.GetModifiedSpeed(targetSpeed);
+                
+                // Update sprint effects through controller
+                float speedFactor = Mathf.Clamp01(_grindSpeed / k_MaxGrindSpeed);
+                _sprintController.UpdateSprint(Time.deltaTime, speedFactor);
+            }
+
             // Accelerate/decelerate based on input
             if (_player.MoveDirection.sqrMagnitude > 0.1f)
             {
@@ -234,6 +260,24 @@ namespace JackRussell.States.Locomotion
 
                 _player.SetVelocityImmediate(Vector3.zero);
                 ChangeState(new JumpState(_player, _stateMachine));
+            }
+        }
+
+        private void OnSprintPressed(InputAction.CallbackContext context)
+        {
+            if (!_sprintController.IsSprinting)
+            {
+                if (_player.Pressure < 5f) return;
+                _player.SetPressure(_player.Pressure - 5f);
+                _sprintController.TryStartSprint();
+            }
+        }
+
+        private void OnSprintCanceled(InputAction.CallbackContext context)
+        {
+            if (_sprintController.IsSprinting)
+            {
+                _sprintController.StopSprint();
             }
         }
     }
