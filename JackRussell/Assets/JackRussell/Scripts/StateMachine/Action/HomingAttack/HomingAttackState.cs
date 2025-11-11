@@ -186,6 +186,14 @@ namespace JackRussell.States.Action
                     // invoke target hit
                     _target.OnHitStopEnd(_player);
 
+                    // Check if the target is a rail end target
+                    if (_target is RailEndHomingTarget railEndTarget)
+                    {
+                        // Rail end target will handle the state transition to grind state
+                        // Don't apply the normal homing attack effects or exit to HomingExitState
+                        return;
+                    }
+
                     // play optional particle from player
                     var ps = _player.HomingHitParticle;
                     if (ps != null) ps.Play();

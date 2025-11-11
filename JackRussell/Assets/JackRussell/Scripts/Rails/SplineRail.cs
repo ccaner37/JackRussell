@@ -47,7 +47,20 @@ namespace JackRussell.Rails
         public float GravityMultiplier => _gravityMultiplier;
         public float RailFriction => _railFriction;
         public Spline Spline => _spline;
-        public float TotalLength => _totalLength;
+        public float TotalLength => GetTotalLength();
+        
+        /// <summary>
+        /// Get the total length of the spline, initializing if necessary
+        /// Works in both Play mode and Edit mode
+        /// </summary>
+        private float GetTotalLength()
+        {
+            if (!_isInitialized)
+            {
+                InitializeSpline();
+            }
+            return _totalLength;
+        }
 
         private void Awake()
         {
