@@ -51,7 +51,7 @@ namespace JackRussell.Rails
             if (Time.time - _lastAttachTime < _attachCooldown) return null;
 
             // Prevent immediate reattachment after detaching from end of rail or jump dismount
-            if ((_detachedFromEnd || _jumpDismount) && Time.time - _lastDetachTime < 0.5f)
+            if ((_detachedFromEnd || _jumpDismount) && Time.time - _lastDetachTime < 0.8f)
             {
                 string reason = _detachedFromEnd ? "end-of-rail detachment" : "jump dismount";
                 Debug.Log($"[RailDetector] Blocking reattachment - cooldown after {reason}");
@@ -191,7 +191,7 @@ namespace JackRussell.Rails
         public void DetachFromRail()
         {
             // Check if we're detaching from the end of the rail
-            if (_currentRail != null && _currentDistance >= _currentRail.TotalLength - 0.1f)
+            if (_currentRail != null && (_currentDistance >= _currentRail.TotalLength * 0.98f || _currentDistance <= _currentRail.TotalLength * 0.02f))
             {
                 _detachedFromEnd = true;
                 _lastDetachTime = Time.time;
@@ -282,9 +282,10 @@ namespace JackRussell.Rails
             // Don't detach immediately after attaching (prevent false positives at start)
             if (Time.time - _lastAttachTime < 0.2f) return false;
 
-            // Detach if reached end of rail
-            return _currentDistance >= _currentRail.TotalLength - 0.1f ||
-                    _currentDistance <= 0.05f; // Reduced from 0.1f to avoid conflict with our 0.01f offset
+            //return _currentDistance >= _currentRail.TotalLength * 1.01f;
+            //Detach if reached end of rail
+            return _currentDistance >= _currentRail.TotalLength * 0.99f ||
+                    _currentDistance <= _currentRail.TotalLength * 0.01f; // Reduced from 0.1f to avoid conflict with our 0.01f offset
         }
 
         private void OnDrawGizmosSelected()
