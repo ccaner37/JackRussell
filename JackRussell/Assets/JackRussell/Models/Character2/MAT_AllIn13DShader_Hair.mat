@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MAT_AllIn13DShader_Character2
+  m_Name: MAT_AllIn13DShader_Hair
   m_Shader: {fileID: 4800000, guid: 6034452bd7752ab41918b7826b5cfd4f, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -98,7 +98,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 1cd130fe3acfb2c479bc1a5ad1c7c6db, type: 3}
+        m_Texture: {fileID: 2800000, guid: f4722b4582539ed40a01cc41c585a85c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MatcapTex:
@@ -110,7 +110,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: df1e2d9e46a638443a4ca97915f06bde, type: 3}
+        m_Texture: {fileID: 2800000, guid: fca612ba15ead094aaed75c509197730, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SSSMap:
@@ -202,7 +202,7 @@ Material:
     - _FogOn: 1
     - _GeneralAlpha: 1
     - _Glitch: 0
-    - _GlitchAmount: 0
+    - _GlitchAmount: 0.5
     - _GlitchSpeed: 2.5
     - _GlitchTiling: 5
     - _GlitchWorldSpace: 1
@@ -210,11 +210,11 @@ Material:
     - _Greyscale: 0
     - _GreyscaleBlend: 1
     - _GreyscaleLuminosity: 0
-    - _HalfLambertWrap: 1
+    - _HalfLambertWrap: 0.66
     - _HandDrawn: 0
     - _HandDrawnAmount: 10
     - _HandDrawnSpeed: 5
-    - _HardnessFakeGI: 0.75
+    - _HardnessFakeGI: 0.734
     - _HeightGradientOn: 0
     - _HeightGradientPositionSpace: 0
     - _HighlightCutoff: 0.5
@@ -299,8 +299,8 @@ Material:
     - _ShakeBlend: 1
     - _ShakeSpeedMult: 1
     - _Shininess: 6.94
-    - _Smoothness: 0.5
-    - _SpecularAtten: 0.5
+    - _Smoothness: 0
+    - _SpecularAtten: 1
     - _SpecularModel: 1
     - _SpecularToonCutoff: 0.836
     - _SpecularToonSmoothness: 0
@@ -314,9 +314,9 @@ Material:
     - _TextureBlendingMode: 0
     - _TextureBlendingSource: 0
     - _TimingSeed: 0
-    - _ToonCutoff: 0.1
+    - _ToonCutoff: 0.285
     - _ToonFactor: 0
-    - _ToonSmoothness: 0.22
+    - _ToonSmoothness: 0.16
     - _TopNormalStrength: 1
     - _TriplanarMappingOn: 0
     - _TriplanarNormalSpace: 1
@@ -363,7 +363,7 @@ Material:
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 1}
     - _RimOffset: {r: 0, g: 0, b: 0, a: 0}
-    - _SSSColor: {r: 1, g: 0.9002614, b: 0.7877358, a: 1}
+    - _SSSColor: {r: 1, g: 0.9019608, b: 0.7882353, a: 1}
     - _ShakeMaxDisplacement: {r: 0.1, g: 0.1, b: 0.1, a: 0}
     - _ShakeSpeed: {r: 5, g: 5, b: 5, a: 0}
     - _VertexDistortionNoiseSpeed: {r: 4, g: 4, b: 0, a: 0}
