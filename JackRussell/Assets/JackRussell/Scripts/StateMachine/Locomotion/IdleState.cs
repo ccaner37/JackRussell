@@ -23,12 +23,18 @@ namespace JackRussell.States.Locomotion
 
         public override void Enter()
         {
+            // Start tentacle idle animation
+            _player.TentacleController?.StartIdleAnimation();
+            
             // Subscribe to jump press
             _player.Actions.Player.Jump.performed += OnJumpPressed;
         }
 
         public override void Exit()
         {
+            // Stop tentacle idle animation
+            _player.TentacleController?.StopIdleAnimation();
+            
             // Unsubscribe
             _player.Actions.Player.Jump.performed -= OnJumpPressed;
         }

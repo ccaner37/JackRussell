@@ -83,6 +83,7 @@ namespace JackRussell
         [SerializeField] private Transform _pelvisTarget;
         [SerializeField] private float _pelvisOffsetMultiplier = 0.1f;
         [SerializeField] private float _pelvisLerpSpeed = 5f;
+        [SerializeField] private TentacleController _tentacleController;
         [SerializeField] private float _maxRotationSpeedForIK = 5f; // degrees per second
 
         [Header("Model Root Adjustments")]
@@ -251,6 +252,7 @@ namespace JackRussell
         public Vector3 OriginalModelRootLocalPos => _originalModelRootLocalPos;
         public float MoveRollMaxDegrees => _moveRollMaxDegrees;
 public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
+        public TentacleController TentacleController => _tentacleController;
         public PostProcessingController PostProcessingController => _postProcessingController;
 
         /// <summary>
@@ -606,6 +608,8 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
             UpdateHomingIndicators();
 
             // animator generic properties
+            // Update tentacle controller
+            _tentacleController?.UpdateController();
             UpdateAnimator();
         }
 
