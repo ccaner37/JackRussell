@@ -15,6 +15,7 @@ using AllIn13DShader;
 using RootMotion.FinalIK;
 using System.Collections;
 using HoaxGames;
+using JackRussell.CameraController;
 using JackRussell.GamePostProcessing;
 
 namespace JackRussell
@@ -83,6 +84,7 @@ namespace JackRussell
         [SerializeField] private Transform _pelvisTarget;
         [SerializeField] private float _pelvisOffsetMultiplier = 0.1f;
         [SerializeField] private float _pelvisLerpSpeed = 5f;
+        [SerializeField] private CinemachineCameraController _cameraController;
         [SerializeField] private TentacleController _tentacleController;
         [SerializeField] private float _maxRotationSpeedForIK = 5f; // degrees per second
 
@@ -251,6 +253,7 @@ namespace JackRussell
         public Quaternion OriginalModelRootLocalRot => _originalModelRootLocalRot;
         public Vector3 OriginalModelRootLocalPos => _originalModelRootLocalPos;
         public float MoveRollMaxDegrees => _moveRollMaxDegrees;
+        public CinemachineCameraController CameraController => _cameraController;
 public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
         public TentacleController TentacleController => _tentacleController;
         public PostProcessingController PostProcessingController => _postProcessingController;
