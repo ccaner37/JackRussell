@@ -82,8 +82,11 @@ namespace JackRussell
         [SerializeField] private FootIK _footIK;
         [SerializeField] private FullBodyBipedIK _ik;
         [SerializeField] private Transform _pelvisTarget;
+        [SerializeField] private Transform _leftHandTarget;
+        [SerializeField] private Transform _rightHandTarget;
         [SerializeField] private float _pelvisOffsetMultiplier = 0.1f;
         [SerializeField] private float _pelvisLerpSpeed = 5f;
+        [SerializeField] private float _handLerpSpeed = 10f;
         [SerializeField] private CinemachineCameraController _cameraController;
         [SerializeField] private TentacleController _tentacleController;
         [SerializeField] private float _maxRotationSpeedForIK = 5f; // degrees per second
@@ -1150,6 +1153,8 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
                 Vector3 targetPos;
                 if (weight > 0)
                 {
+                    if (!_isSprinting) weight *= 0.2f;
+
                     Vector3 offset = new Vector3(TurnDirection * PelvisOffsetMultiplier * weight * pelvisMultiplier, 0, 0);
                     targetPos = BasePelvisPosition + offset;
                 }
@@ -1157,8 +1162,14 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
                 {
                     targetPos = BasePelvisPosition;
                 }
-                PelvisTarget.localPosition = Vector3.Lerp(PelvisTarget.localPosition, targetPos, Time.fixedDeltaTime * PelvisLerpSpeed);
-                IK.solver.bodyEffector.positionWeight = Mathf.Lerp(IK.solver.bodyEffector.positionWeight, weight, Time.fixedDeltaTime * 10f);
+                PelvisTarget.localPosition = Vector3.Lerp(PelvisTarget.localPosition, targetPos, Time.fixedDeltaTime * 2f);
+                IK.solver.bodyEffector.positionWeight = Mathf.Lerp(IK.solver.bodyEffector.positionWeight, weight, Time.fixedDeltaTime * _pelvisLerpSpeed);
+
+                // Hand effectors: Interpolate position weights based on turn direction
+                float rightHandWeight = weight * Mathf.Clamp01(TurnDirection); // Increases when turning right
+                float leftHandWeight = weight * Mathf.Clamp01(-TurnDirection); // Increases when turning left
+                IK.solver.leftHandEffector.positionWeight = Mathf.Lerp(IK.solver.leftHandEffector.positionWeight, leftHandWeight, Time.fixedDeltaTime * _handLerpSpeed);
+                IK.solver.rightHandEffector.positionWeight = Mathf.Lerp(IK.solver.rightHandEffector.positionWeight, rightHandWeight, Time.fixedDeltaTime * _handLerpSpeed);
             }
 
             // ModelRoot: Roll based on turn, scaled by player speed
