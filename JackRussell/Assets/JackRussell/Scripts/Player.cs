@@ -1167,7 +1167,7 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
 
                 // Hand effectors: Interpolate position weights based on turn direction
                 float handWeight = weight;
-                if (IsSprinting) handWeight *= 2f;
+                if (IsSprinting) handWeight *= 3f;
                 float rightHandWeight = handWeight * Mathf.Clamp01(TurnDirection); // Increases when turning right
                 float leftHandWeight = handWeight * Mathf.Clamp01(-TurnDirection); // Increases when turning left
                 IK.solver.leftHandEffector.positionWeight = Mathf.Lerp(IK.solver.leftHandEffector.positionWeight, leftHandWeight, Time.fixedDeltaTime * _handLerpSpeed);
