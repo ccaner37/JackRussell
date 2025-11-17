@@ -207,6 +207,7 @@ namespace JackRussell
             {
                 _postProcessingController.SetSpeedLinesIntensity(CurrentIntensity);
                 _postProcessingController.SetRadialBlurIntensity(CurrentIntensity * 0.4f);
+                _postProcessingController.SetRadialMotionBlurIntensity(CurrentIntensity * 0.08f);
             }
         }
 
@@ -229,6 +230,7 @@ namespace JackRussell
             {
                 _postProcessingController.SetSpeedLinesIntensity(0f);
                 _postProcessingController.SetRadialBlurIntensity(0f);
+                _postProcessingController.SetRadialMotionBlurIntensity(0f);
             }
         }
 

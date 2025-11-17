@@ -9,6 +9,7 @@ namespace JackRussell.GamePostProcessing
     {
         [SerializeField] private SpeedLinesRendererFeature _speedLinesFeature;
         [SerializeField] private RadialBlurRendererFeature _radialBlurFeature;
+        [SerializeField] private RadialMotionBlurRendererFeature _radialMotionBlurFeature;
         [SerializeField] private Volume _volume;
         private ColorAdjustments _colorAdjustments;
         
@@ -39,6 +40,14 @@ namespace JackRussell.GamePostProcessing
             if (_radialBlurFeature != null)
             {
                 _radialBlurFeature.effectIntensity = intensity;
+            }
+        }
+
+        public void SetRadialMotionBlurIntensity(float intensity)
+        {
+            if (_radialBlurFeature != null)
+            {
+                _radialMotionBlurFeature.settings.blurStrength = intensity;
             }
         }
 

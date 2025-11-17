@@ -67,6 +67,25 @@ MonoBehaviour:
   effectIntensity: 0
   brightness: 0.885
   renderPassEvent: 600
+--- !u!114 &-3057517575472373969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e2444353bff2bb4b8fd2c9ec9597c23, type: 3}
+  m_Name: RadialMotionBlurRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    material: {fileID: 2100000, guid: 82bd057aef6681b44b0cf9a9455c2526, type: 2}
+    renderPassEvent: 600
+    blurStrength: 0
+    blurCenter: {x: 0.5, y: 0.5}
+    sampleCount: 12
 --- !u!114 &-2572896121660252506
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -121,7 +140,8 @@ MonoBehaviour:
   - {fileID: 6202913557589794039}
   - {fileID: -2572896121660252506}
   - {fileID: -4538872020470697860}
-  m_RendererFeatureMap: ad6b866f10d7b46cdadc1692f178122f95d971d64c96adabf71c9824042d1556a6de75f09b3c4bdc7c70e202f2af02c1
+  - {fileID: -3057517575472373969}
+  m_RendererFeatureMap: ad6b866f10d7b46cdadc1692f178122f95d971d64c96adabf71c9824042d1556a6de75f09b3c4bdc7c70e202f2af02c12f9f74ebf68391d5
   m_UseNativeRenderPass: 1
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
