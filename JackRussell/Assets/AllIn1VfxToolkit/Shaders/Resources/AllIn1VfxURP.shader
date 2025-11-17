@@ -197,6 +197,11 @@
     	_Sh1BlendOffset("Shape 1 Blend Offset", Range(-5, 5)) = 0 //156
 		_Sh2BlendOffset("Shape 2 Blend Offset", Range(-5, 5)) = 0 //157
 		_Sh3BlendOffset("Shape 3 Blend Offset", Range(-5, 5)) = 0 //158
+
+		_ShakeSpeed("Speed", Vector) = (41, 49, 45, 0) // 159
+    	_ShakeSpeedMult("Shake Mult", Float) = 1.0 // 160
+		_ShakeMaxDisplacement("Shake Max Displacement", Vector) = (0.1, 0.1, 0.1, 0) // 161
+		_ShakeBlend("Shake Blend", Range(0, 1)) = 1.0 // 162
     	
         _DebugShape("Shape Debug Number", Int) = 1 //160 Needs to be last property
     }
@@ -295,6 +300,8 @@
             #pragma shader_feature ALPHAFADETRANSPARENCYTOO_ON
             #pragma shader_feature ALPHAFADEINPUTSTREAM_ON
             #pragma shader_feature CAMDISTFADE_ON
+
+            #pragma shader_feature _VERTEX_SHAKE_ON
 
             #if SOFTPART_ON || DEPTHGLOW_ON || (SCREENDISTORTION_ON && DISTORTONLYBACK_ON)
             #define REQUIRE_DEPTH_TEXTURE 1
@@ -553,6 +560,13 @@
 			half _VertOffsetAmount, _VertOffsetPower, _VertOffsetTexXSpeed, _VertOffsetTexYSpeed;
             #endif
 
+            #if _VERTEX_SHAKE_ON
+            half4 _ShakeSpeed;
+    	    half _ShakeSpeedMult;
+		    half4 _ShakeMaxDisplacement;
+		    half _ShakeBlend;
+            #endif
+
             #if FADE_ON
 			sampler2D _FadeTex;
 			half4 _FadeTex_ST;
@@ -633,6 +647,18 @@
                 offsetUv.y += (time * _VertOffsetTexYSpeed) % 1;
                 half offsetAmount = pow(tex2Dlod(_VertOffsetTex, offsetUv).r, _VertOffsetPower);
                 v.vertex.xyz += v.normal * _VertOffsetAmount * offsetAmount;
+                #endif
+
+                #if _VERTEX_SHAKE_ON
+                const half time2 = v.uv.z + _Time.y;
+
+                float3 res = v.vertex.xyz;
+                
+                float3 speedOffset = float3(1.0f, 1.13f, 1.07f) * _ShakeSpeedMult;
+                float3 displacement = sin(time2 * _ShakeSpeed.xyz * speedOffset) * _ShakeMaxDisplacement.xyz;
+                displacement *= _ShakeBlend;
+                
+                v.vertex.xyz += displacement;
                 #endif
 
                 o.vertex = TransformObjectToHClip(v.vertex.xyz);

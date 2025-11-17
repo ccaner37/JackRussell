@@ -172,6 +172,7 @@ public class AllIn1VfxCustomMaterialEditor : ShaderGUI
             TrailWidth("Trail Width", "TRAILWIDTH_ON", 58, 59);
             GenericEffect("Shake", "SHAKEUV_ON", 84, 86);
             GenericEffect("Vertex Offset", "VERTOFFSET_ON", 110, 114);
+            GenericEffect("Vertex Shake", "_VERTEX_SHAKE_ON", 159, 162);
         }
 
         SetAndSaveEnabledDrawers(iniDrawers);
