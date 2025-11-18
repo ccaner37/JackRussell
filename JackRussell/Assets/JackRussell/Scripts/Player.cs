@@ -87,6 +87,7 @@ namespace JackRussell
         [SerializeField] private float _pelvisOffsetMultiplier = 0.1f;
         [SerializeField] private float _pelvisLerpSpeed = 5f;
         [SerializeField] private float _handLerpSpeed = 10f;
+        [SerializeField] private float _unusedHandDecaySpeed = 20f;
         [SerializeField] private CinemachineCameraController _cameraController;
         [SerializeField] private TentacleController _tentacleController;
         [SerializeField] private float _maxRotationSpeedForIK = 5f; // degrees per second
@@ -1170,8 +1171,38 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
                 if (IsSprinting) handWeight *= 3f;
                 float rightHandWeight = handWeight * Mathf.Clamp01(TurnDirection); // Increases when turning right
                 float leftHandWeight = handWeight * Mathf.Clamp01(-TurnDirection); // Increases when turning left
-                IK.solver.leftHandEffector.positionWeight = Mathf.Lerp(IK.solver.leftHandEffector.positionWeight, leftHandWeight, Time.fixedDeltaTime * _handLerpSpeed);
-                IK.solver.rightHandEffector.positionWeight = Mathf.Lerp(IK.solver.rightHandEffector.positionWeight, rightHandWeight, Time.fixedDeltaTime * _handLerpSpeed);
+                
+                // Determine which hand is active based on turn direction
+                bool isTurningRight = TurnDirection > 0;
+                bool isTurningLeft = TurnDirection < 0;
+                
+                // Apply different lerp speeds: active hand uses normal speed, unused hand decays faster
+                if (isTurningRight || isTurningLeft)
+                {
+                    // Active hand: use normal lerp speed
+                    float activeHandLerpSpeed = _handLerpSpeed;
+                    // Unused hand: decay faster to 0
+                    float inactiveHandLerpSpeed = _unusedHandDecaySpeed;
+                    
+                    if (isTurningRight)
+                    {
+                        // Turning right: right hand active, left hand decays
+                        IK.solver.rightHandEffector.positionWeight = Mathf.Lerp(IK.solver.rightHandEffector.positionWeight, rightHandWeight, Time.fixedDeltaTime * activeHandLerpSpeed);
+                        IK.solver.leftHandEffector.positionWeight = Mathf.Lerp(IK.solver.leftHandEffector.positionWeight, leftHandWeight, Time.fixedDeltaTime * inactiveHandLerpSpeed);
+                    }
+                    else // isTurningLeft
+                    {
+                        // Turning left: left hand active, right hand decays
+                        IK.solver.leftHandEffector.positionWeight = Mathf.Lerp(IK.solver.leftHandEffector.positionWeight, leftHandWeight, Time.fixedDeltaTime * activeHandLerpSpeed);
+                        IK.solver.rightHandEffector.positionWeight = Mathf.Lerp(IK.solver.rightHandEffector.positionWeight, rightHandWeight, Time.fixedDeltaTime * inactiveHandLerpSpeed);
+                    }
+                }
+                else
+                {
+                    // No significant turn: both hands decay to 0
+                    IK.solver.leftHandEffector.positionWeight = Mathf.Lerp(IK.solver.leftHandEffector.positionWeight, leftHandWeight, Time.fixedDeltaTime * _unusedHandDecaySpeed);
+                    IK.solver.rightHandEffector.positionWeight = Mathf.Lerp(IK.solver.rightHandEffector.positionWeight, rightHandWeight, Time.fixedDeltaTime * _unusedHandDecaySpeed);
+                }
             }
 
             // ModelRoot: Roll based on turn, scaled by player speed
