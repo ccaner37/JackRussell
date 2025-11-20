@@ -10,8 +10,16 @@ public class TentacleSplineController : MonoBehaviour
 
     [Header("Physics & Feel")]
     public Vector3 exitDirection = Vector3.back; // Direction "out" of the skin (usually -Z for back)
-    public float startTangentStrength = 2.0f;    // How stiff the base is (higher = straighter at start)
-    public float curveMultiplier = 0.5f;         // How wide the arc swings based on distance
+    
+    [Tooltip("Stiffness of the base. 0.05 allows it to bend immediately.")]
+    public float startTangentStrength = 0.05f;   
+
+    [Header("Dynamic Arching")]
+    [Tooltip("Curve when target is aligned with exit (e.g. Target is Behind).")]
+    public float minCurveMultiplier = 0.05f;
+    
+    [Tooltip("Curve when target is opposite to exit (e.g. Target is Forward).")]
+    public float maxCurveMultiplier = 0.5f;
 
     private SplineContainer splineContainer;
 
@@ -21,7 +29,6 @@ public class TentacleSplineController : MonoBehaviour
         Spline spline = splineContainer.Spline;
         
         spline.Clear();
-        // We need 3 knots: Start (Anchor), Mid (Curve Control), End (Target)
         spline.Add(new BezierKnot(Vector3.zero));
         spline.Add(new BezierKnot(Vector3.zero));
         spline.Add(new BezierKnot(Vector3.zero));
@@ -38,55 +45,61 @@ public class TentacleSplineController : MonoBehaviour
     {
         Spline spline = splineContainer.Spline;
 
-        // 1. Space Conversion
-        // Convert everything to the SplineContainer's local space so the math holds up if the player moves/rotates.
+        // 1. Coordinate Space Setup
         Vector3 localStartPos = transform.InverseTransformPoint(originTransform.position);
         Vector3 localEndPos = transform.InverseTransformPoint(targetTransform.position);
-        
-        // Get the Local Rotation of the origin to lock the mesh orientation
         Quaternion localStartRot = Quaternion.Inverse(transform.rotation) * originTransform.rotation;
 
-        // Calculate the local "Exit Vector" (The direction the tentacle shoots out from the skin)
-        // We transform the logic vector (e.g., Back) by the origin's rotation
+        // Calculate Vectors needed for Math
         Vector3 worldExitDir = originTransform.TransformDirection(exitDirection);
         Vector3 localExitDir = transform.InverseTransformDirection(worldExitDir);
+        
+        // Vector from Origin to Target
+        Vector3 targetDir = (targetTransform.position - originTransform.position).normalized;
+        float totalDistance = Vector3.Distance(localStartPos, localEndPos);
 
-        float distance = Vector3.Distance(localStartPos, localEndPos);
 
+        // 2. DYNAMIC CURVE CALCULATION
+        // Dot Product compares alignment. 
+        // 1.0 = Target is exactly where Exit points (Straight shot)
+        // -1.0 = Target is exactly opposite (Needs to wrap around)
+        float alignmentDot = Vector3.Dot(worldExitDir, targetDir);
+        
+        // Map the Dot (-1 to 1) to a blend value (1 to 0)
+        // If Dot is 1 (Aligned), t becomes 0. If Dot is -1 (Opposite), t becomes 1.
+        float blendT = Mathf.InverseLerp(1.0f, -1.0f, alignmentDot);
+        
+        // Calculate the final multiplier based on the angle
+        float dynamicCurveMultiplier = Mathf.Lerp(minCurveMultiplier, maxCurveMultiplier, blendT);
+
+
+        // 3. Update Knots
+        
         // --- KNOT 0: ANCHOR ---
         BezierKnot startKnot = spline[0];
         startKnot.Position = localStartPos;
-        startKnot.Rotation = localStartRot; // LOCK ROTATION to skin
-        
-        // Force the tangent to shoot straight out
-        // TangentOut controls the shape leaving the knot. 
-        // We multiply by distance/strength to make it scale with the tentacle length.
-        startKnot.TangentOut = localExitDir * (startTangentStrength + (distance * 0.3f));
-        startKnot.TangentIn = Vector3.zero; // Nothing comes before the start
+        startKnot.Rotation = localStartRot;
+        // Apply the tangent strength (0.05f as requested) scaled by distance
+        startKnot.TangentOut = localExitDir * (startTangentStrength + (totalDistance * 0.1f)); 
+        startKnot.TangentIn = Vector3.zero;
         spline.SetKnot(0, startKnot);
-        spline.SetTangentMode(0, TangentMode.Broken); // 'Broken' allows us to set Out without In affecting it
-
+        spline.SetTangentMode(0, TangentMode.Broken);
 
         // --- KNOT 2: TARGET ---
         BezierKnot endKnot = spline[2];
         endKnot.Position = localEndPos;
-        // Optional: Orient the tip to face the impact? 
-        // For now, we leave rotation auto or zero to let the tube end naturally.
         spline.SetKnot(2, endKnot);
-        spline.SetTangentMode(2, TangentMode.AutoSmooth); // Let the end be smooth
-
+        spline.SetTangentMode(2, TangentMode.AutoSmooth);
 
         // --- KNOT 1: DYNAMIC ELBOW ---
-        // Calculate a natural "mid point" that creates an arc
         Vector3 midBase = Vector3.Lerp(localStartPos, localEndPos, 0.5f);
         
-        // The Magic: Push the mid-point OUT in the direction of the exit vector.
-        // This creates the "Arch" that prevents it from looking like a straight line.
-        Vector3 dynamicOffset = localExitDir * (distance * curveMultiplier);
+        // Push the elbow out based on our new Dynamic Multiplier
+        Vector3 dynamicOffset = localExitDir * (totalDistance * dynamicCurveMultiplier);
         
         BezierKnot midKnot = spline[1];
         midKnot.Position = midBase + dynamicOffset;
         spline.SetKnot(1, midKnot);
-        spline.SetTangentMode(1, TangentMode.AutoSmooth); // Smooth the curve through the elbow
+        spline.SetTangentMode(1, TangentMode.AutoSmooth);
     }
 }
