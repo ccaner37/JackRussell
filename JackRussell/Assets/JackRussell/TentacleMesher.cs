@@ -7,12 +7,12 @@ public class TentacleMesher : MonoBehaviour
 {
     [Header("Mesh Settings")]
     public float radius = 0.2f;
-    public int radialSegments = 8;      // 8 is efficient, 12+ is smoother
+    public int radialSegments = 8;
     public int lengthSegmentsPerUnit = 4; 
-    public bool taperTip = true;        // Pointy end?
+    public bool taperTip = true;
 
     [Header("Texture Settings")]
-    public float textureTiling = 1.0f;  // Higher = more repeats
+    public float textureTiling = 1.0f;
 
     private SplineContainer splineContainer;
     private MeshFilter meshFilter;
@@ -24,6 +24,9 @@ public class TentacleMesher : MonoBehaviour
     private List<Vector2> uvs = new List<Vector2>();
     private List<int> tris = new List<int>();
 
+    // Allow external control (prevents double updates)
+    public bool autoUpdate = true; 
+
     void Awake()
     {
         splineContainer = GetComponent<SplineContainer>();
@@ -31,21 +34,23 @@ public class TentacleMesher : MonoBehaviour
         
         mesh = new Mesh();
         mesh.name = "TentacleProceduralMesh";
-        mesh.MarkDynamic(); // Important for performance when updating every frame
+        mesh.MarkDynamic();
         meshFilter.mesh = mesh;
     }
 
     void LateUpdate()
     {
-        GenerateMesh();
+        if (autoUpdate) GenerateMesh();
     }
 
-    private void GenerateMesh()
+    // Made PUBLIC so the Controller can call it immediately after physics
+    public void GenerateMesh()
     {
+        if (splineContainer == null) splineContainer = GetComponent<SplineContainer>();
+        
         Spline spline = splineContainer.Spline;
         float splineLength = spline.GetLength();
 
-        // Avoid errors if length is zero
         if (splineLength < 0.01f) return;
 
         verts.Clear();
@@ -53,49 +58,38 @@ public class TentacleMesher : MonoBehaviour
         uvs.Clear();
         tris.Clear();
 
-        // Determine how many rings we need
         int rings = Mathf.Max(2, Mathf.CeilToInt(splineLength * lengthSegmentsPerUnit));
 
         for (int i = 0; i <= rings; i++)
         {
-            float t = (float)i / rings; // 0.0 to 1.0
+            float t = (float)i / rings;
             
-            // Get data from Spline
             Vector3 pos = spline.EvaluatePosition(t);
             Vector3 tan = spline.EvaluateTangent(t);
             Vector3 up = spline.EvaluateUpVector(t);
 
-            // Calculate Rotation
             Quaternion rot = (tan != Vector3.zero && up != Vector3.zero) 
                 ? Quaternion.LookRotation(tan, up) 
                 : Quaternion.identity;
 
-            // Calculate Radius (Tapering)
             float currentRadius = radius;
-            if (taperTip) currentRadius *= Mathf.Lerp(1f, 0.2f, t);
+            if (taperTip) currentRadius *= Mathf.Lerp(1f, 0.5f, t);
 
-            // Generate Circle Ring
             for (int j = 0; j <= radialSegments; j++)
             {
                 float angle = (float)j / radialSegments * Mathf.PI * 2;
-                
                 float x = Mathf.Cos(angle) * currentRadius;
                 float y = Mathf.Sin(angle) * currentRadius;
 
                 Vector3 localCircleVert = new Vector3(x, y, 0);
-                
-                // Apply rotation and position
                 Vector3 finalVert = pos + (rot * localCircleVert);
 
                 verts.Add(finalVert);
                 normals.Add((finalVert - pos).normalized);
-
-                // UVs: X wraps around, Y tiles based on real-world length
                 uvs.Add(new Vector2((float)j / radialSegments, t * splineLength * textureTiling));
             }
         }
 
-        // Generate Triangles
         for (int i = 0; i < rings; i++)
         {
             for (int j = 0; j < radialSegments; j++)
@@ -113,7 +107,6 @@ public class TentacleMesher : MonoBehaviour
             }
         }
 
-        // Assign to Unity Mesh
         mesh.Clear();
         mesh.SetVertices(verts);
         mesh.SetNormals(normals);
