@@ -11,6 +11,11 @@ public class TentacleMesher : MonoBehaviour
     public int lengthSegmentsPerUnit = 4; 
     public bool taperTip = true;
 
+    [Header("Animation (Talking)")]
+    [Range(0, 1)] 
+    [Tooltip("0 = Closed Point, 1 = Wide Open Mouth")]
+    public float mouthOpen = 0f;
+
     [Header("Texture Settings")]
     public float textureTiling = 1.0f;
 
@@ -43,7 +48,6 @@ public class TentacleMesher : MonoBehaviour
         if (autoUpdate) GenerateMesh();
     }
 
-    // Made PUBLIC so the Controller can call it immediately after physics
     public void GenerateMesh()
     {
         if (splineContainer == null) splineContainer = GetComponent<SplineContainer>();
@@ -62,7 +66,7 @@ public class TentacleMesher : MonoBehaviour
 
         for (int i = 0; i <= rings; i++)
         {
-            float t = (float)i / rings;
+            float t = (float)i / rings; // 0.0 (Base) to 1.0 (Tip)
             
             Vector3 pos = spline.EvaluatePosition(t);
             Vector3 tan = spline.EvaluateTangent(t);
@@ -72,14 +76,31 @@ public class TentacleMesher : MonoBehaviour
                 ? Quaternion.LookRotation(tan, up) 
                 : Quaternion.identity;
 
+            // --- VISEME / MOUTH LOGIC ---
             float currentRadius = radius;
-            if (taperTip) currentRadius *= Mathf.Lerp(1f, 0.5f, t);
+
+            if (taperTip) 
+            {
+                // Define Tip Shape
+                float closedScale = 0.0f; // Sharp point
+                float openScale = 1.5f;   // Flared mouth (larger than body)
+
+                // Blend based on mouthOpen parameter
+                float tipTargetScale = Mathf.Lerp(closedScale, openScale, mouthOpen);
+
+                // Cubic Lerp (t*t*t) keeps the body thick and affects only the very end
+                float taperFactor = Mathf.Lerp(1f, tipTargetScale, t * t * t);
+                currentRadius *= taperFactor;
+            }
 
             for (int j = 0; j <= radialSegments; j++)
             {
                 float angle = (float)j / radialSegments * Mathf.PI * 2;
                 float x = Mathf.Cos(angle) * currentRadius;
                 float y = Mathf.Sin(angle) * currentRadius;
+
+                // Optional: If you want "Lip" shapes later, modify X and Y differently here
+                // e.g. if (mouthOpen > 0.5) y *= 0.5f; // Oval shape
 
                 Vector3 localCircleVert = new Vector3(x, y, 0);
                 Vector3 finalVert = pos + (rot * localCircleVert);

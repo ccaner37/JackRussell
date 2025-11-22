@@ -11,6 +11,10 @@ public class TentacleSplineController : MonoBehaviour
     [Tooltip("Higher = Stiffer rope, less jitter. Lower = Faster but unstable.")]
     public int physicsIterations = 10; 
 
+    [Header("Attachments")]
+    [Tooltip("Assign an empty object here. It will stick to the tentacle tip.")]
+    public Transform tipTracker;
+
     [Header("Physics Feel")]
     [Range(0, 1)] public float damping = 0.2f;   
     public Vector3 gravity = new Vector3(0, -9.81f, 0);
@@ -32,7 +36,6 @@ public class TentacleSplineController : MonoBehaviour
     public Transform originTransform; 
     public Transform targetTransform; 
 
-    // Inner class for Verlet
     private class Particle
     {
         public Vector3 position;
@@ -40,7 +43,7 @@ public class TentacleSplineController : MonoBehaviour
     }
 
     private SplineContainer splineContainer;
-    private TentacleMesher mesher; // Reference to mesher
+    private TentacleMesher mesher; 
     private List<Particle> particles = new List<Particle>();
     private bool isInitialized = false;
 
@@ -48,7 +51,6 @@ public class TentacleSplineController : MonoBehaviour
     {
         InitParticles();
         
-        // Disable auto-update on mesher so we can drive it manually
         mesher = GetComponent<TentacleMesher>();
         if (mesher != null) mesher.autoUpdate = false;
     }
@@ -78,7 +80,6 @@ public class TentacleSplineController : MonoBehaviour
         if (!isInitialized || originTransform == null) return;
 
         float dt = Time.deltaTime;
-        // Prevent explosion if frame rate drops too low
         if (dt > 0.05f) dt = 0.05f; 
 
         // 1. CALCULATE IDEAL CURVE
@@ -100,9 +101,9 @@ public class TentacleSplineController : MonoBehaviour
 
         // 2. PHYSICS LOOP
         
-        // A. Lock Root (Essential for "Skin Connection")
+        // A. Lock Root
         particles[0].position = startPoint;
-        particles[0].prevPosition = startPoint; // Kill root velocity
+        particles[0].prevPosition = startPoint;
 
         float currentSegmentLen = isGrappling && distToTarget > restLength 
             ? distToTarget / (boneCount - 1) 
@@ -112,26 +113,21 @@ public class TentacleSplineController : MonoBehaviour
         {
             Particle p = particles[i];
 
-            // Verlet Integration
             Vector3 velocity = p.position - p.prevPosition;
             p.prevPosition = p.position;
             
-            // Apply Damping
             p.position += velocity * (1.0f - damping);
-            // Apply Gravity
             p.position += gravity * (dt * dt);
 
-            // Apply Pose Stiffness Force
             float t = (float)i / (boneCount - 1);
             Vector3 idealPos = GetQuadraticBezier(startPoint, midPoint, endPoint, t);
             float poseStrength = Mathf.Lerp(baseStiffness, tipStiffness, t * t);
             
-            // We clamp the force to avoid jitter if it pulls too hard
             Vector3 pull = idealPos - p.position;
             p.position += pull * (poseStrength * dt * 10f); 
         }
 
-        // B. Lock Tip (Grapple)
+        // B. Lock Tip
         if (isGrappling && targetTransform != null)
         {
             Particle tip = particles[particles.Count - 1];
@@ -139,30 +135,41 @@ public class TentacleSplineController : MonoBehaviour
             tip.prevPosition = endPoint; 
         }
 
-        // C. Constraints (Iterate multiple times for stability)
+        // C. Constraints
         for (int k = 0; k < physicsIterations; k++)
         {
-            // Forward Pass
             for (int i = 1; i < particles.Count; i++)
                 ConstraintParticles(particles[i - 1], particles[i], currentSegmentLen);
             
-            // Backward Pass (Helps propagate tension from tip)
             if (isGrappling)
             {
                 for (int i = particles.Count - 1; i > 0; i--)
                     ConstraintParticles(particles[i - 1], particles[i], currentSegmentLen);
             }
             
-            // Re-Lock Root (Crucial: Constraints might have pulled it away)
             particles[0].position = startPoint;
             if (isGrappling) particles[particles.Count - 1].position = endPoint;
         }
 
-        // 3. RENDER
+        // 3. RENDER & UPDATE
         UpdateSplineToParticles(startPoint, worldExitDir, currentSegmentLen);
         
-        // 4. FORCE MESH UPDATE NOW (Fixes Lag)
         if (mesher != null) mesher.GenerateMesh();
+
+        // 4. UPDATE TIP TRACKER (For Particles/Attachments)
+        if (tipTracker != null)
+        {
+            // Position is simply the last particle
+            tipTracker.position = particles[particles.Count - 1].position;
+            
+            // Rotation: Match the end tangent of the spline
+            // Since the Spline was just updated, this is accurate
+            Vector3 tipTangent = splineContainer.Spline.EvaluateTangent(1f);
+            if (tipTangent != Vector3.zero)
+            {
+                tipTracker.rotation = Quaternion.LookRotation(tipTangent, Vector3.up);
+            }
+        }
     }
 
     Vector3 GetQuadraticBezier(Vector3 p0, Vector3 p1, Vector3 p2, float t)
@@ -180,8 +187,6 @@ public class TentacleSplineController : MonoBehaviour
         float difference = (currentDist - segmentLen) / currentDist;
         Vector3 correction = direction * difference * 0.5f;
         
-        // We don't move p1 if it's the root (index check implied by loop order, but safer to assume p1 is closer to root)
-        // However, the 'Lock Root' step handles the root explicitly.
         p1.position += correction;
         p2.position -= correction;
     }
@@ -198,12 +203,10 @@ public class TentacleSplineController : MonoBehaviour
 
             if (i == 0)
             {
-                // Fix Tangent: Use Segment Length, not Total Length
                 Quaternion localRot = Quaternion.Inverse(transform.rotation) * originTransform.rotation;
                 knot.Rotation = localRot;
                 
                 Vector3 localExitDir = transform.InverseTransformDirection(startDir);
-                // This prevents the "Broken Mesh" / Huge Loop issue
                 knot.TangentOut = localExitDir * (segmentLen * 1.5f); 
                 knot.TangentIn = Vector3.zero;
                 
