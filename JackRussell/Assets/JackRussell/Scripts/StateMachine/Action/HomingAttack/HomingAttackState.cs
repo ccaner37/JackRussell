@@ -199,7 +199,7 @@ namespace JackRussell.States.Action
                 {
                     // start hit stop
                     _hitStopActive = true;
-                    _hitStopTimer = 0.22f;
+                    _hitStopTimer = 0.15f;
                     _player.SetVelocityImmediate(Vector3.zero);
                     _player.ClearMovementOverride();
                     _target.OnHomingHit(_player);
