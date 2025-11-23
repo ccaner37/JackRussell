@@ -172,6 +172,8 @@ Material:
     - _ShadowAmount: 0.4
     - _ShadowStepMax: 1
     - _ShadowStepMin: 0
+    - _ShakeBlend: 1
+    - _ShakeSpeedMult: 1
     - _ShakeUvSpeed: 20
     - _ShakeUvX: 5
     - _ShakeUvY: 4
@@ -242,6 +244,8 @@ Material:
     - _GlowColor: {r: 1, g: 0, b: 0, a: 1}
     - _LightColor: {r: 1, g: 1, b: 1, a: 1}
     - _RimColor: {r: 0, g: 0.12190771, b: 1, a: 1}
+    - _ShakeMaxDisplacement: {r: 0.1, g: 0.1, b: 0.1, a: 0}
+    - _ShakeSpeed: {r: 41, g: 49, b: 45, a: 0}
     - _Shape2Color: {r: 1, g: 1, b: 1, a: 1}
     - _Shape3Color: {r: 1, g: 1, b: 1, a: 1}
     - _ShapeColor: {r: 1, g: 1, b: 1, a: 1}

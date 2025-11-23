@@ -22,5 +22,7 @@ namespace JackRussell.Audio
         ParryAttackSuccess,
         Teleport,
         HeavyPunch,
+        TentacleMoveStart,
+        TentacleMoveEnd,
     }
 }

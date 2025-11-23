@@ -7,12 +7,10 @@ public class TentacleSplineController : MonoBehaviour
 {
     [Header("Simulation Settings")]
     public int boneCount = 14;
-    public float restLength = 4.0f;
-    [Tooltip("Higher = Stiffer rope, less jitter. Lower = Faster but unstable.")]
+    public float idleLength = 4.0f; 
     public int physicsIterations = 10; 
 
     [Header("Attachments")]
-    [Tooltip("Assign an empty object here. It will stick to the tentacle tip.")]
     public Transform tipTracker;
 
     [Header("Physics Feel")]
@@ -33,6 +31,8 @@ public class TentacleSplineController : MonoBehaviour
 
     [Header("Grapple Settings")]
     public bool isGrappling = false;
+    [Tooltip("Time in seconds to reach the target.")]
+    public float shootDuration = 0.15f; 
     public Transform originTransform; 
     public Transform targetTransform; 
 
@@ -46,6 +46,14 @@ public class TentacleSplineController : MonoBehaviour
     private TentacleMesher mesher; 
     private List<Particle> particles = new List<Particle>();
     private bool isInitialized = false;
+
+    // Grapple State Internals
+    private bool wasGrappling = false;
+    private bool isShooting = false;
+    
+    private Vector3 shootTipPos; 
+    private Vector3 shootStartPos; 
+    private float shootTimer = 0f; 
 
     void Start()
     {
@@ -62,7 +70,7 @@ public class TentacleSplineController : MonoBehaviour
 
         Vector3 startPos = originTransform != null ? originTransform.position : transform.position;
         Vector3 dir = originTransform != null ? originTransform.TransformDirection(exitDirection) : -transform.forward;
-        float segmentLen = restLength / (boneCount - 1);
+        float segmentLen = idleLength / (boneCount - 1);
 
         for (int i = 0; i < boneCount; i++)
         {
@@ -82,12 +90,61 @@ public class TentacleSplineController : MonoBehaviour
         float dt = Time.deltaTime;
         if (dt > 0.05f) dt = 0.05f; 
 
-        // 1. CALCULATE IDEAL CURVE
-        Vector3 startPoint = originTransform.position;
-        Vector3 endPoint = (isGrappling && targetTransform != null) 
-            ? targetTransform.position 
-            : originTransform.TransformPoint(idleRestOffset);
+        // --- STATE MACHINE ---
 
+        // 1. DETECT GRAPPLE TRIGGER
+        if (isGrappling && !wasGrappling)
+        {
+            // Start Shooting!
+            isShooting = true;
+            shootTimer = 0f;
+            shootStartPos = originTransform.position; 
+            shootTipPos = shootStartPos;
+        }
+        else if (!isGrappling && wasGrappling)
+        {
+            // Stop Shooting
+            isShooting = false;
+            shootTimer = 0f;
+        }
+        wasGrappling = isGrappling;
+
+        // 2. DETERMINE TARGET POINTS & LENGTH
+        Vector3 startPoint = originTransform.position;
+        Vector3 endPoint;
+        float targetTotalLength;
+
+        if (isShooting && targetTransform != null)
+        {
+            // SHOOTING STATE
+            shootTimer += dt;
+            float t = Mathf.Clamp01(shootTimer / shootDuration);
+            
+            shootTipPos = Vector3.Lerp(shootStartPos, targetTransform.position, t);
+            endPoint = shootTipPos;
+            
+            targetTotalLength = Vector3.Distance(startPoint, endPoint);
+            
+            if (t >= 1.0f) isShooting = false;
+        }
+        else if (isGrappling && targetTransform != null)
+        {
+            // GRAPPLED STATE
+            endPoint = targetTransform.position;
+            targetTotalLength = Vector3.Distance(startPoint, endPoint);
+        }
+        else
+        {
+            // IDLE STATE
+            endPoint = originTransform.TransformPoint(idleRestOffset);
+            targetTotalLength = idleLength; 
+        }
+
+        if (targetTotalLength < 0.1f) targetTotalLength = 0.1f;
+        float currentSegmentLen = targetTotalLength / (boneCount - 1);
+
+
+        // 3. CURVE CALCULATION
         Vector3 worldExitDir = originTransform.TransformDirection(exitDirection);
         Vector3 targetDir = (endPoint - startPoint).normalized;
         float distToTarget = Vector3.Distance(startPoint, endPoint);
@@ -96,18 +153,15 @@ public class TentacleSplineController : MonoBehaviour
         float blend = Mathf.InverseLerp(1.0f, -1.0f, alignment);
         float curveHeight = Mathf.Lerp(minCurveMultiplier, maxCurveMultiplier, blend);
         
+        if (isGrappling || isShooting) curveHeight *= 0.2f; 
+
         Vector3 midBase = Vector3.Lerp(startPoint, endPoint, 0.5f);
         Vector3 midPoint = midBase + (worldExitDir * (distToTarget * curveHeight));
 
-        // 2. PHYSICS LOOP
-        
-        // A. Lock Root
+
+        // 4. PHYSICS LOOP
         particles[0].position = startPoint;
         particles[0].prevPosition = startPoint;
-
-        float currentSegmentLen = isGrappling && distToTarget > restLength 
-            ? distToTarget / (boneCount - 1) 
-            : restLength / (boneCount - 1);
 
         for (int i = 1; i < particles.Count; i++)
         {
@@ -119,6 +173,7 @@ public class TentacleSplineController : MonoBehaviour
             p.position += velocity * (1.0f - damping);
             p.position += gravity * (dt * dt);
 
+            // Pose Matching
             float t = (float)i / (boneCount - 1);
             Vector3 idealPos = GetQuadraticBezier(startPoint, midPoint, endPoint, t);
             float poseStrength = Mathf.Lerp(baseStiffness, tipStiffness, t * t);
@@ -127,48 +182,47 @@ public class TentacleSplineController : MonoBehaviour
             p.position += pull * (poseStrength * dt * 10f); 
         }
 
-        // B. Lock Tip
-        if (isGrappling && targetTransform != null)
+        // Tip Locking
+        if (isGrappling || isShooting)
         {
             Particle tip = particles[particles.Count - 1];
             tip.position = endPoint;
             tip.prevPosition = endPoint; 
         }
 
-        // C. Constraints
+        // Constraints
         for (int k = 0; k < physicsIterations; k++)
         {
+            // Forward
             for (int i = 1; i < particles.Count; i++)
                 ConstraintParticles(particles[i - 1], particles[i], currentSegmentLen);
             
-            if (isGrappling)
+            // Backward & Grapple Locking
+            if (isGrappling || isShooting)
             {
                 for (int i = particles.Count - 1; i > 0; i--)
                     ConstraintParticles(particles[i - 1], particles[i], currentSegmentLen);
+                
+                // Lock Tip
+                particles[particles.Count - 1].position = endPoint;
             }
             
+            // FIX: Lock Root (MUST happen every iteration, regardless of state)
             particles[0].position = startPoint;
-            if (isGrappling) particles[particles.Count - 1].position = endPoint;
         }
 
-        // 3. RENDER & UPDATE
+
+        // 5. RENDER & UPDATE
         UpdateSplineToParticles(startPoint, worldExitDir, currentSegmentLen);
         
         if (mesher != null) mesher.GenerateMesh();
 
-        // 4. UPDATE TIP TRACKER (For Particles/Attachments)
         if (tipTracker != null)
         {
-            // Position is simply the last particle
             tipTracker.position = particles[particles.Count - 1].position;
-            
-            // Rotation: Match the end tangent of the spline
-            // Since the Spline was just updated, this is accurate
             Vector3 tipTangent = splineContainer.Spline.EvaluateTangent(1f);
             if (tipTangent != Vector3.zero)
-            {
                 tipTracker.rotation = Quaternion.LookRotation(tipTangent, Vector3.up);
-            }
         }
     }
 

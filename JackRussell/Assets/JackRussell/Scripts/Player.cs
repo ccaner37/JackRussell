@@ -68,11 +68,12 @@ namespace JackRussell
         [SerializeField] private GameObject _sprintBoostModel;
         [SerializeField] private AnimationCurve _glitchCurve;
         [SerializeField] private ParticleSystem _footKickParticle, _dashParticle;
-        [SerializeField] private SkinnedMeshRenderer[] _playerRenderers;
-        private Material[] _originalPlayerMaterials;
+        [SerializeField] private Renderer[] _playerRenderers;
+        private List<Material[]> _originalPlayerMaterials;
         [SerializeField] private GameObject[] _footSprintParticles;
         [SerializeField] private VisualEffect[] _smokeVisualEffects;
         [SerializeField] private TrailRenderer[] _smokeTrailRenderers;
+        [SerializeField] private TrailRenderer[] _homingAttackTrailRenderers;
         [SerializeField] private GameObject _punchEffect;
         [SerializeField] private ParticleSystem _punchParticle;
         [SerializeField] private ParticleSystem _railGrindParticle;
@@ -90,6 +91,7 @@ namespace JackRussell
         [SerializeField] private float _unusedHandDecaySpeed = 20f;
         [SerializeField] private CinemachineCameraController _cameraController;
         [SerializeField] private TentacleController _tentacleController;
+        [SerializeField] private TentacleSplineController _tentacleSplineController;
         [SerializeField] private float _maxRotationSpeedForIK = 5f; // degrees per second
 
         [Header("Model Root Adjustments")]
@@ -259,8 +261,9 @@ namespace JackRussell
         public float MoveRollMaxDegrees => _moveRollMaxDegrees;
         public CinemachineCameraController CameraController => _cameraController;
 public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
-        public TentacleController TentacleController => _tentacleController;
-        public PostProcessingController PostProcessingController => _postProcessingController;
+public TentacleController TentacleController => _tentacleController;
+public TentacleSplineController TentacleSplineController => _tentacleSplineController;
+public PostProcessingController PostProcessingController => _postProcessingController;
 
         /// <summary>
         /// Get the IK weight based on movement and rotation speed.
@@ -1008,139 +1011,58 @@ public float SprintRollMaxDegrees => _sprintRollMaxDegrees;
         public void OnHomingAttackEnter()
         {
             Animator.ResetTrigger("HomingAttackReach");
+            foreach (var trail in _homingAttackTrailRenderers)
+            {
+                trail.emitting = true;
+            }
+        }
+
+        public void OnHomingAttackMovement()
+        {
             Animator.Play("HomingAttack");
 
-            // Store original materials before changing
-            _originalPlayerMaterials = new Material[_playerRenderers.Length];
-            for (int i = 0; i < _playerRenderers.Length; i++)
-            {
-                _originalPlayerMaterials[i] = _playerRenderers[i].material;
-                _playerRenderers[i].material = _playerHomingAttackMaterial;
-            }
-
-
-            // Implement player material effects
-            // if (_playerMaterial != null)
-            // {
-            //     DemoUtils.SetMaterialTransparent(_playerMaterial);
-
-            //     _playerMaterial.DOKill();
-
-            //     // Enable keywords and set properties
-            //     _playerMaterial.SetFloat("_FadeOn", 1f);
-            //     _playerMaterial.EnableKeyword("_FADE_ON");
-
-            //     // _playerMaterial.SetFloat("_IntersectionFadeOn", 1f);
-            //     // _playerMaterial.EnableKeyword("_INTERSECTION_FADE_ON");
-
-            //     _playerMaterial.SetFloat("_VertexDistortionOn", 1f);
-            //     _playerMaterial.EnableKeyword("_VERTEX_DISTORTION_ON");
-
-            //     _playerMaterial.SetFloat("_ScrollTextureOn", 1f);
-            //     _playerMaterial.EnableKeyword("_SCROLL_TEXTURE_ON");
-
-            //     // Animate float properties to target values
-            //     _playerMaterial.DOFloat(0.25f, "_FadeAmount", 0.1f);
-            //     // _playerMaterial.DOFloat(0.7f, "_IntersectionFadeFactor", 0.1f);
-            //     _playerMaterial.DOFloat(0.2f, "_VertexDistortionAmount", 0.1f);
-            //     _playerMaterial.DOFloat(20f, "_ScrollTextureY", 0.1f);
-            // }
+            SetHomingAttackPlayerMaterial();
         }
 
         public void OnHomingAttackReach()
         {
             Animator.SetTrigger("HomingAttackReach");
 
-            // Restore original materials
-            if (_originalPlayerMaterials != null && _originalPlayerMaterials.Length == _playerRenderers.Length)
+            ResetPlayerMaterial();
+
+            foreach (var trail in _homingAttackTrailRenderers)
             {
-                for (int i = 0; i < _playerRenderers.Length; i++)
-                {
-                    _playerRenderers[i].material = _originalPlayerMaterials[i];
-                }
+                trail.emitting = false;
             }
-
-            // Implement player material effects revert
-            // if (_playerMaterial != null)
-            // {
-            //     _playerMaterial.DOKill();
-
-            //     // Animate float properties to 0, then disable keywords
-            //     Sequence seq = DOTween.Sequence();
-            //     seq.Append(_playerMaterial.DOFloat(0f, "_FadeAmount", 0.8f));
-            //     // seq.Join(_playerMaterial.DOFloat(0.1f, "_IntersectionFadeFactor", 0.3f));
-            //     seq.Join(_playerMaterial.DOFloat(0f, "_VertexDistortionAmount", 0.8f));
-            //     seq.Join(_playerMaterial.DOFloat(0f, "_ScrollTextureY", 0.8f));
-            //     seq.OnComplete(() =>
-            //     {
-            //         DemoUtils.SetMaterialOpaque(_playerMaterial);
-
-            //         _playerMaterial.SetFloat("_FadeOn", 0f);
-            //         _playerMaterial.DisableKeyword("_FADE_ON");
-
-            //         // _playerMaterial.SetFloat("_IntersectionFadeOn", 0f);
-            //         // _playerMaterial.DisableKeyword("_INTERSECTION_FADE_ON");
-
-            //         _playerMaterial.SetFloat("_VertexDistortionOn", 0f);
-            //         _playerMaterial.DisableKeyword("_VERTEX_DISTORTION_ON");
-
-            //         _playerMaterial.SetFloat("_ScrollTextureOn", 0f);
-            //         _playerMaterial.DisableKeyword("_SCROLL_TEXTURE_ON");
-            //     });
-            // }
         }
 
         // Instant versions for editor testing
         public void SetHomingAttackPlayerMaterial()
         {
-            if (_playerMaterial != null)
+            _originalPlayerMaterials = new();
+
+            foreach (var renderer in _playerRenderers)
             {
-                _playerMaterial.DOKill();
-                _playerMaterial.SetFloat("_FadeOn", 1f);
-                _playerMaterial.EnableKeyword("_FADE_ON");
+                // store original instance array
+                _originalPlayerMaterials.Add(renderer.materials);
 
-                // _playerMaterial.SetFloat("_IntersectionFadeOn", 1f);
-                // _playerMaterial.EnableKeyword("_INTERSECTION_FADE_ON");
+                var mats = renderer.materials;
+                for (int i = 0; i < mats.Length; i++)
+                    mats[i] = _playerHomingAttackMaterial;
 
-                _playerMaterial.SetFloat("_VertexDistortionOn", 1f);
-                _playerMaterial.EnableKeyword("_VERTEX_DISTORTION_ON");
-
-                _playerMaterial.SetFloat("_ScrollTextureOn", 1f);
-                _playerMaterial.EnableKeyword("_SCROLL_TEXTURE_ON");
-
-                _playerMaterial.SetFloat("_FadeAmount", 0.25f);
-                // _playerMaterial.SetFloat("_IntersectionFadeFactor", 0.7f);
-                _playerMaterial.SetFloat("_VertexDistortionAmount", 0.1f);
-                _playerMaterial.SetFloat("_ScrollTextureY", 20f);
-
-                DemoUtils.SetMaterialTransparent(_playerMaterial);
+                renderer.materials = mats; // apply
             }
         }
 
         public void ResetPlayerMaterial()
         {
-            if (_playerMaterial != null)
-            {
-                _playerMaterial.DOKill();
-                _playerMaterial.SetFloat("_FadeOn", 0f);
-                _playerMaterial.DisableKeyword("_FADE_ON");
+            if (_originalPlayerMaterials == null)
+                return;
 
-                // _playerMaterial.SetFloat("_IntersectionFadeOn", 0f);
-                // _playerMaterial.DisableKeyword("_INTERSECTION_FADE_ON");
+            for (int i = 0; i < _playerRenderers.Length; i++)
+                _playerRenderers[i].materials = _originalPlayerMaterials[i];
 
-                _playerMaterial.SetFloat("_VertexDistortionOn", 0f);
-                _playerMaterial.DisableKeyword("_VERTEX_DISTORTION_ON");
-
-                _playerMaterial.SetFloat("_ScrollTextureOn", 0f);
-                _playerMaterial.DisableKeyword("_SCROLL_TEXTURE_ON");
-
-                _playerMaterial.SetFloat("_FadeAmount", 0f);
-                // _playerMaterial.SetFloat("_IntersectionFadeFactor", 0.1f);
-                _playerMaterial.SetFloat("_VertexDistortionAmount", 0f);
-                _playerMaterial.SetFloat("_ScrollTextureY", 0f);
-
-                DemoUtils.SetMaterialOpaque(_playerMaterial);
-            }
+            _originalPlayerMaterials = null;
         }
 
         /// <summary>

@@ -9,6 +9,11 @@ public class TentacleMesher : MonoBehaviour
     public float radius = 0.2f;
     public int radialSegments = 8;
     public int lengthSegmentsPerUnit = 4; 
+
+    [Header("Shape Control")]
+    [Range(0, 1f)]
+    [Tooltip("Where the tapering begins. 0.8 means it stays thick for 80% of length.")]
+    public float taperStart = 0.8f; 
     public bool taperTip = true;
 
     [Header("Animation (Talking)")]
@@ -23,13 +28,11 @@ public class TentacleMesher : MonoBehaviour
     private MeshFilter meshFilter;
     private Mesh mesh;
 
-    // Cache lists to avoid Garbage Collection
     private List<Vector3> verts = new List<Vector3>();
     private List<Vector3> normals = new List<Vector3>();
     private List<Vector2> uvs = new List<Vector2>();
     private List<int> tris = new List<int>();
 
-    // Allow external control (prevents double updates)
     public bool autoUpdate = true; 
 
     void Awake()
@@ -66,7 +69,7 @@ public class TentacleMesher : MonoBehaviour
 
         for (int i = 0; i <= rings; i++)
         {
-            float t = (float)i / rings; // 0.0 (Base) to 1.0 (Tip)
+            float t = (float)i / rings; 
             
             Vector3 pos = spline.EvaluatePosition(t);
             Vector3 tan = spline.EvaluateTangent(t);
@@ -76,20 +79,22 @@ public class TentacleMesher : MonoBehaviour
                 ? Quaternion.LookRotation(tan, up) 
                 : Quaternion.identity;
 
-            // --- VISEME / MOUTH LOGIC ---
+            // --- NEW TAPER LOGIC ---
             float currentRadius = radius;
 
             if (taperTip) 
             {
-                // Define Tip Shape
-                float closedScale = 0.0f; // Sharp point
-                float openScale = 1.5f;   // Flared mouth (larger than body)
+                float tipTargetScale = Mathf.Lerp(0.0f, 1.5f, mouthOpen);
+                float taperFactor = 1.0f;
 
-                // Blend based on mouthOpen parameter
-                float tipTargetScale = Mathf.Lerp(closedScale, openScale, mouthOpen);
-
-                // Cubic Lerp (t*t*t) keeps the body thick and affects only the very end
-                float taperFactor = Mathf.Lerp(1f, tipTargetScale, t * t * t);
+                // Only taper if we are past the start point
+                if (t > taperStart)
+                {
+                    // Remap t from [taperStart, 1.0] to [0.0, 1.0]
+                    float localT = (t - taperStart) / (1.0f - taperStart);
+                    taperFactor = Mathf.Lerp(1.0f, tipTargetScale, localT);
+                }
+                
                 currentRadius *= taperFactor;
             }
 
@@ -98,9 +103,6 @@ public class TentacleMesher : MonoBehaviour
                 float angle = (float)j / radialSegments * Mathf.PI * 2;
                 float x = Mathf.Cos(angle) * currentRadius;
                 float y = Mathf.Sin(angle) * currentRadius;
-
-                // Optional: If you want "Lip" shapes later, modify X and Y differently here
-                // e.g. if (mouthOpen > 0.5) y *= 0.5f; // Oval shape
 
                 Vector3 localCircleVert = new Vector3(x, y, 0);
                 Vector3 finalVert = pos + (rot * localCircleVert);

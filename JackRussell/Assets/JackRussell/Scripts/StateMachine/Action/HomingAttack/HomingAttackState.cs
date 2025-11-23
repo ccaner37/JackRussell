@@ -22,6 +22,8 @@ namespace JackRussell.States.Action
         private bool _effectTriggered;
         private bool _hitStopActive;
         private float _hitStopTimer;
+        private bool _isWaitingForTentacle;
+        private float _tentacleWaitTimer;
 
         public HomingAttackState(Player player, StateMachine stateMachine) : base(player, stateMachine)
         {
@@ -64,20 +66,26 @@ namespace JackRussell.States.Action
             _player.OnHomingAttackEnter();
 
             // Enable smoke effects
-            _player.EnableSmokeEffects();
+            //_player.EnableSmokeEffects();
 
             // initialize homing attack variables
             Vector3 toTarget = (_target.TargetTransform.position - _player.transform.position);
             _initialDistance = toTarget.magnitude;
             _reachTriggered = false;
             _hitStopActive = false;
+            _isWaitingForTentacle = true;
 
-            // request movement override toward target (will be refreshed each physics update)
-            Vector3 horiz = new Vector3(toTarget.x, 0f, toTarget.z);
-            Vector3 vel = (horiz.sqrMagnitude > 0.0001f ? horiz.normalized : Vector3.zero) * _speed;
-            // preserve current vertical velocity by adding rb.velocity.y
-            vel.y = _player.Rigidbody.linearVelocity.y;
-            _player.RequestMovementOverride(vel, _maxDuration, true);
+            // Stop player movement velocity / gravity
+            _player.SetVelocityImmediate(Vector3.zero);
+
+            // Enable tentacle grappling
+            _player.TentacleSplineController.isGrappling = true;
+            _player.PlaySound(Audio.SoundType.TentacleMoveStart);
+            _player.TentacleSplineController.targetTransform = _target.TargetTransform;
+
+            // Wait for tentacle shoot duration
+            _tentacleWaitTimer = _player.TentacleSplineController.shootDuration;
+            _player.RequestMovementOverride(Vector3.zero, _tentacleWaitTimer, true);
 
             // rotate towards target (full 3D rotation, instantaneous for initial snap)
             if (toTarget.sqrMagnitude > 0.0001f)
@@ -96,7 +104,10 @@ namespace JackRussell.States.Action
             _player.HideHomingIndicators();
 
             // Disable smoke effects with delay
-            _player.DisableSmokeEffects();
+            //_player.DisableSmokeEffects();
+
+            // Disable tentacle grappling
+            _player.TentacleSplineController.isGrappling = false;
 
             // Reset vertical rotation to horizontal
             Quaternion currentRot = _player.transform.rotation;
@@ -129,6 +140,24 @@ namespace JackRussell.States.Action
             if (_target == null || !_target.IsActive)
             {
                 ChangeState(new ActionNoneState(_player, _stateMachine));
+                return;
+            }
+
+            // Handle tentacle waiting phase
+            if (_isWaitingForTentacle)
+            {
+                _tentacleWaitTimer -= Time.fixedDeltaTime;
+                if (_tentacleWaitTimer <= 0f)
+                {
+                    _isWaitingForTentacle = false;
+                    OnTentacleWaitEnd();
+                    // Start moving towards enemy
+                    Vector3 toTargetWait = _target.TargetTransform.position - _player.transform.position;
+                    Vector3 horizWait = new Vector3(toTargetWait.x, 0f, toTargetWait.z);
+                    Vector3 vel = (horizWait.sqrMagnitude > 0.0001f ? horizWait.normalized : Vector3.zero) * _speed;
+                    vel.y = _player.Rigidbody.linearVelocity.y;
+                    _player.RequestMovementOverride(vel, _maxDuration, true);
+                }
                 return;
             }
 
@@ -218,6 +247,12 @@ namespace JackRussell.States.Action
                     _player.RotateTowardsDirection(toTarget, Time.fixedDeltaTime, isAir: true, instantaneous: false, allow3DRotation: true);
                 }
             }
+        }
+
+        private void OnTentacleWaitEnd()
+        {
+            _player.OnHomingAttackMovement();
+            _player.PlaySound(Audio.SoundType.TentacleMoveEnd);
         }
     }
 }
