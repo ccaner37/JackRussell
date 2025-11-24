@@ -728,7 +728,8 @@ public PostProcessingController PostProcessingController => _postProcessingContr
 
         public bool CanHomingAttack()
         {
-            return !_isGrounded && !_isRailGrinding;
+            var bestHomingTarget = FindBestHomingTarget(HomingRange, HomingConeAngle, HomingMask);
+            return !_isGrounded && !_isRailGrinding && bestHomingTarget != null;
         }
 
         /// <summary>

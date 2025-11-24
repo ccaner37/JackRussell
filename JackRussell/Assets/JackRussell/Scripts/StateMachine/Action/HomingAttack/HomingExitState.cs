@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using JackRussell;
 using JackRussell.States.Action;
 using JackRussell.CameraController;
@@ -19,12 +20,15 @@ namespace JackRussell.States.Action
         public override string Name => nameof(HomingExitState);
         
         /// <summary>
-        /// HomingExit blocks all locomotion to prevent interruption during the exit animation sequence.
+        /// HomingExit allows locomotion to enable fast-paced gameplay, but can be interrupted by new actions.
         /// </summary>
-        public override LocomotionType BlocksLocomotion => LocomotionType.All;
+        public override LocomotionType BlocksLocomotion => LocomotionType.None;
 
         public override void Enter()
         {
+            // Subscribe to inputs for interruption
+            _player.Actions.Player.Attack.performed += OnAttackPressed;
+
             // Randomly select from configured exit animations, avoiding the same as last time
             var exitAnimations = _player.HomingExitConfig.exitAnimations;
             if (exitAnimations.Count == 0)
@@ -77,8 +81,20 @@ namespace JackRussell.States.Action
             }
         }
 
+        private void OnAttackPressed(InputAction.CallbackContext context)
+        {
+            // Check if we can perform another homing attack
+            if (_player.CanHomingAttack())
+            {
+                ChangeState(new HomingAttackState(_player, _stateMachine));
+            }
+        }
+
         public override void Exit()
         {
+            // Unsubscribe from inputs
+            _player.Actions.Player.Attack.performed -= OnAttackPressed;
+
             if (_player.LocomotionStateName == "PathFollowState")
             {
                         _player.Animator.Play("thug_life");

@@ -16,6 +16,7 @@ namespace JackRussell.States.Action
         [SerializeField] private bool _isActive = true;
         [SerializeField] private ParticleSystem _hitEffect;
         [SerializeField] private MeshRenderer[] _hitEffectRenderers;
+        [SerializeField] private Collider _collider;
 
         public Transform TargetTransform => transform;
 
@@ -33,7 +34,9 @@ namespace JackRussell.States.Action
             OnHitMaterialEffect();
 
             // Example behavior: deactivate the target (could be destroy, apply damage, spring bounce, etc.)
-            transform.DOPunchScale(Vector3.one, 0.25f, 10, 1).OnComplete(() => StartCoroutine(TestingEnableBack()));
+            transform.DOPunchScale(Vector3.one, 0.15f, 10, 1);
+            _isActive = false;
+            StartCoroutine(TestingEnableBack());
         }
 
         private void OnHitMaterialEffect()
@@ -58,18 +61,19 @@ namespace JackRussell.States.Action
 
         private IEnumerator TestingEnableBack()
         {
-            //yield return new WaitForSeconds(0.1f);
-            _isActive = false;
+            yield return new WaitForSeconds(0.15f);
             foreach (var renderer in _hitEffectRenderers)
             {
                 renderer.enabled = false;
             }
+            _collider.enabled = false;
             yield return new WaitForSeconds(2f);
             foreach (var renderer in _hitEffectRenderers)
             {
                 renderer.enabled = true;
             }
             _isActive = true;
+            _collider.enabled = true;
 
             foreach (var renderer in _hitEffectRenderers)
             {

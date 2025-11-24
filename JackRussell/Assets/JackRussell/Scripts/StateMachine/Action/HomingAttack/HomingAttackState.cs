@@ -128,20 +128,20 @@ namespace JackRussell.States.Action
             }
 
             // if the target became invalid, abort
-            if (_target == null || !_target.IsActive)
-            {
-                ChangeState(new ActionNoneState(_player, _stateMachine));
-                return;
-            }
+            // if (_target == null || !_target.IsActive)
+            // {
+            //     ChangeState(new ActionNoneState(_player, _stateMachine));
+            //     return;
+            // }
         }
 
         public override void PhysicsUpdate()
         {
-            if (_target == null || !_target.IsActive)
-            {
-                ChangeState(new ActionNoneState(_player, _stateMachine));
-                return;
-            }
+            // if (_target == null || !_target.IsActive)
+            // {
+            //     ChangeState(new ActionNoneState(_player, _stateMachine));
+            //     return;
+            // }
 
             // Handle tentacle waiting phase
             if (_isWaitingForTentacle)
