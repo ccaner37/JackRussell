@@ -144,6 +144,7 @@ namespace JackRussell
         private bool _isGrounded;
         private bool _isRailGrinding;
         private bool _isSprinting;
+        private bool _isHomingAttack;
         private bool _wasGrounded;
         private Vector3 _groundNormal = Vector3.up;
 
@@ -183,6 +184,7 @@ namespace JackRussell
         public bool IsGrounded => _isGrounded;
         public bool IsRailGrinding => _isRailGrinding;
         public bool IsSprinting => _isSprinting;
+        public bool IsHomingAttack => _isHomingAttack;
         public Vector3 GroundNormal => _groundNormal;
         public float WalkSpeed => _walkSpeed;
         public float RunSpeed => _runSpeed;
@@ -729,7 +731,7 @@ public PostProcessingController PostProcessingController => _postProcessingContr
         public bool CanHomingAttack()
         {
             var bestHomingTarget = FindBestHomingTarget(HomingRange, HomingConeAngle, HomingMask);
-            return !_isGrounded && !_isRailGrinding && bestHomingTarget != null;
+            return !_isGrounded && !_isRailGrinding && !_isHomingAttack && bestHomingTarget != null;
         }
 
         /// <summary>
@@ -1011,6 +1013,7 @@ public PostProcessingController PostProcessingController => _postProcessingContr
 
         public void OnHomingAttackEnter()
         {
+            _isHomingAttack = true;
             Animator.ResetTrigger("HomingAttackReach");
             foreach (var trail in _homingAttackTrailRenderers)
             {
@@ -1035,6 +1038,11 @@ public PostProcessingController PostProcessingController => _postProcessingContr
             {
                 trail.emitting = false;
             }
+        }
+
+        public void OnHomingAttackExit()
+        {
+            _isHomingAttack = false;
         }
 
         // Instant versions for editor testing

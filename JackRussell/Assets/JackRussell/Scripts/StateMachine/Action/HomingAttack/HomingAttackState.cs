@@ -102,6 +102,7 @@ namespace JackRussell.States.Action
         {
             _player.ClearMovementOverride();
             _player.HideHomingIndicators();
+            _player.OnHomingAttackExit();
 
             // Disable smoke effects with delay
             //_player.DisableSmokeEffects();
