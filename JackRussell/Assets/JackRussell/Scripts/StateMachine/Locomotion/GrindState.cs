@@ -34,6 +34,7 @@ namespace JackRussell.States.Locomotion
         private const float k_GravityMultiplier = 0.3f; // Reduced gravity while grinding
         private const float k_RailFriction = 0.05f; // Friction applied to rail movement
         private const float k_DismountJumpMultiplier = 1.2f; // Extra jump power when dismounting
+        private const float k_FastPositionSmoothTime = 0.02f; // Faster smoothing for precise attachment
 
         public GrindState(Player player, StateMachine stateMachine) : base(player, stateMachine)
         {
@@ -91,12 +92,12 @@ namespace JackRussell.States.Locomotion
             _player.Actions.Player.Sprint.canceled += OnSprintCanceled;
 
             // Set initial position on rail
-            if (_railDetector.GetCurrentRailPosition(out Vector3 railPos, out Vector3 tangent))
+            if (_railDetector.GetCurrentRailPosition(out Vector3 railPos, out Vector3 tangent, out Vector3 up))
             {
                 _player.transform.position = railPos;
 
                 // Debug: Check tangent validity
-                Debug.Log($"[GrindState] Attach at distance {_currentDistance:F3}, Tangent: {tangent}, Magnitude: {tangent.magnitude}");
+                Debug.Log($"[GrindState] Attach at distance {_currentDistance:F3}, Tangent: {tangent}, Up: {up}, Magnitude: {tangent.magnitude}");
 
                 // Safeguard: ensure tangent is valid
                 if (tangent.sqrMagnitude < 0.1f)
@@ -149,7 +150,7 @@ namespace JackRussell.States.Locomotion
             if (_currentRail == null || !_railDetector.IsAttached) return;
 
             // Get current rail position and tangent
-            if (!_railDetector.GetCurrentRailPosition(out Vector3 targetPos, out Vector3 tangent))
+            if (!_railDetector.GetCurrentRailPosition(out Vector3 targetPos, out Vector3 tangent, out Vector3 up))
             {
                 // Lost rail, transition to fall
                 ChangeState(new FallState(_player, _stateMachine));
@@ -172,24 +173,18 @@ namespace JackRussell.States.Locomotion
             _currentDistance = _railDetector.CurrentDistance;
 
             // Get new position
-            if (!_railDetector.GetCurrentRailPosition(out targetPos, out tangent))
+            if (!_railDetector.GetCurrentRailPosition(out targetPos, out tangent, out up))
             {
                 ChangeState(new FallState(_player, _stateMachine));
                 Debug.LogError("GetCurrentRailPosition2");
                 return;
             }
 
-            targetPos.y += 0.2f;
+            targetPos += up * 0.2f;
 
-            // Move player along rail
+            // Move player along rail (fast smoothing for precise attachment feel)
             Vector3 currentPos = _player.transform.position;
-            Vector3 newPos = Vector3.Lerp(currentPos, targetPos, deltaTime / k_PositionSmoothTime);
-
-            // Debug: Check if we're at the start and having issues
-            if (_currentDistance < 0.1f)
-            {
-                Debug.Log($"[GrindState] Physics at start - Current: {currentPos}, Target: {targetPos}, Distance: {_currentDistance:F3}");
-            }
+            Vector3 newPos = Vector3.Lerp(currentPos, targetPos, deltaTime / k_FastPositionSmoothTime);
 
             // Apply reduced gravity while grinding
             Vector3 velocity = (newPos - currentPos) / deltaTime;
@@ -200,11 +195,12 @@ namespace JackRussell.States.Locomotion
 
             _player.SetVelocityImmediate(velocity);
 
-            // Rotate player to face rail direction (use tangent for proper 3D alignment)
-            if (tangent.sqrMagnitude > 0.1f)
+            // Rotate player to face rail direction with proper up alignment for 3D curves
+            if (tangent.sqrMagnitude > 0.1f && up.sqrMagnitude > 0.1f)
             {
                 Vector3 grindDirection = _railDetector.GrindForward ? tangent : -tangent;
-                _player.RotateTowardsDirection(grindDirection, deltaTime, isAir: false, instantaneous: false, allow3DRotation: true);
+                Quaternion targetRotation = Quaternion.LookRotation(grindDirection, up);
+                _player.transform.rotation = Quaternion.RotateTowards(_player.transform.rotation, targetRotation, 720f * deltaTime);
             }
 
             _lastPosition = newPos;

@@ -235,12 +235,22 @@ namespace JackRussell.Rails
         /// </summary>
         public bool GetCurrentRailPosition(out Vector3 position, out Vector3 tangent)
         {
+            Vector3 up;
+            return GetCurrentRailPosition(out position, out tangent, out up);
+        }
+
+        /// <summary>
+        /// Get current position, tangent, and up vector on the rail
+        /// </summary>
+        public bool GetCurrentRailPosition(out Vector3 position, out Vector3 tangent, out Vector3 up)
+        {
             position = Vector3.zero;
             tangent = Vector3.forward;
+            up = Vector3.up;
 
             if (!_isAttached || _currentRail == null) return false;
 
-            return _currentRail.GetPositionAndTangent(_currentDistance, out position, out tangent);
+            return _currentRail.GetPositionAndTangent(_currentDistance, out position, out tangent, out up);
         }
 
         /// <summary>

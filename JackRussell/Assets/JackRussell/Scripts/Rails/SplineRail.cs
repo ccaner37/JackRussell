@@ -93,8 +93,18 @@ namespace JackRussell.Rails
         /// </summary>
         public bool GetPositionAndTangent(float distance, out Vector3 position, out Vector3 tangent)
         {
+            Vector3 up;
+            return GetPositionAndTangent(distance, out position, out tangent, out up);
+        }
+
+        /// <summary>
+        /// Get position, tangent, and up vector at a specific distance along the rail
+        /// </summary>
+        public bool GetPositionAndTangent(float distance, out Vector3 position, out Vector3 tangent, out Vector3 up)
+        {
             position = Vector3.zero;
             tangent = Vector3.forward;
+            up = Vector3.up;
 
             if (!_isInitialized) return false;
 
@@ -109,10 +119,12 @@ namespace JackRussell.Rails
             _spline.Evaluate(t, out float3 pos, out float3 tan, out upVector);
             position = pos;
             tangent = tan;
+            up = upVector;
 
             // Transform to world space
             position = _splineContainer.transform.TransformPoint(position);
             tangent = _splineContainer.transform.TransformDirection(tangent);
+            up = _splineContainer.transform.TransformDirection(up);
 
             return true;
         }
