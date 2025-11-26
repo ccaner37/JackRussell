@@ -18,13 +18,13 @@ Material:
   - _LIGHTMODEL_TOON
   - _MATCAPBLENDMODE_MULTIPLY
   - _NORMAL_MAP_ON
-  - _OUTLINETYPE_CONSTANT
+  - _OUTLINETYPE_SIMPLE
   - _RECEIVE_SHADOWS_ON
   - _REFLECTIONS_CLASSIC
   - _RIMLIGHTINGSTAGE_BEFORELIGHTINGLAST
+  - _RIM_LIGHTING_ON
   - _SHADINGMODEL_PBR
   - _SPECULARMODEL_CLASSIC
-  - _SUBSURFACE_SCATTERING_ON
   - _TEXTUREBLENDINGMODE_RGB
   - _USE_WIND_VERTICAL_MASK
   m_InvalidKeywords:
@@ -58,15 +58,15 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BlendingNormalMapB:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 6246e3fe4a63c1f4f9acec9623576fc7, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BlendingNormalMapG:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 8175cba73bf87af41aeba7bbd2f3c4cd, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BlendingNormalMapWhite:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 8175cba73bf87af41aeba7bbd2f3c4cd, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BlendingTextureB:
@@ -78,7 +78,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BlendingTextureWhite:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 2af6ba1567607124eb61349fa044375b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ColorRampTex:
@@ -122,7 +122,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TexBlendingMask:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 5a775794f8704ba4385b9c92cf9f1224, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ToonRamp:
@@ -130,7 +130,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TriplanarTopNormalMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 8175cba73bf87af41aeba7bbd2f3c4cd, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TriplanarTopTex:
@@ -263,14 +263,14 @@ Material:
     - _MinDistanceToFade: 0
     - _MinGradientHeight: 0
     - _MinInflate: 0
-    - _MinRim: 0
+    - _MinRim: 0.5
     - _NearFade: 0
     - _NormalInfluence: 0.5
     - _NormalMapEnabled: 1
     - _NormalStrength: 1
     - _OutlineMode: 6
-    - _OutlineThickness: 2
-    - _OutlineType: 2
+    - _OutlineThickness: 0.5
+    - _OutlineType: 1
     - _Pixelate: 0
     - _PixelateSize: 32
     - _Posterize: 0
@@ -283,7 +283,7 @@ Material:
     - _ReflectionsAtten: 1
     - _RenderPreset: 1
     - _RimAttenuation: 1
-    - _RimLighting: 0
+    - _RimLighting: 1
     - _RimLightingStage: 1
     - _SSSAtten: 1
     - _SSSFrontAtten: 0.3
@@ -309,7 +309,7 @@ Material:
     - _StochasticSampling: 0
     - _StochasticScale: 3.464
     - _StochasticSkew: 0.57735026
-    - _SubsurfaceScattering: 1
+    - _SubsurfaceScattering: 0
     - _TextureBlending: 0
     - _TextureBlendingMode: 0
     - _TextureBlendingSource: 0
@@ -360,8 +360,8 @@ Material:
     - _HitColor: {r: 1, g: 1, b: 1, a: 1}
     - _HologramColor: {r: 1.25, g: 2.8, b: 6.8, a: 1}
     - _HologramLineDirection: {r: 0, g: 1, b: 0, a: 0}
-    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
-    - _RimColor: {r: 1, g: 1, b: 1, a: 1}
+    - _OutlineColor: {r: 0.050980393, g: 0.050980393, b: 0.050980393, a: 1}
+    - _RimColor: {r: 0.88235295, g: 0.9411765, b: 1, a: 1}
     - _RimOffset: {r: 0, g: 0, b: 0, a: 0}
     - _SSSColor: {r: 1, g: 0.9002614, b: 0.7877358, a: 1}
     - _ShakeMaxDisplacement: {r: 0.1, g: 0.1, b: 0.1, a: 0}
