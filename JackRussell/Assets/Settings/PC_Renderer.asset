@@ -109,6 +109,42 @@ MonoBehaviour:
   fadeStrength: 2
   speedLinesColor: {r: 1, g: 1, b: 1, a: 1}
   renderPassEvent: 600
+--- !u!114 &-1881650197544211418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c53165b379c3d94ca34b12cb8eb10f1, type: 3}
+  m_Name: VolFx
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  _event: 550
+  _format:
+    enabled: 1
+    value: 0
+  _mask:
+    enabled: 0
+    value:
+      serializedVersion: 2
+      m_Bits: 0
+  _source:
+    _source: 0
+    _globalTex: _inputTex
+    _renderTex: {fileID: 0}
+    _pool: {fileID: 0}
+  _output:
+    _output: 0
+    _renderTex: {fileID: 0}
+    _outputTex: _VolFxTex
+    _sortingOrder: 0
+    _camDistance: 100
+  _passes:
+    m_List: []
+  _blitShader: {fileID: 4800000, guid: a8a709d9db2241741ab3032b946ef258, type: 3}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
