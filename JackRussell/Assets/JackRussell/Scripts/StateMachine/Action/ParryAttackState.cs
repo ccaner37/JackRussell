@@ -66,7 +66,7 @@ namespace JackRussell.States.Action
             _player.StartCoroutine(ParrySequence());
         }
         
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // Disable parry effects
             _player.DisableSmokeEffects();

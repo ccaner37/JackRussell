@@ -15,7 +15,7 @@ namespace JackRussell.States.Action
             _player.StartLoopedSound(Audio.SoundType.InhaleLoop);
         }
 
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             _player.StopLoopedSound(Audio.SoundType.InhaleLoop);
         }

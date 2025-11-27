@@ -19,9 +19,10 @@ namespace JackRussell.States
         Fall = 1 << 7,
         Land = 1 << 8,
         PathFollow = 1 << 9,
+        DashPanel = 1 << 10,
 
         // Combinations for convenience
-        All = Move | Sprint | Jump | FastFall | Dash | Grind | Crouch | Fall | Land | PathFollow,
+        All = Move | Sprint | Jump | FastFall | Dash | Grind | Crouch | Fall | Land | PathFollow | DashPanel,
         Movement = Move | Sprint | Jump | FastFall | Dash,
         AirControl = Jump | FastFall | Dash | Fall
     }

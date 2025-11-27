@@ -44,7 +44,7 @@ namespace JackRussell.States.Locomotion
             // If attack requested, action state machine handles it (action SM runs in Player)
         }
 
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // Unsubscribe
             _player.Actions.Player.Sprint.performed -= OnSprintPressed;

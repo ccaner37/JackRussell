@@ -57,7 +57,7 @@ namespace JackRussell.States.Locomotion
             // Allow action states to trigger overrides (handled elsewhere)
         }
 
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // Unsubscribe
             _player.Actions.Player.Sprint.performed -= OnSprintPressed;

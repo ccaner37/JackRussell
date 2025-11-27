@@ -25,7 +25,7 @@ namespace JackRussell.Enemies
             _turret.EnableCooldownEffects();
         }
         
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // Disable cooldown effects
             _turret.DisableCooldownEffects();

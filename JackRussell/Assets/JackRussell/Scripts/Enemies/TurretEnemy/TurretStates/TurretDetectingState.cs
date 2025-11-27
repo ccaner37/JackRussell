@@ -26,7 +26,7 @@ namespace JackRussell.Enemies
             _turret.EnableDetectionEffects();
         }
         
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // Disable detection effects
             _turret.DisableDetectionEffects();

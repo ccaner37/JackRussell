@@ -30,7 +30,7 @@ namespace JackRussell.States
 
         public virtual void Enter() { }
 
-        public virtual void Exit() { }
+        public virtual void Exit(IState nextState = null) { }
 
         public virtual void LogicUpdate() { }
 

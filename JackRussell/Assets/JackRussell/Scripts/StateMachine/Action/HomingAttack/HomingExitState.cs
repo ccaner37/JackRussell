@@ -90,7 +90,7 @@ namespace JackRussell.States.Action
             }
         }
 
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // Unsubscribe from inputs
             _player.Actions.Player.Attack.performed -= OnAttackPressed;

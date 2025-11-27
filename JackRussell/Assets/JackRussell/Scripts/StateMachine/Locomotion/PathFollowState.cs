@@ -86,7 +86,7 @@ namespace JackRussell.States.Locomotion
             }
         }
 
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // No special cleanup needed
         }

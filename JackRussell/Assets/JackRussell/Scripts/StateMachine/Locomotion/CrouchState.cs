@@ -22,7 +22,7 @@ namespace JackRussell.States.Locomotion
             _player.Animator.SetBool(Animator.StringToHash("IsCrouching"), true);
         }
 
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             _player.Animator.SetBool(Animator.StringToHash("IsCrouching"), false);
         }

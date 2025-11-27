@@ -30,11 +30,11 @@ namespace JackRussell.States.Locomotion
             _player.Actions.Player.Jump.performed += OnJumpPressed;
         }
 
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // Stop tentacle idle animation
             _player.TentacleController?.StopIdleAnimation();
-            
+
             // Unsubscribe
             _player.Actions.Player.Jump.performed -= OnJumpPressed;
         }

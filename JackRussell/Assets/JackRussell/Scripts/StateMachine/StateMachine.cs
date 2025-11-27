@@ -40,7 +40,7 @@ namespace JackRussell.States
             if (newState == null) throw new ArgumentNullException(nameof(newState));
             if (ReferenceEquals(newState, _current)) return;
 
-            _current?.Exit();
+            _current?.Exit(newState);
             _current = newState;
             _timeInState = 0f;
             _current.Enter();

@@ -810,6 +810,18 @@ public PostProcessingController PostProcessingController => _postProcessingContr
             }
         }
 
+        /// <summary>
+        /// Force the player into dash panel state along the specified spline path.
+        /// </summary>
+        public void EnterDashPanelState(JackRussell.Rails.SplinePath path, float speed, float duration, bool allowSprint = true, float sprintMultiplier = 1.5f)
+        {
+            if (path != null)
+            {
+                var dashState = new DashPanelState(this, _locomotionSM, path, speed, duration, allowSprint, sprintMultiplier);
+                _locomotionSM.ChangeState(dashState);
+            }
+        }
+
         public void OnSprintEnter()
         {
             _shockwaveParticle.Play();

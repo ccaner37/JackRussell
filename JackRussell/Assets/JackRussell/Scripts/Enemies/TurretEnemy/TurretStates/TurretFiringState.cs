@@ -25,7 +25,7 @@ namespace JackRussell.Enemies
             _turret.EnableFiringEffects();
         }
         
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // Disable firing effects
             _turret.DisableFiringEffects();

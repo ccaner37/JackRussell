@@ -19,7 +19,7 @@ namespace JackRussell.States
         /// <summary>
         /// Called once when the state is exited.
         /// </summary>
-        void Exit();
+        void Exit(IState nextState = null);
 
         /// <summary>
         /// Called every frame from Update() for non-physics logic / input handling.

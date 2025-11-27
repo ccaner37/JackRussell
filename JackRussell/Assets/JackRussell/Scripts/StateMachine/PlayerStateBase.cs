@@ -37,7 +37,7 @@ namespace JackRussell.States
         /// Called when the state is exited.
         /// Use this to clear parameters or stop coroutines.
         /// </summary>
-        public virtual void Exit() { }
+        public virtual void Exit(IState nextState = null) { }
 
         /// <summary>
         /// Called from Player.Update() for non-physics logic and input handling.

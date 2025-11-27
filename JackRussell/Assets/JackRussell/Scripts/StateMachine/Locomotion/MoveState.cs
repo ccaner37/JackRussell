@@ -29,7 +29,7 @@ namespace JackRussell.States.Locomotion
             _player.Actions.Player.Dash.performed += OnDashPressed;
         }
 
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // Unsubscribe
             _player.Actions.Player.Jump.performed -= OnJumpPressed;

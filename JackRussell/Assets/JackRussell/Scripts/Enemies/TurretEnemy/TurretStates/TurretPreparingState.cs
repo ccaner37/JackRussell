@@ -32,7 +32,7 @@ namespace JackRussell.Enemies
             _turret.StartCoroutine(ParryWindowSequence());
         }
         
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // Stop glow effect
             _turret.StopGlowEffect();

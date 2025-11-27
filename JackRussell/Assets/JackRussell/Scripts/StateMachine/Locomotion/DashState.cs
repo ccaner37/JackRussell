@@ -46,7 +46,7 @@ namespace JackRussell.States.Locomotion
             _player.PlaySound(Audio.SoundType.Dash);
         }
 
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // Clear dash velocity to prevent slipping
             _player.SetVelocityImmediate(Vector3.zero);

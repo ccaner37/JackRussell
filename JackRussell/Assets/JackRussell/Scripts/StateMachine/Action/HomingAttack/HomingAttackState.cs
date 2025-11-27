@@ -98,7 +98,7 @@ namespace JackRussell.States.Action
             _player.CommandPublisher.PublishAsync(new CameraStateUpdateCommand(3.3f, 100f));
         }
 
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             _player.ClearMovementOverride();
             _player.HideHomingIndicators();

@@ -77,7 +77,7 @@ namespace JackRussell.States.Locomotion
             _defaultSprintTime = 0f;
         }
 
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // Unsubscribe
             _player.Actions.Player.Jump.performed -= OnJumpPressed;
@@ -86,8 +86,18 @@ namespace JackRussell.States.Locomotion
             // Publish camera state update command to revert to default
             _commandPublisher.PublishAsync(new CameraStateUpdateCommand(transitionDuration: 0.3f));
 
-            // Stop sprinting in the controller
-            _sprintController?.StopSprint();
+            // Stop sprinting only if not transitioning to a state that allows sprint
+            if (nextState is PlayerStateBase nextPlayerState &&
+                (nextPlayerState.LocomotionType == LocomotionType.DashPanel ||
+                 nextPlayerState.LocomotionType == LocomotionType.Grind))
+            {
+                // Keep sprinting
+            }
+            else
+            {
+                // Stop sprinting in the controller
+                _sprintController?.StopSprint();
+            }
         }
 
         public override void LogicUpdate()

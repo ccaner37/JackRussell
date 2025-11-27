@@ -115,7 +115,7 @@ namespace JackRussell.States.Locomotion
             }
         }
 
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // Publish camera state update command to revert to default
             _commandPublisher.PublishAsync(new CameraStateUpdateCommand());
@@ -128,7 +128,18 @@ namespace JackRussell.States.Locomotion
             _railDetector.DetachFromRail();
             _currentRail = null;
             _player.OnGrindExit();
-            if (_player.IsSprinting) _sprintController.StopSprint();
+
+            // Stop sprinting only if not transitioning to a state that allows sprint
+            if (nextState is PlayerStateBase nextPlayerState &&
+                (nextPlayerState.LocomotionType == LocomotionType.DashPanel ||
+                 nextPlayerState.LocomotionType == LocomotionType.Grind))
+            {
+                // Keep sprinting
+            }
+            else
+            {
+                if (_player.IsSprinting) _sprintController.StopSprint();
+            }
         }
 
         public override void LogicUpdate()

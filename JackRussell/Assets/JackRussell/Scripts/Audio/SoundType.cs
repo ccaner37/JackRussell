@@ -24,5 +24,6 @@ namespace JackRussell.Audio
         HeavyPunch,
         TentacleMoveStart,
         TentacleMoveEnd,
+        DashPanelEnter,
     }
 }

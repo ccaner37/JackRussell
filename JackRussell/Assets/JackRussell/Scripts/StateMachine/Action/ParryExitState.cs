@@ -49,7 +49,7 @@ namespace JackRussell.States.Action
             //_player.PlaySound(Audio.SoundType.Jump);
         }
         
-        public override void Exit()
+        public override void Exit(IState nextState = null)
         {
             // Disable recovery effects
             _player.DisableSmokeEffects();
