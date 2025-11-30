@@ -1403,7 +1403,7 @@ MonoBehaviour:
   m_Name: Jpeg
   m_EditorClassIdentifier: 
   _active: 1
-  _shader: {fileID: 0}
+  _shader: {fileID: 4800000, guid: c87cb70bbf7424448b290759a6e27a96, type: 3}
 --- !u!114 &-6293240961524348392
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -1902,7 +1902,7 @@ MonoBehaviour:
     - {fileID: 4603053508349320540}
     - {fileID: -1971190782790212353}
     - {fileID: -2199452994592786874}
-    - {fileID: 6415587422668710723}
+    - {fileID: 0}
     - {fileID: 4068637316641339350}
     - {fileID: 5987759519609888380}
   _blitShader: {fileID: 4800000, guid: a8a709d9db2241741ab3032b946ef258, type: 3}
@@ -3224,7 +3224,7 @@ MonoBehaviour:
   m_Name: Jpeg
   m_EditorClassIdentifier: 
   _active: 1
-  _shader: {fileID: 0}
+  _shader: {fileID: 4800000, guid: c87cb70bbf7424448b290759a6e27a96, type: 3}
 --- !u!114 &-1758362552670884211
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -3394,7 +3394,7 @@ MonoBehaviour:
     - {fileID: -4257423273496752385}
     - {fileID: 6919079705327887024}
     - {fileID: 8088723223438040883}
-    - {fileID: -1696261682843467995}
+    - {fileID: 0}
     - {fileID: -1949278447087147400}
     - {fileID: 1759243646554307821}
     - {fileID: 3072093010266988080}
@@ -4123,7 +4123,7 @@ MonoBehaviour:
   m_Name: Jpeg
   m_EditorClassIdentifier: 
   _active: 1
-  _shader: {fileID: 0}
+  _shader: {fileID: 4800000, guid: c87cb70bbf7424448b290759a6e27a96, type: 3}
 --- !u!114 &165970556945247959
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -5734,7 +5734,7 @@ MonoBehaviour:
   m_Name: Warp
   m_EditorClassIdentifier: 
   _active: 1
-  _shader: {fileID: 0}
+  _shader: {fileID: 4800000, guid: c8ad0a2f4d91daa428cc0448e8687944, type: 3}
   _maskPower: 2
 --- !u!114 &3356084632516931071
 MonoBehaviour:
@@ -6131,7 +6131,7 @@ MonoBehaviour:
     - {fileID: -7654499882842191734}
     - {fileID: -4435753502278807470}
     - {fileID: -5918947707816620911}
-    - {fileID: -4691864259741191934}
+    - {fileID: 0}
     - {fileID: -2817415343270060667}
     - {fileID: 8375272415795312550}
     - {fileID: 2854339674567784643}
@@ -6276,7 +6276,7 @@ MonoBehaviour:
   m_Name: Jpeg
   m_EditorClassIdentifier: 
   _active: 1
-  _shader: {fileID: 0}
+  _shader: {fileID: 4800000, guid: c87cb70bbf7424448b290759a6e27a96, type: 3}
 --- !u!114 &4136514323097345858
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -6497,8 +6497,8 @@ MonoBehaviour:
   m_Name: Comics
   m_EditorClassIdentifier: 
   _active: 1
-  _shader: {fileID: 0}
-  _ditherTex: {fileID: 0}
+  _shader: {fileID: 4800000, guid: f97628ee99a0e10418407fba82d232cb, type: 3}
+  _ditherTex: {fileID: 2800000, guid: e470306b2a0935842a3dc6bdc1f3e813, type: 3}
 --- !u!114 &4857726858340676142
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -7360,7 +7360,7 @@ MonoBehaviour:
   m_Name: Warp
   m_EditorClassIdentifier: 
   _active: 1
-  _shader: {fileID: 0}
+  _shader: {fileID: 4800000, guid: c8ad0a2f4d91daa428cc0448e8687944, type: 3}
   _maskPower: 2
 --- !u!114 &5945225783884248284
 MonoBehaviour:
@@ -7404,7 +7404,7 @@ MonoBehaviour:
   m_Name: Warp
   m_EditorClassIdentifier: 
   _active: 1
-  _shader: {fileID: 0}
+  _shader: {fileID: 4800000, guid: c8ad0a2f4d91daa428cc0448e8687944, type: 3}
   _maskPower: 2
 --- !u!114 &6230838400150702978
 MonoBehaviour:
