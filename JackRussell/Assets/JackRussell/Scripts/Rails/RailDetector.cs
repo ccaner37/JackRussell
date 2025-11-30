@@ -54,7 +54,7 @@ namespace JackRussell.Rails
             if ((_detachedFromEnd || _jumpDismount) && Time.time - _lastDetachTime < 0.8f)
             {
                 string reason = _detachedFromEnd ? "end-of-rail detachment" : "jump dismount";
-                Debug.Log($"[RailDetector] Blocking reattachment - cooldown after {reason}");
+                //Debug.Log($"[RailDetector] Blocking reattachment - cooldown after {reason}");
                 return null;
             }
 

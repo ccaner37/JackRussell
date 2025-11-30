@@ -291,6 +291,8 @@ public PostProcessingController PostProcessingController => _postProcessingContr
         public ParticleSystem FootKickParticle => _footKickParticle;
         public Transform LeftFootTransform => _animator != null ? _animator.GetBoneTransform(HumanBodyBones.LeftFoot) : null;
 
+        public StateMachine LocomotionSM => _locomotionSM;
+
         /// <summary>
         /// Request a temporary rotation override. If exclusive=true locomotion rotation is suspended.
         /// </summary>
@@ -784,6 +786,11 @@ public PostProcessingController PostProcessingController => _postProcessingContr
         public void ForceEnterLocomotionState(IState state)
         {
             _locomotionSM.ForceSetState(state);
+        }
+
+        public void ChangeLocomotionState(IState state)
+        {
+            _locomotionSM.ChangeState(state);
         }
 
         /// <summary>

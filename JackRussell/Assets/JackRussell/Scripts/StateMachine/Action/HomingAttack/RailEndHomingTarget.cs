@@ -70,7 +70,7 @@ namespace JackRussell.States.Action
                 railDetector.UpdateRailPosition(targetDistance - railDetector.CurrentDistance);
                 
                 // Transition to grind state
-                ChangeToGrindState(player);
+                //ChangeToGrindState(player);
             }
             else
             {
@@ -83,13 +83,7 @@ namespace JackRussell.States.Action
         /// </summary>
         private void ChangeToGrindState(Player player)
         {
-            // Find the state machine
-            var stateMachine = player.GetComponent<StateMachine>();
-            if (stateMachine != null)
-            {
-                // Transition directly to grind state
-                stateMachine.ChangeState(new States.Locomotion.GrindState(player, stateMachine));
-            }
+            player.ChangeLocomotionState(new Locomotion.GrindState(player, player.LocomotionSM));
         }
         
         /// <summary>

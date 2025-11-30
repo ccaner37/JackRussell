@@ -58,7 +58,7 @@ namespace JackRussell.States
             // Check if this new locomotion type is allowed by the current action state
             if (!_player.IsLocomotionAllowed(newState.LocomotionType))
             {
-                Debug.LogWarning($"Locomotion {newState.LocomotionType} is blocked by current action state: {_player.ActionStateName}");
+                //Debug.LogWarning($"Locomotion {newState.LocomotionType} is blocked by current action state: {_player.ActionStateName}");
                 return;
             }
             

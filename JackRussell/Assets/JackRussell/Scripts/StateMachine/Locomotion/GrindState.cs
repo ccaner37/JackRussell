@@ -129,17 +129,7 @@ namespace JackRussell.States.Locomotion
             _currentRail = null;
             _player.OnGrindExit();
 
-            // Stop sprinting only if not transitioning to a state that allows sprint
-            if (nextState is PlayerStateBase nextPlayerState &&
-                (nextPlayerState.LocomotionType == LocomotionType.DashPanel ||
-                 nextPlayerState.LocomotionType == LocomotionType.Grind))
-            {
-                // Keep sprinting
-            }
-            else
-            {
-                if (_player.IsSprinting) _sprintController.StopSprint();
-            }
+            if (_player.IsSprinting) _sprintController.StopSprint();
         }
 
         public override void LogicUpdate()
@@ -148,7 +138,6 @@ namespace JackRussell.States.Locomotion
             if (_railDetector.ShouldDetach())
             {
                 ChangeState(new FallState(_player, _stateMachine));
-                Debug.LogError("ShouldDeatch1");
                 return;
             }
 

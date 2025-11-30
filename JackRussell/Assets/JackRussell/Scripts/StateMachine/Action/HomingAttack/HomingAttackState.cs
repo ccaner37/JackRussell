@@ -221,6 +221,7 @@ namespace JackRussell.States.Action
                     {
                         // Rail end target will handle the state transition to grind state
                         // Don't apply the normal homing attack effects or exit to HomingExitState
+                        ChangeState(new ActionNoneState(_player, _stateMachine));
                         return;
                     }
 
