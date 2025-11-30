@@ -7,6 +7,7 @@ using VContainer.Unity;
 using VitalRouter.VContainer;
 using JackRussell;
 using JackRussell.GamePostProcessing;
+using JackRussell.Enemies;
 
 namespace JackRussell.GameScope
 {
@@ -37,6 +38,10 @@ namespace JackRussell.GameScope
 
             // Register UI components
             builder.RegisterComponentInHierarchy<PressureBarUI>();
+            builder.RegisterComponentInHierarchy<ParticleEffectUI>();
+
+            // Register enemy components for DI
+            builder.RegisterComponentInHierarchy<JackRussell.Enemies.Enemy>();
 
             // Vital Router //
             builder.RegisterVitalRouter(routing =>

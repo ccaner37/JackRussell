@@ -2,6 +2,9 @@ using UnityEngine;
 using JackRussell.States.Action;
 using System.Collections;
 using DG.Tweening;
+using VContainer;
+using VitalRouter;
+using JackRussell;
 
 namespace JackRussell.Enemies
 {
@@ -16,6 +19,8 @@ namespace JackRussell.Enemies
         [SerializeField] protected bool _destroyOnDeath = true;
         [SerializeField] protected GameObject _deathEffectPrefab;
         [SerializeField] protected float _deathEffectDuration = 2f;
+
+        [Inject] private readonly ICommandPublisher _commandPublisher;
         
         [Header("Hit Effects")]
         [SerializeField] private ParticleSystem _hitEffect;
@@ -116,7 +121,7 @@ namespace JackRussell.Enemies
         public virtual void OnHomingHit(Player player)
         {
             // Default behavior: homing attack is lethal
-            TakeDamage(MaxHealth * 0.5f);
+            TakeDamage(50);
             
             // Play hit effects
             PlayHomingHitEffects();
@@ -153,10 +158,13 @@ namespace JackRussell.Enemies
         {
             //_isActive = false;
             StartCoroutine(TestingEnableBack());
-            
+
             // Play death effects
             PlayDeathEffects();
-            
+
+            // Publish particle collection command
+            _commandPublisher.PublishAsync(new PressureCollectParticleCommand(transform.position));
+
             // Handle destruction
             // if (_destroyOnDeath)
             // {
