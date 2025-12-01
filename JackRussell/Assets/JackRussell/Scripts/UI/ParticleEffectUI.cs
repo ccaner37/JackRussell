@@ -1,10 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 using VContainer;
 using VitalRouter;
 using DG.Tweening;
 using System.Collections.Generic;
 using Coffee.UIExtensions;
+using JackRussell.Audio;
 
 namespace JackRussell.UI
 {
@@ -20,6 +22,7 @@ namespace JackRussell.UI
         [SerializeField] private int _particleCount = 5; // Number of particles to spawn
 
         [Inject] private readonly ICommandSubscribable _commandSubscribable;
+        [Inject] private readonly AudioManager _audioManager;
 
         private Camera _mainCamera;
         private List<GameObject> _activeParticles = new List<GameObject>();
@@ -62,11 +65,10 @@ namespace JackRussell.UI
             Vector2 targetPos = _targetRectTransform.localPosition;
             Debug.LogError(targetPos);
 
-            // Spawn particles
+            // Spawn particles with random delays
             for (int i = 0; i < _particleCount; i++)
             {
                 GameObject particle = Instantiate(_particlePrefab, _canvas.transform);
-                particle.SetActive(true);
                 RectTransform particleRect = particle.GetComponent<RectTransform>();
                 particleRect.localPosition = canvasPos + Random.insideUnitCircle * 100f; // Slight random offset
 
@@ -74,32 +76,57 @@ namespace JackRussell.UI
                 var uiParticle = particle.GetComponent<UIParticle>();
                 uiParticle.scale = scale;
 
-                // Animate to target with curved path
-                AnimateParticle(particleRect, uiParticle, targetPos, scale);
+                // Random delay before starting animation
+                float delay = Random.Range(0.01f, 0.02f) + (i * 0.06f);
+                DOVirtual.DelayedCall(delay, () => AnimateParticle(particleRect, uiParticle, targetPos, scale));
             }
         }
 
         private void AnimateParticle(RectTransform particleRect, UIParticle uiParticle, Vector2 targetPos, float initialScale)
         {
-            // Create a curved path using bezier
+            particleRect.gameObject.SetActive(true);
+
             Vector2 startPos = particleRect.localPosition;
-            Vector2 controlPoint = (startPos + targetPos) / 2 + Vector2.up * 100f; // Control point above
 
-            // Animate position
-            particleRect.DOLocalPath(
-                new Vector3[] { startPos, controlPoint, targetPos },
-                _animationDuration,
-                PathType.CatmullRom
-            ).SetEase(Ease.InOutQuad);
+            // Create sequence
+            Sequence sequence = DOTween.Sequence();
 
-            // Animate scale to grow bigger
-            DOTween.To(() => uiParticle.scale, x => uiParticle.scale = x, initialScale * 2f, _animationDuration)
-                .SetEase(Ease.InOutQuad)
-                .OnComplete(() =>
-                {
-                    // Cleanup
-                    Destroy(particleRect.gameObject);
-                });
+            // Phase 1: Move up with some random X
+            float upDistance = Random.Range(300, 350);
+            float xAmount = Random.Range(-50f, 50f); // Random left/right
+            Vector2 upPos = startPos + Vector2.up * upDistance + Vector2.right * xAmount;
+            float upDuration = _animationDuration * 0.6f;
+
+            sequence.Append(
+                particleRect.DOLocalMove(upPos, upDuration).SetEase(Ease.OutQuad)
+            );
+
+            // Phase 2: Instant curve to target
+            Vector2 controlPoint = (upPos + targetPos) / 2 + Vector2.up * 100f;
+            float curveDuration = _animationDuration * 0.4f;
+
+            sequence.Append(
+                particleRect.DOLocalPath(
+                    new Vector3[] { upPos, controlPoint, targetPos },
+                    curveDuration,
+                    PathType.CatmullRom
+                ).SetEase(Ease.InOutQuad)
+            );
+
+            // Animate scale to grow bigger over total duration
+            sequence.Insert(0,
+                DOTween.To(() => uiParticle.scale, x => uiParticle.scale = x, initialScale * 2f, _animationDuration)
+                    .SetEase(Ease.InOutQuad)
+            );
+
+            // On complete
+            sequence.OnComplete(() =>
+            {
+                _audioManager.PlaySound(SoundType.PressureCollectParticle);
+                Destroy(particleRect.gameObject);
+            });
+
+            sequence.Play();
         }
     }
 }

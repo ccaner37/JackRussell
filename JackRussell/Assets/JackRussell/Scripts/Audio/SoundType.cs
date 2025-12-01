@@ -25,5 +25,7 @@ namespace JackRussell.Audio
         TentacleMoveStart,
         TentacleMoveEnd,
         DashPanelEnter,
+        PressureCollectParticle,
+        ZombieVaporize,
     }
 }

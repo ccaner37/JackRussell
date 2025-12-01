@@ -24,7 +24,7 @@ namespace JackRussell.Enemies
         
         [Header("Hit Effects")]
         [SerializeField] private ParticleSystem _hitEffect;
-        [SerializeField] private MeshRenderer[] _hitEffectRenderers;
+        [SerializeField] private Renderer[] _hitEffectRenderers;
         
         protected bool IsEnemyActive => _isActive;
         
@@ -150,6 +150,17 @@ namespace JackRussell.Enemies
             // Override for custom behaviors like launching the player or special effects
         }
         
+        /// <summary>
+        /// Called when the player sprints near this enemy.
+        /// Default implementation applies lethal damage, but can be overridden for custom behaviors.
+        /// </summary>
+        /// <param name="player">Player that triggered the sprint kill</param>
+        public virtual void OnSprintKill(Player player)
+        {
+            // Default behavior: lethal damage
+            TakeDamage(CurrentHealth);
+        }
+
         /// <summary>
         /// Called when health reaches zero.
         /// Handles death effects and cleanup.
