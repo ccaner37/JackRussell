@@ -278,6 +278,7 @@ public PostProcessingController PostProcessingController => _postProcessingContr
         [Inject] private readonly AudioManager _audioManager;
         [Inject] private readonly HomingIndicatorManager _indicatorManager;
         [Inject] private readonly ICommandPublisher _commandPublisher;
+        [Inject] private readonly ICommandSubscribable _commandSubscribable;
         [Inject] private readonly HomingExitAnimationConfig _homingExitConfig;
 
         public ICommandPublisher CommandPublisher => _commandPublisher;
@@ -546,6 +547,9 @@ public PostProcessingController PostProcessingController => _postProcessingContr
             _actions.Player.Inhale.canceled += ctx => _inhaleInput = false;
             _actions.Player.Crouch.performed += ctx => _crouchInput = true;
             _actions.Player.Crouch.canceled += ctx => _crouchInput = false;
+
+            // Subscribe to pressure particle collection
+            _commandSubscribable.Subscribe<PressureParticleCollectedCommand>((cmd, ctx) => OnPressureParticleCollected(cmd));
 
             // initialize states (create initial state instances)
             var idle = new IdleState(this, _locomotionSM);
@@ -1238,10 +1242,15 @@ public PostProcessingController PostProcessingController => _postProcessingContr
         {
             _footIK.enabled = false;
         }
-        
+
         public void EnableFootIK()
         {
             _footIK.enabled = true;
+        }
+
+        private void OnPressureParticleCollected(PressureParticleCollectedCommand command)
+        {
+            SetPressure(Pressure + command.PressureAmount);
         }
 
         public void OnDashEnter()

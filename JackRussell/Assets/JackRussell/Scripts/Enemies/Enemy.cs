@@ -19,6 +19,7 @@ namespace JackRussell.Enemies
         [SerializeField] protected bool _destroyOnDeath = true;
         [SerializeField] protected GameObject _deathEffectPrefab;
         [SerializeField] protected float _deathEffectDuration = 2f;
+        [SerializeField] protected float _pressureGain = 10f;
 
         [Inject] private readonly ICommandPublisher _commandPublisher;
         
@@ -177,7 +178,7 @@ namespace JackRussell.Enemies
             PlayDeathEffects();
 
             // Publish particle collection command
-            _commandPublisher.PublishAsync(new PressureCollectParticleCommand(transform.position));
+            _commandPublisher.PublishAsync(new PressureCollectParticleCommand(transform.position, _pressureGain));
 
             // Handle destruction
             // if (_destroyOnDeath)

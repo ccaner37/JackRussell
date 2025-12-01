@@ -22,6 +22,7 @@ namespace JackRussell.UI
         [SerializeField] private int _particleCount = 5; // Number of particles to spawn
 
         [Inject] private readonly ICommandSubscribable _commandSubscribable;
+        [Inject] private readonly ICommandPublisher _commandPublisher;
         [Inject] private readonly AudioManager _audioManager;
 
         private Camera _mainCamera;
@@ -39,12 +40,15 @@ namespace JackRussell.UI
 
         private void OnPressureCollectParticle(PressureCollectParticleCommand command)
         {
-            SpawnParticles(command.EnemyWorldPosition);
+            SpawnParticles(command.EnemyWorldPosition, command.TotalPressure);
         }
 
-        private void SpawnParticles(Vector3 enemyWorldPosition)
+        private void SpawnParticles(Vector3 enemyWorldPosition, float totalPressure)
         {
             if (_canvas == null || _targetRectTransform == null || _particlePrefab == null) return;
+
+            // Calculate pressure per particle
+            float pressurePerParticle = totalPressure / _particleCount;
 
             // Convert world position to viewport position (0-1)
             Vector3 viewportPos = _mainCamera.WorldToViewportPoint(enemyWorldPosition);
@@ -77,11 +81,11 @@ namespace JackRussell.UI
 
                 // Random delay before starting animation
                 float delay = Random.Range(0.01f, 0.02f) + (i * 0.06f);
-                DOVirtual.DelayedCall(delay, () => AnimateParticle(particleRect, uiParticle, targetPos, scale));
+                DOVirtual.DelayedCall(delay, () => AnimateParticle(particleRect, uiParticle, targetPos, scale, pressurePerParticle));
             }
         }
 
-        private void AnimateParticle(RectTransform particleRect, UIParticle uiParticle, Vector2 targetPos, float initialScale)
+        private void AnimateParticle(RectTransform particleRect, UIParticle uiParticle, Vector2 targetPos, float initialScale, float pressurePerParticle)
         {
             particleRect.gameObject.SetActive(true);
 
@@ -122,6 +126,7 @@ namespace JackRussell.UI
             sequence.OnComplete(() =>
             {
                 _audioManager.PlaySound(SoundType.PressureCollectParticle);
+                _commandPublisher.PublishAsync(new PressureParticleCollectedCommand(pressurePerParticle));
                 Destroy(particleRect.gameObject);
             });
 
