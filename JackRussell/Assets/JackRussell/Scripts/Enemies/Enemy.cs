@@ -25,6 +25,7 @@ namespace JackRussell.Enemies
         [Header("Hit Effects")]
         [SerializeField] private ParticleSystem _hitEffect;
         [SerializeField] private Renderer[] _hitEffectRenderers;
+        [SerializeField] private Collider _collider;
         
         protected bool IsEnemyActive => _isActive;
         
@@ -56,6 +57,7 @@ namespace JackRussell.Enemies
         {
             yield return new WaitForSeconds(0.25f);
             _isActive = false;
+            _collider.enabled = false;
             foreach (var renderer in _hitEffectRenderers)
             {
                 if (renderer != null)
@@ -68,6 +70,7 @@ namespace JackRussell.Enemies
                     renderer.enabled = true;
             }
             _isActive = true;
+            _collider.enabled = true;
             CurrentHealth = _maxHealth;
         }
         

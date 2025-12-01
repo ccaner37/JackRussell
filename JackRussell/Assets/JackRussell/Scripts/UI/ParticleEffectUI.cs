@@ -63,7 +63,6 @@ namespace JackRussell.UI
 
             // Target position is the local position of the target RectTransform
             Vector2 targetPos = _targetRectTransform.localPosition;
-            Debug.LogError(targetPos);
 
             // Spawn particles with random delays
             for (int i = 0; i < _particleCount; i++)
