@@ -56,9 +56,9 @@ namespace JackRussell.Enemies
         
         private IEnumerator TestingEnableBack()
         {
-            yield return new WaitForSeconds(0.25f);
             _isActive = false;
             _collider.enabled = false;
+            yield return new WaitForSeconds(0.25f);
             foreach (var renderer in _hitEffectRenderers)
             {
                 if (renderer != null)
