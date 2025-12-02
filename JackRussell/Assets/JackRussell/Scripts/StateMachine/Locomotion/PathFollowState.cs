@@ -10,7 +10,7 @@ namespace JackRussell.States.Locomotion
     /// </summary>
     public class PathFollowState : PlayerStateBase
     {
-        private SplineRail _path;
+        private SplinePath _path;
         private float _currentDistance;
         private float _pathSpeed;
         private Vector3 _lastPosition;
@@ -24,13 +24,13 @@ namespace JackRussell.States.Locomotion
         private const float k_PathSpeed = 25f; // Fixed speed for path following
         private const float k_PositionSmoothTime = 0.1f;
 
-        public PathFollowState(Player player, StateMachine stateMachine, SplineRail path) : base(player, stateMachine)
+        public PathFollowState(Player player, StateMachine stateMachine, SplinePath path) : base(player, stateMachine)
         {
             _path = path;
             _pathSpeed = k_PathSpeed;
         }
 
-        public PathFollowState(Player player, StateMachine stateMachine, SplineRail path, AnimationCurve speedCurve, float duration) : base(player, stateMachine)
+        public PathFollowState(Player player, StateMachine stateMachine, SplinePath path, AnimationCurve speedCurve, float duration) : base(player, stateMachine)
         {
             _path = path;
             _speedCurve = speedCurve;
@@ -51,7 +51,7 @@ namespace JackRussell.States.Locomotion
                 return;
             }
 
-            _player.Animator.Play("thug_life");
+            //_player.Animator.Play("thug_life");
 
             // Find closest point on path to start
             _currentDistance = _path.FindClosestDistance(_player.transform.position);

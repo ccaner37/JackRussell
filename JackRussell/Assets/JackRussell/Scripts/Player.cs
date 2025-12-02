@@ -798,9 +798,9 @@ public PostProcessingController PostProcessingController => _postProcessingContr
         }
 
         /// <summary>
-        /// Force the player into path following state along the specified rail.
+        /// Force the player into path following state along the specified path.
         /// </summary>
-        public void EnterPathFollowState(JackRussell.Rails.SplineRail path)
+        public void EnterPathFollowState(JackRussell.Rails.SplinePath path)
         {
             if (path != null)
             {
@@ -810,9 +810,9 @@ public PostProcessingController PostProcessingController => _postProcessingContr
         }
 
         /// <summary>
-        /// Force the player into path following state along the specified rail with easing.
+        /// Force the player into path following state along the specified path with easing.
         /// </summary>
-        public void EnterPathFollowState(JackRussell.Rails.SplineRail path, AnimationCurve speedCurve, float duration)
+        public void EnterPathFollowState(JackRussell.Rails.SplinePath path, AnimationCurve speedCurve, float duration)
         {
             if (path != null)
             {

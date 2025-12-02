@@ -4,15 +4,15 @@ using DG.Tweening;
 
 namespace JackRussell.States.Action
 {
-    public class BellTarget : PathLauncherTarget
+    public class BellTarget : PathLauncherTarget, IHomingTarget
     {
         [SerializeField] private MeshRenderer _meshRenderer;
 
-        public override Transform TargetTransform => transform;
+        public Transform TargetTransform => transform;
 
-        public override bool IsActive => true;
+        public bool IsActive => true;
 
-        public override void OnHomingHit(Player player)
+        public void OnHomingHit(Player player)
         {
             // Play bell effects
             if (_meshRenderer != null && _meshRenderer.material != null)

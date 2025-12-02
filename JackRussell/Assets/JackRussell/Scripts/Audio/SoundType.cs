@@ -27,5 +27,6 @@ namespace JackRussell.Audio
         DashPanelEnter,
         PressureCollectParticle,
         ZombieVaporize,
+        DashRing,
     }
 }
