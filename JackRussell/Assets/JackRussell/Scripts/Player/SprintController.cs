@@ -143,7 +143,7 @@ namespace JackRussell
 
             // Consume pressure
             float pressureCost = _sprintPressureCost * deltaTime;
-            if (_player.Pressure >= pressureCost)
+            if (HasEnoughPressure(deltaTime))
             {
                 _player.SetPressure(_player.Pressure - pressureCost);
             }
@@ -156,6 +156,12 @@ namespace JackRussell
 
             // Update visual effects
             UpdatePostProcessingEffects();
+        }
+
+        public bool HasEnoughPressure(float deltaTime)
+        {
+            float pressureCost = _sprintPressureCost * deltaTime;
+            return _player.Pressure >= pressureCost;
         }
 
         /// <summary>

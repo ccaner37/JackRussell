@@ -194,6 +194,12 @@ namespace JackRussell.States.Locomotion
                 _sprintController.UpdateSprint(deltaTime, speedFactor);
             }
 
+            if (!_sprintController.HasEnoughPressure(Time.deltaTime))
+            {
+                ChangeState(new MoveState(_player, _stateMachine));
+                return;
+            }
+
             // Project velocity onto ground plane to keep movement along the surface
             if (_player.IsGrounded)
             {
