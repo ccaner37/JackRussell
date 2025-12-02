@@ -1236,6 +1236,7 @@ public PostProcessingController PostProcessingController => _postProcessingContr
             _collectedStars++;
             _commandPublisher.PublishAsync(new StarCollectedUpdateCommand(_collectedStars));
             PlaySound(SoundType.StarCollect);
+            SetPressure(Pressure + 2);
         }
 
         public void DisableFootIK()
