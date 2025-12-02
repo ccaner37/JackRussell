@@ -1122,7 +1122,7 @@ public PostProcessingController PostProcessingController => _postProcessingContr
 
                 // Hand effectors: Interpolate position weights based on turn direction
                 float handWeight = weight;
-                if (IsSprinting) handWeight *= 3f;
+                if (IsSprinting) handWeight *= 1.2f;
                 float rightHandWeight = handWeight * Mathf.Clamp01(TurnDirection); // Increases when turning right
                 float leftHandWeight = handWeight * Mathf.Clamp01(-TurnDirection); // Increases when turning left
                 
