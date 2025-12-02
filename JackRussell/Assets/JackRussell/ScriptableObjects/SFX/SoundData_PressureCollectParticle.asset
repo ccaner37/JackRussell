@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SoundType: 23
   AudioClips:
-  - {fileID: 8300000, guid: 7bf2334f1ba5b594792ea9335554f938, type: 3}
+  - {fileID: 8300000, guid: 4ded266dc71ea774099b2c3582434b95, type: 3}
   Volume: 1
   Loop: 0
   IsRandomized: 0
   RandomizePitch: 1
-  PitchRandomizationRange: 0.03
+  PitchRandomizationRange: 0.01
