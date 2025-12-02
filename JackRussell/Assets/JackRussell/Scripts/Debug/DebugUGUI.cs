@@ -73,78 +73,29 @@ namespace JackRussell.DebugTools
                 };
             }
 
-            // Draw left panel (player info)
+            DrawCombinedPanel();
+        }
+
+        private void DrawCombinedPanel()
+        {
+            System.Collections.Generic.List<string> lines = new System.Collections.Generic.List<string>();
             if (_player != null)
             {
-                DrawLeftPanel();
+                lines.Add($"Locomotion: {_player.LocomotionStateName} ({_player.LocomotionStateTime:F2}s)");
+                lines.Add($"Action    : {_player.ActionStateName} ({_player.ActionStateTime:F2}s)");
+                lines.Add($"Grounded  : {_player.IsGrounded}");
+                lines.Add($"Velocity  : {_player.Rigidbody.linearVelocity.x:F2}, {_player.Rigidbody.linearVelocity.y:F2}, {_player.Rigidbody.linearVelocity.z:F2} (horiz {new Vector3(_player.Rigidbody.linearVelocity.x,0,_player.Rigidbody.linearVelocity.z).magnitude:F2})");
+                lines.Add($"MoveDir   : {_player.MoveDirection.x:F2}, {_player.MoveDirection.y:F2}, {_player.MoveDirection.z:F2}");
+                lines.Add($"Input     : {_player.MoveInput.x:F2}, {_player.MoveInput.y:F2}  Sprint: {_player.SprintRequested}");
+                // hidden: AnimatorS, MovOverride, RotOverride, Pressure
             }
 
-            // Draw right panel (system info)
-            DrawRightPanel();
-        }
-
-        private void DrawLeftPanel()
-        {
-            // Build lines
-            string movOverrideStr = _player.HasMovementOverride() ? "YES" : "NO";
-            Vector3 ov = _player.GetOverrideVelocity();
-            string rotOverrideStr = _player.HasRotationOverride() ? "YES" : "NO";
-
-            string[] lines = new string[]
-            {
-                $"Locomotion: {_player.LocomotionStateName} ({_player.LocomotionStateTime:F2}s)",
-                $"Action    : {_player.ActionStateName} ({_player.ActionStateTime:F2}s)",
-                $"Grounded  : {_player.IsGrounded}",
-                $"Velocity  : {_player.Rigidbody.linearVelocity.x:F2}, {_player.Rigidbody.linearVelocity.y:F2}, {_player.Rigidbody.linearVelocity.z:F2} (horiz {new Vector3(_player.Rigidbody.linearVelocity.x,0,_player.Rigidbody.linearVelocity.z).magnitude:F2})",
-                $"MoveDir   : {_player.MoveDirection.x:F2}, {_player.MoveDirection.y:F2}, {_player.MoveDirection.z:F2}",
-                $"Input     : {_player.MoveInput.x:F2}, {_player.MoveInput.y:F2}  Sprint: {_player.SprintRequested}",
-                $"AnimatorS : {_player.AnimatorSpeed:F2}",
-                $"MovOverride: {movOverrideStr}  Vel: {ov.x:F2},{ov.y:F2},{ov.z:F2}  Exclusive: {_player.IsOverrideExclusive()}  TimeLeft: {_player.MovementOverrideTimeRemaining:F2}s",
-                $"RotOverride: {rotOverrideStr}  TimeLeft: {_player.RotationOverrideTimeRemaining:F2}s",
-                $"Pressure : {_player.Pressure:F2}",
-            };
-
-            // compute size
-            float width = 0f;
-            float height = 0f;
-            foreach (var line in lines)
-            {
-                Vector2 size = _labelStyle.CalcSize(new GUIContent(line));
-                if (size.x > width) width = size.x;
-                height += size.y;
-            }
-            width += _padding.x * 2f;
-            height += _padding.y * 2f;
-
-            Rect boxRect = new Rect(10, 10, width, height);
-            // draw background
-            Color prevColor = GUI.color;
-            GUI.color = _bgColor;
-            GUI.Box(boxRect, GUIContent.none, _boxStyle);
-            GUI.color = prevColor;
-
-            // draw lines
-            float y = boxRect.y + _padding.y / 2f;
-            float x = boxRect.x + _padding.x / 2f;
-            foreach (var line in lines)
-            {
-                GUI.Label(new Rect(x, y, boxRect.width - _padding.x, _fontSize + 6), line, _labelStyle);
-                y += _labelStyle.lineHeight;
-            }
-        }
-
-        private void DrawRightPanel()
-        {
-            // Build lines for system info
+            // system lines
             long memoryMB = Profiler.GetTotalAllocatedMemoryLong() / 1024 / 1024;
-
-            string[] lines = new string[]
-            {
-                $"FPS: {_fps:F1}",
-                $"Frame Time: {Time.deltaTime * 1000:F1}ms",
-                $"Memory: {memoryMB}MB",
-                $"Time Scale: {_timeScale:F2}",
-            };
+            lines.Add($"FPS: {_fps:F1}");
+            lines.Add($"Frame Time: {Time.deltaTime * 1000:F1}ms");
+            lines.Add($"Memory: {memoryMB}MB");
+            lines.Add($"Time Scale: {_timeScale:F2}");
 
             // compute size
             float width = 0f;
@@ -159,9 +110,9 @@ namespace JackRussell.DebugTools
             height += _padding.y * 2f;
 
             // Add space for slider
-            height += 30f; // slider height
+            height += 30f;
 
-            Rect boxRect = new Rect(Screen.width - width - 10, 10, width, height);
+            Rect boxRect = new Rect(Screen.width - width - 10, Screen.height - height - 10, width, height);
             // draw background
             Color prevColor = GUI.color;
             GUI.color = _bgColor;
@@ -178,7 +129,7 @@ namespace JackRussell.DebugTools
             }
 
             // Draw timescale slider
-            Rect sliderRect = new Rect(x, y, boxRect.width - _padding.x, 20);
+            //Rect sliderRect = new Rect(x, y, boxRect.width - _padding.x, 20);
             //_timeScale = GUI.HorizontalSlider(sliderRect, _timeScale, 0.1f, 2.0f);
             //Time.timeScale = _timeScale;
         }
