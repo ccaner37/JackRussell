@@ -57,7 +57,6 @@ namespace JackRussell.Enemies
         private IEnumerator TestingEnableBack()
         {
             _isActive = false;
-            _collider.enabled = false;
             yield return new WaitForSeconds(0.25f);
             foreach (var renderer in _hitEffectRenderers)
             {
@@ -172,6 +171,7 @@ namespace JackRussell.Enemies
         public override void OnDeath()
         {
             //_isActive = false;
+            _collider.enabled = false;
             StartCoroutine(TestingEnableBack());
 
             // Play death effects

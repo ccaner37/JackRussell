@@ -21,7 +21,8 @@ namespace JackRussell.GameScope
 
         protected override void Configure(IContainerBuilder builder)
         {
-            //builder.RegisterEntryPoint<RootEntryPoint>();
+            builder.RegisterEntryPoint<RootEntryPoint>();
+            builder.Register<SceneLoaderService>(Lifetime.Singleton);
 
             builder.RegisterComponent(_audioManager);
 
@@ -36,12 +37,8 @@ namespace JackRussell.GameScope
             builder.RegisterInstance(_homingIndicatorPrefab);
             builder.Register<HomingIndicatorManager>(Lifetime.Singleton);
 
-            // Register UI components
-            builder.RegisterComponentInHierarchy<PressureBarUI>();
-            builder.RegisterComponentInHierarchy<ParticleEffectUI>();
-
             // Register enemy components for DI
-            builder.RegisterComponentInHierarchy<JackRussell.Enemies.Enemy>();
+            //builder.RegisterComponentInHierarchy<JackRussell.Enemies.Enemy>();
 
             // Vital Router //
             builder.RegisterVitalRouter(routing =>

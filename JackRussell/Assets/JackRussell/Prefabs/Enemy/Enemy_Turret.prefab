@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5061586861291763287}
   m_Layer: 0
-  m_Name: Turret
+  m_Name: Enemy_Turret
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -245,6 +245,7 @@ MonoBehaviour:
   _destroyOnDeath: 1
   _deathEffectPrefab: {fileID: 0}
   _deathEffectDuration: 2
+  _pressureGain: 10
   _hitEffect: {fileID: 0}
   _hitEffectRenderers:
   - {fileID: 6549330471613538397}
@@ -256,19 +257,20 @@ MonoBehaviour:
   - {fileID: 6012759491250922510}
   - {fileID: 5417181304291642051}
   - {fileID: 1885906353372952167}
+  _collider: {fileID: 7423692153481655797}
   _headTransform: {fileID: 2717016077527351081}
   _firePoint: {fileID: 3422638191492899971}
   _glowEffect: {fileID: 4316724432924476081}
   _laserProjectilePrefab: {fileID: 4912132851013299804, guid: 517a13d70857e0d4f84829ffc45cfc78, type: 3}
   _audioSource: {fileID: 2703716797036956972}
-  _detectionRadius: 20
+  _detectionRadius: 15
   _playerLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
   _showDetectionGizmo: 0
   _rotationSpeed: 180
   _preparationTime: 1
-  _cooldownTime: 2
+  _cooldownTime: 3
   _laserDamage: 20
   _laserSpeed: 30
   _maxVerticalAngle: 45

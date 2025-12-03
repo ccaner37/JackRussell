@@ -38,7 +38,6 @@ namespace JackRussell.Enemies
         [SerializeField] private GameObject _detectionEffectPrefab;
         [SerializeField] private GameObject _chargingEffectPrefab;
         [SerializeField] private GameObject _firingEffectPrefab;
-        [SerializeField] private GameObject _deathEffectPrefab;
         
         [Header("Audio")]
         [SerializeField] private SoundType _detectionSound = SoundType.None;
