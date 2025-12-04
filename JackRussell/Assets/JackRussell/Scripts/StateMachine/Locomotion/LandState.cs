@@ -22,7 +22,7 @@ namespace JackRussell.States.Locomotion
         {
             _timer = 0.02f; // adjust to animation length
             // trigger landing-move animation based on speed/sprint, if speed > 3
-            Vector3 horizontalVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
+            Vector3 horizontalVel = new Vector3(_player.KinematicController.Velocity.x, 0f, _player.KinematicController.Velocity.z);
             if (horizontalVel.magnitude > 6f)
             {
                 bool isSprinting = _player.Animator.GetBool(Animator.StringToHash("IsSprinting"));
@@ -40,20 +40,15 @@ namespace JackRussell.States.Locomotion
             }
 
             // Optionally zero vertical velocity to avoid small bounces
-            var v = _player.Rigidbody.linearVelocity;
+            var v = _player.KinematicController.Velocity;
             v.y = 0f;
             _player.SetVelocityImmediate(v);
         }
 
         public override void LogicUpdate()
         {
-            // nothing special in LogicUpdate for now
-        }
-
-        public override void PhysicsUpdate()
-        {
             // Count down then transition to move or idle depending on input
-            _timer -= Time.fixedDeltaTime;
+            _timer -= Time.deltaTime;
             if (_timer <= 0f)
             {
                 if (_player.MoveDirection.sqrMagnitude > 0.001f)
@@ -61,6 +56,10 @@ namespace JackRussell.States.Locomotion
                 else
                     ChangeState(new IdleState(_player, _stateMachine));
             }
+        }
+
+        public override void PhysicsUpdate()
+        {
         }
     }
 }

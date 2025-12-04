@@ -42,6 +42,8 @@ namespace JackRussell.States.Locomotion
             }
 
             // If attack requested, action state machine handles it (action SM runs in Player)
+
+            HandleFall();
         }
 
         public override void Exit(IState nextState = null)
@@ -65,7 +67,7 @@ namespace JackRussell.States.Locomotion
             if (!_player.HasDoubleJumped)
             {
                 _player.MarkDoubleJumped();
-                Vector3 v = _player.Rigidbody.linearVelocity;
+                Vector3 v = _player.KinematicController.Velocity;
                 v.y = _player.JumpVelocity;
                 _player.SetVelocityImmediate(v);
                 _player.OnJumpEnter(); // play jump sound
@@ -83,6 +85,10 @@ namespace JackRussell.States.Locomotion
 
         public override void PhysicsUpdate()
         {
+        }
+
+        private void HandleFall()
+        {
             // If an exclusive movement override is active, let it control movement
             if (_player.HasMovementOverride() && _player.IsOverrideExclusive())
             {
@@ -95,7 +101,7 @@ namespace JackRussell.States.Locomotion
             float targetSpeed = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
             Vector3 desiredVel = desired * targetSpeed;
 
-            Vector3 horizontalVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
+            Vector3 horizontalVel = new Vector3(_player.KinematicController.Velocity.x, 0f, _player.KinematicController.Velocity.z);
             Vector3 velocityDiff = desiredVel - horizontalVel;
 
             _player.AddGroundForce(velocityDiff * (_player.AccelAir * k_AirControlFactor));
@@ -104,16 +110,16 @@ namespace JackRussell.States.Locomotion
             _player.ClampHorizontalSpeed(Mathf.Max(targetSpeed, horizontalVel.magnitude));
 
             // General speed decay if speed > WalkSpeed
-            Vector3 currentVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
+            Vector3 currentVel = new Vector3(_player.KinematicController.Velocity.x, 0f, _player.KinematicController.Velocity.z);
             float currentSpeed = currentVel.magnitude;
             if (currentSpeed > _player.WalkSpeed * 0.6f)
             {
-                Vector3 targetVel = currentVel.normalized * Mathf.Lerp(currentSpeed, _player.WalkSpeed * 0.6f, Time.fixedDeltaTime * 6f);
-                _player.Rigidbody.linearVelocity = new Vector3(targetVel.x, _player.Rigidbody.linearVelocity.y, targetVel.z);
+                Vector3 targetVel = currentVel.normalized * Mathf.Lerp(currentSpeed, _player.WalkSpeed * 0.6f, Time.deltaTime * 6f);
+                _player.SetVelocityImmediate(new Vector3(targetVel.x, _player.KinematicController.Velocity.y, targetVel.z));
             }
 
             // Rotate in air with reduced responsiveness
-            _player.RotateTowardsDirection(desired, Time.fixedDeltaTime, isAir: true);
+            _player.RotateTowardsDirection(desired, Time.deltaTime, isAir: true);
 
             // Apply extra gravity if user configured gravity multiplier (handled by Player or states if necessary)
         }

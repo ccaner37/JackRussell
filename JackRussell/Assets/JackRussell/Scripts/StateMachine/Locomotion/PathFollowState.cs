@@ -66,7 +66,7 @@ namespace JackRussell.States.Locomotion
             if (_path.GetPositionAndTangent(_currentDistance, out Vector3 startPos, out Vector3 tangent))
             {
                 _player.transform.position = startPos;
-                _player.Rigidbody.linearVelocity = tangent.normalized * _pathSpeed;
+                _player.SetVelocityImmediate(tangent.normalized * _pathSpeed);
                 _lastPosition = startPos;
 
                 Debug.Log($"[PathFollowState] Starting path at distance {_currentDistance:F3}");
@@ -93,14 +93,18 @@ namespace JackRussell.States.Locomotion
 
         public override void LogicUpdate()
         {
-            // No input handling - forced movement
+            HandleForcedMovement();
         }
 
         public override void PhysicsUpdate()
         {
+        }
+
+        private void HandleForcedMovement()
+        {
             if (_path == null) return;
 
-            float deltaTime = Time.fixedDeltaTime;
+            float deltaTime = Time.deltaTime;
 
             if (_isTweening)
             {

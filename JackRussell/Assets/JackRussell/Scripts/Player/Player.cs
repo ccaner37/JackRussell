@@ -25,10 +25,8 @@ namespace JackRussell
     public class Player : MonoBehaviour
     {
         // Serialized inspector fields (user requested: use serialized fields, "_" prefix)
-        [SerializeField] private Rigidbody _rb;
+        [SerializeField] private KinematicCharacterController _kinematicController;
         [SerializeField] private Animator _animator;
-        [SerializeField] private Transform _groundCheck;
-        [SerializeField] private LayerMask _groundMask;
         [SerializeField] private RailDetector _railDetector;
         [SerializeField] private SprintController _sprintController;
 
@@ -47,11 +45,6 @@ namespace JackRussell
         [Header("Jump & Gravity")]
         [SerializeField] private float _jumpVelocity = 10f;
         [SerializeField] private float _gravityMultiplier = 1f;
-
-        [Header("Ground Check")]
-        [SerializeField] private float _groundCheckRadius = 0.25f;
-        [SerializeField] private Vector3 _groundCheckOffset = Vector3.zero;
-        [SerializeField] private float _maxSlopeAngle = 45f; // degrees
 
         [Header("Dash / Boost")]
         [SerializeField] private float _dashDuration = 0.18f;
@@ -144,6 +137,7 @@ namespace JackRussell
         private bool _isGrounded;
         private bool _isRailGrinding;
         private bool _isSprinting;
+        private bool _isJumping;
         private bool _isHomingAttack;
         private bool _wasGrounded;
         private Vector3 _groundNormal = Vector3.up;
@@ -178,12 +172,13 @@ namespace JackRussell
 
         // Public read-only helpers for states
         public Vector3 MoveDirection => _moveDirection;
-        public Rigidbody Rigidbody => _rb;
+        public KinematicCharacterController KinematicController => _kinematicController;
         public Animator Animator => _animator;
         public SprintController SprintController => _sprintController;
         public bool IsGrounded => _isGrounded;
         public bool IsRailGrinding => _isRailGrinding;
         public bool IsSprinting => _isSprinting;
+        public bool IsJumping => _isJumping;
         public bool IsHomingAttack => _isHomingAttack;
         public Vector3 GroundNormal => _groundNormal;
         public float WalkSpeed => _walkSpeed;
@@ -316,26 +311,17 @@ public PostProcessingController PostProcessingController => _postProcessingContr
         public bool IsRotationOverrideExclusive() => _rotationOverrideExclusive;
 
         /// <summary>
-        /// Rotate player (or modelRoot if assigned) toward the given direction.
-        /// Uses Rigidbody.MoveRotation for physics-friendly rotation.
-        /// Simple smooth rotation using Lerp.
+        /// Request rotation override toward the given direction.
+        /// Uses kinematic controller's rotation override system for proper priority handling.
         /// Falls back to horizontal velocity if move input is tiny.
         /// </summary>
         public void RotateTowardsDirection(Vector3 direction, float deltaTime, bool isAir = false, bool instantaneous = false, bool allow3DRotation = false)
         {
-            // If rotation override is exclusive, apply it immediately
-            if (_hasRotationOverride && _rotationOverrideExclusive)
-            {
-                ApplyRotation(_rotationOverrideTarget, instantaneous);
-                if (_debugRotation) Debug.DrawLine(transform.position, transform.position + _rotationOverrideTarget * Vector3.forward, Color.magenta, 0.1f);
-                return;
-            }
-
             // Primary direction is the provided one; if it's too small, fallback to current horizontal velocity
             Vector3 dir = direction;
             if (dir.sqrMagnitude < 0.0001f)
             {
-                Vector3 hv = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
+                Vector3 hv = new Vector3(_kinematicController.Velocity.x, 0f, _kinematicController.Velocity.z);
                 if (hv.sqrMagnitude < 0.0001f) return; // nothing meaningful to rotate to
                 dir = hv.normalized;
             }
@@ -344,7 +330,6 @@ public PostProcessingController PostProcessingController => _postProcessingContr
                 dir.Normalize();
             }
 
-            Quaternion currentRotation = GetCurrentRotation();
             Quaternion targetRotation;
 
             if (allow3DRotation)
@@ -354,27 +339,21 @@ public PostProcessingController PostProcessingController => _postProcessingContr
             }
             else
             {
-                // 2D horizontal rotation using LerpAngle for smooth yaw interpolation
-                float currentYaw = currentRotation.eulerAngles.y;
+                // 2D horizontal rotation
                 float targetYaw = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
-                float lerpFactor = _turnSpeed * (isAir ? _airTurnMultiplier : 1f);
-                float newYaw = instantaneous ? targetYaw : Mathf.LerpAngle(currentYaw, targetYaw, lerpFactor);
-                Quaternion newRot = Quaternion.Euler(0f, newYaw, 0f);
-                ApplyRotation(newRot, true);
-                return;
+                targetRotation = Quaternion.Euler(0f, targetYaw, 0f);
             }
 
-            // 3D rotation
-            // Smooth lerp rotation
-            float lerpFactor3D = _turnSpeed * (isAir ? _airTurnMultiplier : 1f);
-            Quaternion newRot3D = instantaneous ? targetRotation : Quaternion.Lerp(currentRotation, targetRotation, lerpFactor3D);
-
-            ApplyRotation(newRot3D, true);
+            // Use kinematic controller's rotation override system
+            // For surface following, use non-exclusive override to blend with ground alignment
+            float duration = instantaneous ? 0f : 0.1f; // Very short duration for responsive rotation
+            bool exclusive = false; // Allow blending with ground alignment
+            _kinematicController.RequestRotationOverride(targetRotation, duration, exclusive);
 
             if (_debugRotation)
             {
                 Vector3 origin = transform.position + Vector3.up * 1.2f;
-                Debug.DrawLine(origin, origin + currentRotation * Vector3.forward * 2f, Color.green, 0.1f);
+                Debug.DrawLine(origin, origin + GetCurrentRotation() * Vector3.forward * 2f, Color.green, 0.1f);
                 Debug.DrawLine(origin, origin + targetRotation * Vector3.forward * 2f, Color.red, 0.1f);
             }
         }
@@ -384,10 +363,7 @@ public PostProcessingController PostProcessingController => _postProcessingContr
             return transform.rotation;
         }
 
-        private void ApplyRotation(Quaternion rot, bool useRigidbody)
-        {
-            _rb.MoveRotation(rot);
-        }
+        // Rotation is now handled by kinematic controller's override system
 
         // Input consumption API for states
         public bool ConsumeJumpRequest()
@@ -473,21 +449,23 @@ public PostProcessingController PostProcessingController => _postProcessingContr
         // Simple physics helpers states will use
         public void SetVelocityImmediate(Vector3 v)
         {
-            _rb.linearVelocity = v;
+            _kinematicController.SetVelocity(v);
         }
 
         public void AddGroundForce(Vector3 force)
         {
-            _rb.AddForce(force, ForceMode.Acceleration);
+            // For air control and special effects - adds to current velocity
+            Vector3 newVelocity = _kinematicController.Velocity + force * Time.fixedDeltaTime;
+            _kinematicController.SetVelocity(newVelocity);
         }
 
         public void ClampHorizontalSpeed(float maxSpeed)
         {
-            Vector3 horizontal = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
+            Vector3 horizontal = new Vector3(_kinematicController.Velocity.x, 0f, _kinematicController.Velocity.z);
             if (horizontal.magnitude > maxSpeed)
             {
                 Vector3 clamped = horizontal.normalized * maxSpeed;
-                _rb.linearVelocity = new Vector3(clamped.x, _rb.linearVelocity.y, clamped.z);
+                _kinematicController.SetVelocity(new Vector3(clamped.x, _kinematicController.Velocity.y, clamped.z));
             }
         }
 
@@ -495,10 +473,6 @@ public PostProcessingController PostProcessingController => _postProcessingContr
         private void Awake()
         {
             _actions = new InputSystem_Actions();
-
-            // Ensure Rigidbody uses interpolation for smooth visuals (prevents camera stutter when physics drives the character)
-            if (_rb != null && _rb.interpolation == RigidbodyInterpolation.None)
-                _rb.interpolation = RigidbodyInterpolation.Interpolate;
 
             // Warn if Animator root motion is enabled — root motion can override rotation applied in code.
             if (_animator != null && _animator.applyRootMotion)
@@ -633,24 +607,9 @@ public PostProcessingController PostProcessingController => _postProcessingContr
 
         private void FixedUpdate()
         {
-            // ground check
-            bool sphereGrounded = Physics.CheckSphere(_groundCheck.position + _groundCheckOffset, _groundCheckRadius, _groundMask, QueryTriggerInteraction.Ignore);
-
-            // ground normal detection
-            Vector3 normal = Vector3.up;
-            if (sphereGrounded)
-            {
-                RaycastHit hit;
-                if (Physics.Raycast(transform.position, Vector3.down, out hit, 2f, _groundMask))
-                {
-                    normal = hit.normal;
-                }
-            }
-
-            // check if slope is walkable
-            float slopeAngle = Vector3.Angle(normal, Vector3.up);
-            _isGrounded = sphereGrounded && slopeAngle <= _maxSlopeAngle;
-            _groundNormal = normal;
+            // Update grounded state from kinematic controller
+            _isGrounded = _kinematicController.IsGrounded;
+            _groundNormal = _kinematicController.GroundNormal;
 
             // Reset air flags when landing
             if (_isGrounded && !_wasGrounded)
@@ -693,19 +652,18 @@ public PostProcessingController PostProcessingController => _postProcessingContr
 
         private void UpdateAnimator()
         {
-            Vector3 horizontalVel = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
+            Vector3 horizontalVel = new Vector3(_kinematicController.Velocity.x, 0f, _kinematicController.Velocity.z);
             _animator.SetFloat(ANIM_SPEED, horizontalVel.magnitude);
             _animator.SetFloat(ANIM_INPUT_LENGTH, _moveInput.magnitude);
 
             // Distance to ground
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position, Vector3.down, out hit, 10f, _groundMask, QueryTriggerInteraction.Ignore))
+            if (_isGrounded)
             {
-                _animator.SetFloat(ANIM_DISTANCE_TO_GROUND, hit.distance);
+                _animator.SetFloat(ANIM_DISTANCE_TO_GROUND, _kinematicController.GroundDistance);
             }
             else
             {
-                _animator.SetFloat(ANIM_DISTANCE_TO_GROUND, 10f); // max distance
+                _animator.SetFloat(ANIM_DISTANCE_TO_GROUND, 10f); // max distance when not grounded
             }
 
             _animator.SetBool(ANIM_IS_GROUNDED, _isGrounded);
@@ -856,7 +814,13 @@ public PostProcessingController PostProcessingController => _postProcessingContr
 
         public void OnJumpEnter()
         {
+            _isJumping = true;
             _audioManager.PlaySound(SoundType.Jump, _audioSource);
+        }
+
+        public void OnJumpExit()
+        {
+            _isJumping = false;
         }
 
         public void OnGrindEnter()
@@ -1162,7 +1126,7 @@ public PostProcessingController PostProcessingController => _postProcessingContr
             // ModelRoot: Roll based on turn, scaled by player speed
             if (_modelRoot != null)
             {
-                float speedFactor = Mathf.Clamp01(_rb.linearVelocity.magnitude / WalkSpeed); // 0 to 1 based on walk speed
+                float speedFactor = Mathf.Clamp01(_kinematicController.Velocity.magnitude / WalkSpeed); // 0 to 1 based on walk speed
                 if (weight > 0)
                 {
                     Quaternion targetRot = _originalModelRootLocalRot * Quaternion.Euler(0, 0, TurnDirection * rollMaxDegrees * weight * speedFactor);

@@ -42,9 +42,15 @@ namespace JackRussell.States.Locomotion
             // Fast fall state persists until grounded (crouch input was the trigger to enter)
 
             // If attack requested, action state machine handles it (action SM runs in Player)
+
+            HandleFastFall();
         }
 
         public override void PhysicsUpdate()
+        {
+        }
+
+        private void HandleFastFall()
         {
             // If an exclusive movement override is active, let it control movement
             if (_player.HasMovementOverride() && _player.IsOverrideExclusive())
@@ -58,7 +64,7 @@ namespace JackRussell.States.Locomotion
             float targetSpeed = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
             Vector3 desiredVel = desired * targetSpeed;
 
-            Vector3 horizontalVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
+            Vector3 horizontalVel = new Vector3(_player.KinematicController.Velocity.x, 0f, _player.KinematicController.Velocity.z);
             Vector3 velocityDiff = desiredVel - horizontalVel;
 
             _player.AddGroundForce(velocityDiff * (_player.AccelAir * k_AirControlFactor));
@@ -67,10 +73,10 @@ namespace JackRussell.States.Locomotion
             _player.ClampHorizontalSpeed(Mathf.Max(targetSpeed, horizontalVel.magnitude));
 
             // Rotate in air with reduced responsiveness
-            _player.RotateTowardsDirection(desired, Time.fixedDeltaTime, isAir: true);
+            _player.RotateTowardsDirection(desired, Time.deltaTime, isAir: true);
 
             // Update delay timer
-            _fastFallDelayTimer -= Time.fixedDeltaTime;
+            _fastFallDelayTimer -= Time.deltaTime;
 
             // Apply extra gravity for fast fall after delay
             if (_fastFallDelayTimer <= 0f)

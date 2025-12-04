@@ -92,8 +92,8 @@ namespace JackRussell.States.Locomotion
                 // Apply ground projection only if grounded
                 if (_player.IsGrounded)
                 {
-                    Vector3 projectedVel = Vector3.ProjectOnPlane(_player.Rigidbody.linearVelocity, _player.GroundNormal);
-                    _player.Rigidbody.linearVelocity = projectedVel;
+                    Vector3 projectedVel = Vector3.ProjectOnPlane(_player.KinematicController.Velocity, _player.GroundNormal);
+                    _player.SetVelocityImmediate(projectedVel);
                 }
             }
         }

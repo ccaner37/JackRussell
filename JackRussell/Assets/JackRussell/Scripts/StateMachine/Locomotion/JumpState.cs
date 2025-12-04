@@ -21,7 +21,7 @@ namespace JackRussell.States.Locomotion
         public override void Enter()
         {
             // Apply instant vertical velocity for a snappy jump
-            Vector3 v = _player.Rigidbody.linearVelocity;
+            Vector3 v = _player.KinematicController.Velocity;
             v.y = _player.JumpVelocity;
             _player.SetVelocityImmediate(v);
 
@@ -48,17 +48,20 @@ namespace JackRussell.States.Locomotion
             }
 
             // If we start falling, transition to FallState
-            if (_player.Rigidbody.linearVelocity.y < 0f)
+            if (_player.KinematicController.Velocity.y < 0f)
             {
                 ChangeState(new FallState(_player, _stateMachine));
                 return;
             }
 
             // Allow action states to trigger overrides (handled elsewhere)
+            HandleJump();
         }
 
         public override void Exit(IState nextState = null)
         {
+            _player.OnJumpExit();
+            
             // Unsubscribe
             _player.Actions.Player.Sprint.performed -= OnSprintPressed;
             _player.Actions.Player.Jump.performed -= OnJumpPressed;
@@ -77,14 +80,14 @@ namespace JackRussell.States.Locomotion
             if (!_player.HasDoubleJumped)
             {
                 _player.MarkDoubleJumped();
-                Vector3 v = _player.Rigidbody.linearVelocity;
+                Vector3 v = _player.KinematicController.Velocity;
                 v.y = _player.JumpVelocity;
                 _player.SetVelocityImmediate(v);
                 _player.OnJumpEnter(); // play jump sound
             }
         }
 
-        public override void PhysicsUpdate()
+        private void HandleJump()
         {
             // If an exclusive movement override is active, let it control movement
             if (_player.HasMovementOverride() && _player.IsOverrideExclusive())
@@ -98,7 +101,7 @@ namespace JackRussell.States.Locomotion
             float targetSpeed = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
             Vector3 desiredVel = desired * targetSpeed;
 
-            Vector3 horizontalVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
+            Vector3 horizontalVel = new Vector3(_player.KinematicController.Velocity.x, 0f, _player.KinematicController.Velocity.z);
             Vector3 velocityDiff = desiredVel - horizontalVel;
 
             _player.AddGroundForce(velocityDiff * (_player.AccelAir * k_AirControlFactor));
@@ -107,16 +110,16 @@ namespace JackRussell.States.Locomotion
             _player.ClampHorizontalSpeed(Mathf.Max(targetSpeed, horizontalVel.magnitude));
 
             // General speed decay if speed > WalkSpeed
-            Vector3 currentVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
+            Vector3 currentVel = new Vector3(_player.KinematicController.Velocity.x, 0f, _player.KinematicController.Velocity.z);
             float currentSpeed = currentVel.magnitude;
             if (currentSpeed > _player.WalkSpeed * 0.8f)
             {
-                Vector3 targetVel = currentVel.normalized * Mathf.Lerp(currentSpeed, _player.WalkSpeed * 0.8f, Time.fixedDeltaTime * 4f);
-                _player.Rigidbody.linearVelocity = new Vector3(targetVel.x, _player.Rigidbody.linearVelocity.y, targetVel.z);
+                Vector3 targetVel = currentVel.normalized * Mathf.Lerp(currentSpeed, _player.WalkSpeed * 0.8f, Time.deltaTime * 4f);
+                _player.SetVelocityImmediate(new Vector3(targetVel.x, _player.KinematicController.Velocity.y, targetVel.z));
             }
 
             // Rotate in air with reduced responsiveness
-            _player.RotateTowardsDirection(desired, Time.fixedDeltaTime, isAir: true);
+            _player.RotateTowardsDirection(desired, Time.deltaTime, isAir: true);
 
             // apply extra gravity multiplier if configured (makes falling snappier)
             if (_player.JumpVelocity != 0f && _player.AccelAir >= 0f)
@@ -126,6 +129,11 @@ namespace JackRussell.States.Locomotion
                 Vector3 extraGravity = Physics.gravity * (gMult - 1f);
                 if (extraGravity != Vector3.zero) _player.AddGroundForce(extraGravity);
             }
+        }
+
+        public override void PhysicsUpdate()
+        {
+
         }
     }
 }

@@ -35,24 +35,25 @@ namespace JackRussell.States.Locomotion
                     ChangeState(new MoveState(_player, _stateMachine));
                 return;
             }
-        }
 
-        public override void PhysicsUpdate()
-        {
             // decelerate
-            Vector3 horizontal = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
+            Vector3 horizontal = new Vector3(_player.KinematicController.Velocity.x, 0f, _player.KinematicController.Velocity.z);
             if (horizontal.sqrMagnitude > 0.0001f)
             {
-                Vector3 decel = -horizontal.normalized * Mathf.Min(horizontal.magnitude, _player.Deceleration * Time.fixedDeltaTime);
-                _player.AddGroundForce(decel / Time.fixedDeltaTime);
+                Vector3 decel = -horizontal.normalized * Mathf.Min(horizontal.magnitude, _player.Deceleration * Time.deltaTime);
+                _player.AddGroundForce(decel / Time.deltaTime);
             }
 
             // count down then transition to idle
-            _timer -= Time.fixedDeltaTime;
+            _timer -= Time.deltaTime;
             if (_timer <= 0f)
             {
                 ChangeState(new IdleState(_player, _stateMachine));
             }
+        }
+
+        public override void PhysicsUpdate()
+        {
         }
     }
 }

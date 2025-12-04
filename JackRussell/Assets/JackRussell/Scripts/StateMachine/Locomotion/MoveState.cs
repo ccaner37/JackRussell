@@ -61,13 +61,12 @@ namespace JackRussell.States.Locomotion
 
         public override void LogicUpdate()
         {
-            // Rotate player toward move direction
-            _player.RotateTowardsDirection(_player.MoveDirection, Time.deltaTime, isAir: false);
+            // Kinematic controller handles automatic rotation toward movement direction
 
             // If no input, go to WalkStop if moving fast enough
             if (_player.MoveDirection.sqrMagnitude < k_InputDeadzone)
             {
-                Vector3 horizontalVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
+                Vector3 horizontalVel = new Vector3(_player.KinematicController.Velocity.x, 0f, _player.KinematicController.Velocity.z);
                 if (horizontalVel.magnitude > 8f)
                 {
                     ChangeState(new WalkStopState(_player, _stateMachine));
@@ -79,9 +78,16 @@ namespace JackRussell.States.Locomotion
                 return;
             }
 
+            HandleMovement();
+
         }
 
         public override void PhysicsUpdate()
+        {
+
+        }
+
+        private void HandleMovement()
         {
             // If an exclusive movement override is active, let it control velocity
             if (_player.HasMovementOverride() && _player.IsOverrideExclusive())
@@ -90,35 +96,51 @@ namespace JackRussell.States.Locomotion
                 return;
             }
 
-            // Ground movement acceleration
-            Vector3 desired = _player.MoveDirection;
+            // Pure Sonic-style ground movement using direct velocity calculation
+            Vector3 desiredDirection = _player.MoveDirection;
             float targetSpeed = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
 
-            Vector3 currentVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
-            float currentSpeed = currentVel.magnitude;
+            Vector3 currentVelocity = _player.KinematicController.Velocity;
+            Vector3 horizontalVelocity = new Vector3(currentVelocity.x, 0f, currentVelocity.z);
+            float currentSpeed = horizontalVelocity.magnitude;
 
-            Vector3 force;
-            if (currentSpeed < targetSpeed)
+            Vector3 newVelocity;
+
+            if (desiredDirection.sqrMagnitude > 0.001f)
             {
-                force = desired.normalized * _player.AccelGround - currentVel * (_player.Damping * 0.5f);
+                // Accelerating toward target speed
+                if (currentSpeed < targetSpeed)
+                {
+                    // Accelerate toward desired direction
+                    float acceleration = _player.AccelGround * Time.deltaTime;
+                    Vector3 targetVelocity = desiredDirection.normalized * targetSpeed;
+
+                    // Smooth acceleration curve (Sonic-style)
+                    newVelocity = Vector3.MoveTowards(horizontalVelocity, targetVelocity, acceleration);
+                }
+                else
+                {
+                    // Decelerate if going too fast
+                    float deceleration = _player.Deceleration * Time.deltaTime;
+                    Vector3 targetVelocity = desiredDirection.normalized * targetSpeed;
+                    newVelocity = Vector3.MoveTowards(horizontalVelocity, targetVelocity, deceleration);
+                }
             }
             else
             {
-                force = -currentVel.normalized * _player.Deceleration;
+                // No input - decelerate to stop
+                float deceleration = _player.Deceleration * Time.deltaTime;
+                newVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, deceleration);
             }
 
-            _player.AddGroundForce(force);
+            // Preserve vertical velocity (gravity)
+            newVelocity.y = currentVelocity.y;
 
-            // Project velocity onto ground plane to keep movement along the surface
-            if (_player.IsGrounded)
-            {
-                Vector3 projectedVel = Vector3.ProjectOnPlane(_player.Rigidbody.linearVelocity, _player.GroundNormal);
-                _player.Rigidbody.linearVelocity = projectedVel;
-            }
+            // Set the calculated velocity
+            _player.SetVelocityImmediate(newVelocity);
 
             // Apply turn adjustments
             _player.ApplyTurnAdjustments(_player.GetIKWeight(), _player.MoveRollMaxDegrees, 1f);
-
         }
     }
 }

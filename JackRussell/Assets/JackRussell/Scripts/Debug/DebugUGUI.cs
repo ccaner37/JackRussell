@@ -84,7 +84,7 @@ namespace JackRussell.DebugTools
                 lines.Add($"Locomotion: {_player.LocomotionStateName} ({_player.LocomotionStateTime:F2}s)");
                 lines.Add($"Action    : {_player.ActionStateName} ({_player.ActionStateTime:F2}s)");
                 lines.Add($"Grounded  : {_player.IsGrounded}");
-                lines.Add($"Velocity  : {_player.Rigidbody.linearVelocity.x:F2}, {_player.Rigidbody.linearVelocity.y:F2}, {_player.Rigidbody.linearVelocity.z:F2} (horiz {new Vector3(_player.Rigidbody.linearVelocity.x,0,_player.Rigidbody.linearVelocity.z).magnitude:F2})");
+                lines.Add($"Velocity  : {_player.KinematicController.Velocity.x:F2}, {_player.KinematicController.Velocity.y:F2}, {_player.KinematicController.Velocity.z:F2} (horiz {new Vector3(_player.KinematicController.Velocity.x,0,_player.KinematicController.Velocity.z).magnitude:F2})");
                 lines.Add($"MoveDir   : {_player.MoveDirection.x:F2}, {_player.MoveDirection.y:F2}, {_player.MoveDirection.z:F2}");
                 lines.Add($"Input     : {_player.MoveInput.x:F2}, {_player.MoveInput.y:F2}  Sprint: {_player.SprintRequested}");
                 // hidden: AnimatorS, MovOverride, RotOverride, Pressure

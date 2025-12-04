@@ -101,7 +101,7 @@ namespace JackRussell.States.Action
             //Vector3 dashVelocity = direction * _teleportSpeed;
             
             //_player.RequestMovementOverride(dashVelocity, _teleportDuration * 0.5f, true);
-            _player.RotateTowardsDirection(direction, Time.fixedDeltaTime, isAir: true, instantaneous: true);
+            _player.RotateTowardsDirection(direction, Time.deltaTime, isAir: true, instantaneous: true);
 
             yield return new WaitForSeconds(0.3f); // _teleportDuration * 0.5f
             
@@ -120,7 +120,7 @@ namespace JackRussell.States.Action
                 float stopDistance = 3f; // always stay 3 meters away from target
                 // Calculate final position
                 Vector3 finalPos = _targetPosition - direction * stopDistance;
-                _player.Rigidbody.position = finalPos;
+                _player.transform.position = finalPos;
 
                 // Apply post-processing effect
                 _player.PostProcessingController?.ParryAttackEffect();

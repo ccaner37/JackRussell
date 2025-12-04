@@ -29571,7 +29571,7 @@ MonoBehaviour:
       m_ColorSpace: -1
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
-    m_ColorMin: {r: -808.2858, g: 6.75e-43, b: -3.271728e+29, a: 6.75e-43}
+    m_ColorMin: {r: 5.8628858e+23, g: 1.7199627e-38, b: 4.2e-44, a: 0}
     m_ColorMax: {r: 1, g: 1, b: 1, a: 1}
   isBurst: 1
   minNumberOfParticles: 2
@@ -35187,7 +35187,7 @@ MonoBehaviour:
   taperTip: 1
   mouthOpen: 0
   textureTiling: 1
-  autoUpdate: 1
+  autoUpdate: 0
 --- !u!1 &6131277344648153450
 GameObject:
   m_ObjectHideFlags: 0
@@ -40304,12 +40304,13 @@ GameObject:
   - component: {fileID: 6321666665028827176}
   - component: {fileID: 2798034086976868430}
   - component: {fileID: 6923816364515724190}
-  - component: {fileID: 3621128682319069695}
   - component: {fileID: 679420080937140670}
   - component: {fileID: 8455630118357654823}
   - component: {fileID: 1369113188443810207}
   - component: {fileID: 5793570464519208682}
   - component: {fileID: 6721252528188917686}
+  - component: {fileID: 2688307048481712486}
+  - component: {fileID: 8140817326552113851}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -40361,12 +40362,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a339fd29a248054bbc08ce9934b86cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rb: {fileID: 3621128682319069695}
+  _kinematicController: {fileID: 2688307048481712486}
   _animator: {fileID: 7938293584200363969}
-  _groundCheck: {fileID: 993128341492881788}
-  _groundMask:
-    serializedVersion: 2
-    m_Bits: 1
   _railDetector: {fileID: 1369113188443810207}
   _sprintController: {fileID: 5793570464519208682}
   _walkSpeed: 14
@@ -40374,14 +40371,11 @@ MonoBehaviour:
   _boostSpeed: 50
   _dashSpeed: 65
   _accelGround: 35
-  _accelAir: 0.6
+  _accelAir: 1.8
   _deceleration: 80
   _damping: 4
   _jumpVelocity: 10
   _gravityMultiplier: 1
-  _groundCheckRadius: 0.25
-  _groundCheckOffset: {x: 0, y: 0, z: 0}
-  _maxSlopeAngle: 45
   _dashDuration: 0.15
   _boostDuration: 0.6
   _dashCooldown: 0.5
@@ -41550,33 +41544,6 @@ CapsuleCollider:
   m_Height: 1.7
   m_Direction: 1
   m_Center: {x: 0, y: 0.85, z: 0}
---- !u!54 &3621128682319069695
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7699810119274171613}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 1
-  m_Constraints: 112
-  m_CollisionDetection: 2
 --- !u!114 &679420080937140670
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -41675,6 +41642,52 @@ MonoBehaviour:
   _cameraResponsiveRange: 5
   _aimSpeed: 10
   _aimLerpSpeed: 5
+--- !u!114 &2688307048481712486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7699810119274171613}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bf1e69bcf6b3c048ba10b4cf28e715e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _player: {fileID: 2798034086976868430}
+  _groundCheckDistance: 0.5
+  _groundMask:
+    serializedVersion: 2
+    m_Bits: 1
+  _collisionRadius: 0.4
+  _rotationSpeed: 12
+--- !u!54 &8140817326552113851
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7699810119274171613}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 2
 --- !u!1 &7989376735811021107
 GameObject:
   m_ObjectHideFlags: 0

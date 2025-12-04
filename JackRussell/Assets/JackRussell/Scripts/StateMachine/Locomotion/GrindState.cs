@@ -77,7 +77,7 @@ namespace JackRussell.States.Locomotion
 
             _currentRail = _railDetector.CurrentRail;
             _currentDistance = _railDetector.CurrentDistance;
-            _grindSpeed = Mathf.Max(_player.Rigidbody.linearVelocity.magnitude, _currentRail.BaseSpeed);
+            _grindSpeed = Mathf.Max(_player.KinematicController.Velocity.magnitude, _currentRail.BaseSpeed);
             _lastPosition = _player.transform.position;
             _isAccelerating = false;
 
@@ -109,9 +109,9 @@ namespace JackRussell.States.Locomotion
                 Vector3 grindDirection = _railDetector.GrindForward ? tangent : -tangent;
                 grindDirection = grindDirection.normalized;
 
-                _player.Rigidbody.linearVelocity = grindDirection * _grindSpeed;
+                _player.SetVelocityImmediate(grindDirection * _grindSpeed);
 
-                Debug.Log($"[GrindState] Final velocity: {_player.Rigidbody.linearVelocity} (speed: {_grindSpeed:F1})");
+                Debug.Log($"[GrindState] Final velocity: {_player.KinematicController.Velocity} (speed: {_grindSpeed:F1})");
             }
         }
 
@@ -143,9 +143,15 @@ namespace JackRussell.States.Locomotion
 
             // Update grind speed based on input
             UpdateGrindSpeed();
+
+            HandleGrindMovement();
         }
 
         public override void PhysicsUpdate()
+        {
+        }
+
+        private void HandleGrindMovement()
         {
             if (_currentRail == null || !_railDetector.IsAttached) return;
 
@@ -159,7 +165,7 @@ namespace JackRussell.States.Locomotion
             }
 
             // Calculate movement along rail
-            float deltaTime = Time.fixedDeltaTime;
+            float deltaTime = Time.deltaTime;
             float distanceDelta = _grindSpeed * deltaTime;
 
             // Apply direction based on grinding direction

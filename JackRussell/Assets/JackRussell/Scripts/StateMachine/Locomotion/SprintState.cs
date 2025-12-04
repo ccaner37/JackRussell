@@ -48,7 +48,7 @@ namespace JackRussell.States.Locomotion
             // If entering from air, neutralize Y velocity and mark as sprinted
             if (!_player.IsGrounded)
             {
-                Vector3 v = _player.Rigidbody.linearVelocity;
+                Vector3 v = _player.KinematicController.Velocity;
                 v.y = 0f;
                 _player.SetVelocityImmediate(v);
                 _player.MarkSprintInAir();
@@ -102,8 +102,7 @@ namespace JackRussell.States.Locomotion
 
         public override void LogicUpdate()
         {
-            // Rotate toward movement direction
-            _player.RotateTowardsDirection(_player.MoveDirection, Time.deltaTime, isAir: !_player.IsGrounded);
+            // Kinematic controller handles automatic rotation toward movement direction
 
             // If sprint is released or no move input, go back to appropriate state
             if (!_player.SprintRequested)
@@ -136,10 +135,15 @@ namespace JackRussell.States.Locomotion
                 return;
             }
 
-            // Jump handled by event subscription
+            HandleSprint();
         }
 
         public override void PhysicsUpdate()
+        {
+            
+        }
+
+        private void HandleSprint()
         {
             // Sprint applies stronger acceleration and higher max speed
             if (_player.HasMovementOverride() && _player.IsOverrideExclusive())
@@ -148,7 +152,7 @@ namespace JackRussell.States.Locomotion
                 return;
             }
 
-            Vector3 desired = _player.MoveDirection;
+            Vector3 desiredDirection = _player.MoveDirection;
             float targetSpeed = _player.RunSpeed;
 
             // Apply sprint speed modifier through controller
@@ -157,20 +161,41 @@ namespace JackRussell.States.Locomotion
                 targetSpeed = _sprintController.GetModifiedSpeed(targetSpeed);
             }
 
-            Vector3 currentVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
-            float currentSpeed = currentVel.magnitude;
+            Vector3 currentVelocity = _player.KinematicController.Velocity;
+            Vector3 horizontalVelocity = new Vector3(currentVelocity.x, 0f, currentVelocity.z);
+            float currentSpeed = horizontalVelocity.magnitude;
 
-            Vector3 force;
-            if (currentSpeed < targetSpeed)
+            Vector3 newVelocity;
+
+            if (desiredDirection.sqrMagnitude > 0.001f)
             {
-                force = desired.normalized * (_player.AccelGround * 10) - currentVel * (_player.Damping * 0.5f);
+                // Sprint acceleration (faster than normal movement)
+                if (currentSpeed < targetSpeed)
+                {
+                    float sprintAcceleration = _player.AccelGround * 2f * Time.deltaTime; // Faster acceleration
+                    Vector3 targetVelocity = desiredDirection.normalized * targetSpeed;
+                    newVelocity = Vector3.MoveTowards(horizontalVelocity, targetVelocity, sprintAcceleration);
+                }
+                else
+                {
+                    // Maintain or slightly adjust speed
+                    float deceleration = _player.Deceleration * 0.5f * Time.deltaTime; // Less deceleration
+                    Vector3 targetVelocity = desiredDirection.normalized * targetSpeed;
+                    newVelocity = Vector3.MoveTowards(horizontalVelocity, targetVelocity, deceleration);
+                }
             }
             else
             {
-                force = -currentVel.normalized * _player.Deceleration;
+                // No input - decelerate to stop (slower than normal for momentum)
+                float deceleration = _player.Deceleration * 0.7f * Time.deltaTime;
+                newVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, deceleration);
             }
 
-            _player.AddGroundForce(force);
+            // Preserve vertical velocity (gravity)
+            newVelocity.y = currentVelocity.y;
+
+            // Set the calculated velocity
+            _player.SetVelocityImmediate(newVelocity);
 
             // Update sprint time and effects through controller
             float deltaTime = Time.fixedDeltaTime;
@@ -200,16 +225,12 @@ namespace JackRussell.States.Locomotion
                 return;
             }
 
-            // Project velocity onto ground plane to keep movement along the surface
-            if (_player.IsGrounded)
-            {
-                Vector3 projectedVel = Vector3.ProjectOnPlane(_player.Rigidbody.linearVelocity, _player.GroundNormal);
-                _player.Rigidbody.linearVelocity = projectedVel;
-            }
-            else
+            // Handle air sprint gravity reduction
+            if (!_player.IsGrounded)
             {
                 // Reduce gravity during air sprint for straighter flight
-                _player.AddGroundForce(-Physics.gravity * 0.5f);
+                Vector3 reducedGravity = -Physics.gravity * 0.5f;
+                _player.SetVelocityImmediate(_player.KinematicController.Velocity + reducedGravity * Time.fixedDeltaTime);
             }
 
             // Apply turn adjustments (more pronounced for sprint)

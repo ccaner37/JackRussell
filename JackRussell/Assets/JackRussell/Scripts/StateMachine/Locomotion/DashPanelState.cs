@@ -65,7 +65,7 @@ namespace JackRussell.States.Locomotion
             if (_path.GetPositionAndTangent(_currentDistance, out Vector3 startPos, out Vector3 tangent))
             {
                 _player.transform.position = startPos;
-                _player.Rigidbody.linearVelocity = tangent.normalized * _dashSpeed;
+                _player.SetVelocityImmediate(tangent.normalized * _dashSpeed);
                 _lastPosition = startPos;
 
                 // Immediately rotate towards movement direction
@@ -119,13 +119,19 @@ namespace JackRussell.States.Locomotion
                 TransitionToAppropriateState("Duration expired");
                 return;
             }
+
+            HandleDashPanelMovement();
         }
 
         public override void PhysicsUpdate()
         {
+        }
+
+        private void HandleDashPanelMovement()
+        {
             if (_path == null) return;
 
-            float deltaTime = Time.fixedDeltaTime;
+            float deltaTime = Time.deltaTime;
 
             // Calculate speed (base + sprint bonus)
             float currentSpeed = _dashSpeed;

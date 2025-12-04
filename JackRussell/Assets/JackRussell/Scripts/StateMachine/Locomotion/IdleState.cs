@@ -58,9 +58,15 @@ namespace JackRussell.States.Locomotion
                     ChangeState(new MoveState(_player, _stateMachine));
                 return;
             }
+
+            HandleIdle();
         }
 
         public override void PhysicsUpdate()
+        {
+        }
+
+        private void HandleIdle()
         {
             // Reset turn adjustments when idle
             _player.ApplyTurnAdjustments(0f, 0f, 0f);
@@ -75,32 +81,25 @@ namespace JackRussell.States.Locomotion
                 }
                 // If it's a blend override, we will let normal locomotion run and the override can bias it.
             }
-            // Basic ground movement physics: gentle acceleration toward desired velocity
-            Vector3 desired = _player.MoveDirection;
-            if (desired.sqrMagnitude < k_InputDeadzone)
+            // Pure Sonic-style deceleration when no input
+            Vector3 desiredDirection = _player.MoveDirection;
+            if (desiredDirection.sqrMagnitude < k_InputDeadzone)
             {
                 // decelerate to stop
-                Vector3 horizontal = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
-                if (horizontal.sqrMagnitude > 0.0001f)
+                Vector3 currentVelocity = _player.KinematicController.Velocity;
+                Vector3 horizontalVelocity = new Vector3(currentVelocity.x, 0f, currentVelocity.z);
+
+                if (horizontalVelocity.sqrMagnitude > 0.0001f)
                 {
-                    Vector3 decel = -horizontal.normalized * Mathf.Min(horizontal.magnitude, _player.Deceleration * Time.fixedDeltaTime);
-                    _player.AddGroundForce(decel / Time.fixedDeltaTime);
+                    float deceleration = _player.Deceleration * Time.fixedDeltaTime;
+                    Vector3 newHorizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, deceleration);
+
+                    // Preserve vertical velocity
+                    Vector3 newVelocity = new Vector3(newHorizontalVelocity.x, currentVelocity.y, newHorizontalVelocity.z);
+                    _player.SetVelocityImmediate(newVelocity);
                 }
                 return;
             }
-
-            // float targetSpeed = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
-            // Vector3 desiredVel = desired * targetSpeed;
-
-            // Vector3 horizontalVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
-            // Vector3 velocityDiff = desiredVel - horizontalVel;
-
-            // // apply ground acceleration
-            // _player.AddGroundForce(velocityDiff * _player.AccelGround);
-
-            // // clamp to the appropriate top speed
-            // float clampTo = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
-            // _player.ClampHorizontalSpeed(clampTo);
         }
     }
 }

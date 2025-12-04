@@ -32,7 +32,7 @@ namespace JackRussell.States.Locomotion
             // If jump requested while crouching, do a normal jump (or stand-jump)
             if (_player.ConsumeJumpRequest() && _player.IsGrounded)
             {
-                Vector3 v = _player.Rigidbody.linearVelocity;
+                Vector3 v = _player.KinematicController.Velocity;
                 v.y = _player.JumpVelocity;
                 _player.SetVelocityImmediate(v);
                 ChangeState(new JumpState(_player, _stateMachine));
@@ -57,7 +57,7 @@ namespace JackRussell.States.Locomotion
             float targetSpeed = _player.SprintRequested ? _player.RunSpeed * k_CrouchSpeedMultiplier : _player.WalkSpeed * k_CrouchSpeedMultiplier;
             Vector3 desiredVel = desired * targetSpeed;
 
-            Vector3 horizontalVel = new Vector3(_player.Rigidbody.linearVelocity.x, 0f, _player.Rigidbody.linearVelocity.z);
+            Vector3 horizontalVel = new Vector3(_player.KinematicController.Velocity.x, 0f, _player.KinematicController.Velocity.z);
             Vector3 velocityDiff = desiredVel - horizontalVel;
 
             _player.AddGroundForce(velocityDiff * _player.AccelGround);

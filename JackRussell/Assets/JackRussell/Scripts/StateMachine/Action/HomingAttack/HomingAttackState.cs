@@ -90,7 +90,7 @@ namespace JackRussell.States.Action
             // rotate towards target (full 3D rotation, instantaneous for initial snap)
             if (toTarget.sqrMagnitude > 0.0001f)
             {
-                _player.RotateTowardsDirection(toTarget, Time.fixedDeltaTime, isAir: true, instantaneous: true, allow3DRotation: true);
+                _player.RotateTowardsDirection(toTarget, Time.deltaTime, isAir: true, instantaneous: true, allow3DRotation: true);
             }
 
             _player.PlaySound(Audio.SoundType.HomingAttackStart);
@@ -134,9 +134,15 @@ namespace JackRussell.States.Action
             //     ChangeState(new ActionNoneState(_player, _stateMachine));
             //     return;
             // }
+
+            ProcessHomingAttack();
         }
 
         public override void PhysicsUpdate()
+        {
+        }
+
+        private void ProcessHomingAttack()
         {
             // if (_target == null || !_target.IsActive)
             // {
@@ -147,7 +153,7 @@ namespace JackRussell.States.Action
             // Handle tentacle waiting phase
             if (_isWaitingForTentacle)
             {
-                _tentacleWaitTimer -= Time.fixedDeltaTime;
+                _tentacleWaitTimer -= Time.deltaTime;
                 if (_tentacleWaitTimer <= 0f)
                 {
                     _isWaitingForTentacle = false;
@@ -156,7 +162,7 @@ namespace JackRussell.States.Action
                     Vector3 toTargetWait = _target.TargetTransform.position - _player.transform.position;
                     Vector3 horizWait = new Vector3(toTargetWait.x, 0f, toTargetWait.z);
                     Vector3 vel = (horizWait.sqrMagnitude > 0.0001f ? horizWait.normalized : Vector3.zero) * _speed;
-                    vel.y = _player.Rigidbody.linearVelocity.y;
+                    vel.y = _player.KinematicController.Velocity.y;
                     _player.RequestMovementOverride(vel, _maxDuration, true);
                 }
                 return;
@@ -210,7 +216,7 @@ namespace JackRussell.States.Action
             if (_hitStopActive)
             {
                 // during hit stop
-                _hitStopTimer -= Time.fixedDeltaTime;
+                _hitStopTimer -= Time.deltaTime;
                 if (_hitStopTimer <= 0f)
                 {
                     // invoke target hit
@@ -246,7 +252,7 @@ namespace JackRussell.States.Action
                     Vector3 desired = toTarget.normalized * _speed;
                     _player.SetVelocityImmediate(desired);
                     _player.RequestMovementOverride(desired, Mathf.Max(0f, _timer), true);
-                    _player.RotateTowardsDirection(toTarget, Time.fixedDeltaTime, isAir: true, instantaneous: false, allow3DRotation: true);
+                    _player.RotateTowardsDirection(toTarget, Time.deltaTime, isAir: true, instantaneous: false, allow3DRotation: true);
                 }
             }
         }
