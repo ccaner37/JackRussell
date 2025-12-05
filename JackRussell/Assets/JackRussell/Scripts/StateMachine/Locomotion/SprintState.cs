@@ -205,7 +205,7 @@ namespace JackRussell.States.Locomotion
             if (_enteredFromAir && !_player.IsGrounded)
             {
                 _airSprintTimer += deltaTime;
-                if (_airSprintTimer >= 0.4f)
+                if (_airSprintTimer >= 1f)
                 {
                     ChangeState(new FallState(_player, _stateMachine));
                     return;
