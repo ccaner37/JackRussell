@@ -3,14 +3,13 @@ using UnityEngine;
 namespace JackRussell.States.Locomotion
 {
     /// <summary>
-    /// Fast fall state: applied when crouch is held during fall. Increases downward speed.
-    /// Transitions back to FallState when crouch is released or when grounded.
+    /// Fast fall state: applied when crouch is pressed during fall. Sets constant high downward speed.
+    /// Transitions to LandState when grounded.
     /// </summary>
     public class FastFallState : PlayerStateBase
     {
         private const float k_AirControlFactor = 0.5f;
-        private const float k_FastFallMultiplier = 20f; // multiplier for extra downward force
-        private float _fastFallDelayTimer;
+        private const float k_FastFallSpeed = 30f; // constant downward speed for fast fall
 
         public FastFallState(Player player, StateMachine stateMachine) : base(player, stateMachine) { }
 
@@ -20,11 +19,8 @@ namespace JackRussell.States.Locomotion
 
         public override void Enter()
         {
-            // Cancel all velocity to immediately start fast falling straight down
-            _player.SetVelocityImmediate(Vector3.zero);
-
-            // Delay before applying fast fall force
-            _fastFallDelayTimer = 0.1f;
+            // Set constant downward velocity for fast fall
+            _player.SetVelocityImmediate(new Vector3(0f, -k_FastFallSpeed, 0f));
 
             // Could set fast fall animator parameter if desired
             _player.Animator.CrossFade("fast_fall_enter", 0.08f);
@@ -39,7 +35,7 @@ namespace JackRussell.States.Locomotion
                 return;
             }
 
-            // Fast fall state persists until grounded (crouch input was the trigger to enter)
+            // Fast fall state persists until grounded
 
             // If attack requested, action state machine handles it (action SM runs in Player)
 
@@ -53,37 +49,38 @@ namespace JackRussell.States.Locomotion
         private void HandleFastFall()
         {
             // If an exclusive movement override is active, let it control movement
-            if (_player.HasMovementOverride() && _player.IsOverrideExclusive())
-            {
-                _player.SetVelocityImmediate(_player.GetOverrideVelocity());
-                return;
-            }
+            // if (_player.HasMovementOverride() && _player.IsOverrideExclusive())
+            // {
+            //     _player.SetVelocityImmediate(_player.GetOverrideVelocity());
+            //     return;
+            // }
 
-            // Air control (weaker than jump state's control)
-            Vector3 desired = _player.MoveDirection;
-            float targetSpeed = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
-            Vector3 desiredVel = desired * targetSpeed;
+            // // Get current velocity
+            // Vector3 currentVel = _player.KinematicController.Velocity;
 
-            Vector3 horizontalVel = new Vector3(_player.KinematicController.Velocity.x, 0f, _player.KinematicController.Velocity.z);
-            Vector3 velocityDiff = desiredVel - horizontalVel;
+            // // Air control (weaker than jump state's control)
+            // Vector3 desired = _player.MoveDirection;
+            // float targetSpeed = _player.SprintRequested ? _player.RunSpeed : _player.WalkSpeed;
+            // Vector3 desiredVel = desired * targetSpeed;
 
-            _player.AddGroundForce(velocityDiff * (_player.AccelAir * k_AirControlFactor));
+            // Vector3 horizontalVel = new Vector3(currentVel.x, 0f, currentVel.z);
+            // Vector3 velocityDiff = desiredVel - horizontalVel;
 
-            // Allow existing horizontal momentum to persist; optionally clamp to a large air max
-            _player.ClampHorizontalSpeed(Mathf.Max(targetSpeed, horizontalVel.magnitude));
+            // // Apply air acceleration directly
+            // Vector3 newHorizontalVel = horizontalVel + velocityDiff * (_player.AccelAir * k_AirControlFactor) * Time.deltaTime;
 
-            // Rotate in air with reduced responsiveness
-            _player.RotateTowardsDirection(desired, Time.deltaTime, isAir: true);
+            // // Clamp horizontal speed
+            // newHorizontalVel = Vector3.ClampMagnitude(newHorizontalVel, Mathf.Max(targetSpeed, newHorizontalVel.magnitude));
 
-            // Update delay timer
-            _fastFallDelayTimer -= Time.deltaTime;
+            // // Maintain constant fast fall speed
+            // float newY = -k_FastFallSpeed;
 
-            // Apply extra gravity for fast fall after delay
-            if (_fastFallDelayTimer <= 0f)
-            {
-                Vector3 extraGravity = Physics.gravity * (k_FastFallMultiplier - 1f);
-                if (extraGravity != Vector3.zero) _player.AddGroundForce(extraGravity);
-            }
+            // // Set new velocity
+            // Vector3 newVel = new Vector3(newHorizontalVel.x, newY, newHorizontalVel.z);
+            // _player.SetVelocityImmediate(newVel);
+
+            // // Rotate in air with reduced responsiveness
+            // _player.RotateTowardsDirection(desired, Time.deltaTime, isAir: true);
         }
     }
 }
