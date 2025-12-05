@@ -1,3 +1,4 @@
+using JackRussell.Audio;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -70,7 +71,7 @@ namespace JackRussell.States.Locomotion
                 Vector3 v = _player.KinematicController.Velocity;
                 v.y = _player.JumpVelocity;
                 _player.SetVelocityImmediate(v);
-                _player.OnJumpEnter(); // play jump sound
+                _player.PlaySound(SoundType.Jump);
             }
         }
 

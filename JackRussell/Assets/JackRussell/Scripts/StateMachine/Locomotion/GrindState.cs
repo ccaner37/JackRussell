@@ -128,6 +128,7 @@ namespace JackRussell.States.Locomotion
             _railDetector.DetachFromRail();
             _currentRail = null;
             _player.OnGrindExit();
+            _player.KinematicController.ClearRotationOverride();
 
             if (_player.IsSprinting) _sprintController.StopSprint();
         }
@@ -206,7 +207,7 @@ namespace JackRussell.States.Locomotion
             {
                 Vector3 grindDirection = _railDetector.GrindForward ? tangent : -tangent;
                 Quaternion targetRotation = Quaternion.LookRotation(grindDirection, up);
-                _player.transform.rotation = Quaternion.RotateTowards(_player.transform.rotation, targetRotation, 720f * deltaTime);
+                _player.KinematicController.RequestRotationOverride(targetRotation, 0.1f, true);
             }
 
             _lastPosition = newPos;
