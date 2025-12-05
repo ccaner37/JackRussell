@@ -17,6 +17,7 @@ namespace JackRussell
 
         [Header("Collision")]
         [SerializeField] private float _collisionRadius = 0.4f;
+        [SerializeField] private LayerMask _wallMask;
 
         [Header("Movement")]
         private float _gravity = -9.8f;
@@ -29,6 +30,8 @@ namespace JackRussell
         private Vector3 _groundPoint;
         private float _groundDistance;
         private Transform _transform;
+        private CapsuleCollider _capsule;
+        private Vector3 _capsulePoint1, _capsulePoint2;
 
         // Movement is handled through velocity modifications from states
 
@@ -49,6 +52,15 @@ namespace JackRussell
         {
             _transform = transform;
             _velocity = Vector3.zero;
+
+            _capsule = GetComponent<CapsuleCollider>();
+            if (_capsule != null)
+            {
+                Vector3 center = _capsule.center;
+                float halfHeight = _capsule.height / 2 - _capsule.radius;
+                _capsulePoint1 = center + Vector3.up * halfHeight;
+                _capsulePoint2 = center - Vector3.up * halfHeight;
+            }
         }
 
         private void Update()
@@ -86,7 +98,7 @@ namespace JackRussell
         {
             if (!_player.IsJumping)
             {
-                if (Physics.SphereCast(transform.position + Vector3.up, 0.35f, Vector3.down, out var sphereHit, 1f, _groundMask))
+                if (Physics.SphereCast(transform.position + Vector3.up * 0.5f, 0.3f, Vector3.down, out var sphereHit, 0.5f, _groundMask))
                 {
                     _isGrounded = true;
                 }
@@ -123,19 +135,64 @@ namespace JackRussell
             {
                 _velocity.y += _gravity * deltaTime;
                 Vector3 movement = _velocity * deltaTime;
+                movement = HandleCollision(movement);
                 _transform.position += movement;
                 return;
             }
 
             // Ground movement - follow surface contours with collision detection
             // Project velocity onto ground plane to maintain speed on slopes
-            
+
             Vector3 slopeMove = Vector3.ProjectOnPlane(_velocity, _groundNormal);
             if (_velocity.sqrMagnitude < 0.001f) return;
             Vector3 intendedMovement = slopeMove * deltaTime;
 
-            // Use swept collision to prevent tunneling
+            // Perform collision detection
+            intendedMovement = HandleCollision(intendedMovement);
+
+            // Apply movement
             transform.position += intendedMovement;
+        }
+
+        private Vector3 HandleCollision(Vector3 movement)
+        {
+            if (_capsule == null || movement.sqrMagnitude < 0.0001f) return movement;
+
+            Vector3 currentPos = _transform.position;
+            Vector3 point1 = currentPos + _capsulePoint1;
+            Vector3 point2 = currentPos + _capsulePoint2;
+            float radius = _capsule.radius;
+
+            Vector3 direction = movement.normalized;
+            float distance = movement.magnitude;
+
+            // Multiple iterations for sliding
+            for (int i = 0; i < 3; i++)
+            {
+                if (Physics.CapsuleCast(point1, point2, radius, direction, out RaycastHit hit, distance, _wallMask, QueryTriggerInteraction.Ignore))
+                {
+                    // If too close to the hit, stop movement to prevent tunneling
+                    if (hit.distance < 0.05f)
+                    {
+                        movement = Vector3.zero;
+                        break;
+                    }
+                    // Move up to the hit point
+                    float allowedDistance = Mathf.Max(0, hit.distance - 0.05f);
+                    movement = direction * allowedDistance;
+                    // Slide along the surface
+                    movement = Vector3.ProjectOnPlane(movement, hit.normal);
+                    // Update for next iteration
+                    direction = movement.normalized;
+                    distance = movement.magnitude;
+                    if (distance < 0.001f) break;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return movement;
         }
 
         private void SnapToGround()
@@ -258,10 +315,10 @@ namespace JackRussell
         private void OnDrawGizmos()
         {
 // Senin koddaki değerlerin aynısı:
-    float castRadius = 0.5f;
-    float castDistance = 0.5f;
+    float castRadius = 0.35f;
+    float castDistance = 0.6f;
     Vector3 castDirection = Vector3.down;
-    Vector3 castOrigin = transform.position + (Vector3.up * 0.1f);
+    Vector3 castOrigin = transform.position + (Vector3.up * 0.6f);
 
     // Yerdeysek Yeşil, Havadaysak Kırmızı olsun
     Gizmos.color = _isGrounded ? Color.green : Color.red;
