@@ -86,20 +86,13 @@ namespace JackRussell
 
         private void UpdateGroundDetection()
         {
-            if (!_player.IsJumping)
+            if (_player.IsJumping)
             {
-                if (Physics.SphereCast(transform.position + Vector3.up, 0.25f, Vector3.down, out var sphereHit, 1f, _groundMask, QueryTriggerInteraction.Ignore))
-                {
-                    _isGrounded = true;
-                }
-                else
-                {
-                    _isGrounded = false;
-                }
+                _isGrounded = false;
             }
             else
             {
-                _isGrounded = false;
+                _isGrounded = CheckGroundMultiRay();
             }
 
             if (Physics.Raycast(_transform.position + Vector3.up * 0.7f, -Vector3.up, out var hit, 5f, _groundMask, QueryTriggerInteraction.Ignore))
@@ -114,6 +107,34 @@ namespace JackRussell
                 _groundDistance = float.MaxValue;
             }
         }
+
+    private bool CheckGroundMultiRay()
+    {
+        Vector3 origin = transform.position + Vector3.up * 0.5f;
+        float maxDistance = 0.6f;
+        
+        // Center ray
+        if (Physics.Raycast(origin, Vector3.down, maxDistance, _groundMask))
+            return true;
+        
+        // 4 corner rays around the character
+        float offset = 0.3f; // Adjust based on your character size
+        Vector3[] offsets = new Vector3[]
+        {
+            new Vector3(offset, 0, 0),
+            new Vector3(-offset, 0, 0),
+            new Vector3(0, 0, offset),
+            new Vector3(0, 0, -offset)
+        };
+        
+        foreach (var off in offsets)
+        {
+            if (Physics.Raycast(origin + off, Vector3.down, maxDistance, _groundMask))
+                return true;
+        }
+        
+        return false;
+    }
 
         private void ApplyMovement(float deltaTime)
         {
