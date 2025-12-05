@@ -88,7 +88,7 @@ namespace JackRussell
         {
             if (!_player.IsJumping)
             {
-                if (Physics.SphereCast(transform.position + Vector3.up * 0.5f, 0.3f, Vector3.down, out var sphereHit, 0.5f, _groundMask))
+                if (Physics.SphereCast(transform.position + Vector3.up, 0.25f, Vector3.down, out var sphereHit, 1f, _groundMask, QueryTriggerInteraction.Ignore))
                 {
                     _isGrounded = true;
                 }
@@ -102,7 +102,7 @@ namespace JackRussell
                 _isGrounded = false;
             }
 
-            if (Physics.Raycast(_transform.position + Vector3.up * 0.5f, -Vector3.up, out var hit, 1f, _groundMask, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(_transform.position + Vector3.up * 0.7f, -Vector3.up, out var hit, 5f, _groundMask, QueryTriggerInteraction.Ignore))
             {
                 _groundNormal = hit.normal;
                 _groundPoint = hit.point;
@@ -170,8 +170,8 @@ namespace JackRussell
                 if (distance < 0.001f) break;
 
                 // Update capsule points with current position
-                Vector3 point1 = currentPos + _capsulePoint1;
-                Vector3 point2 = currentPos + _capsulePoint2;
+                Vector3 point1 = currentPos + _transform.rotation * _capsulePoint1;
+                Vector3 point2 = currentPos + _transform.rotation * _capsulePoint2;
 
                 if (Physics.CapsuleCast(point1, point2, radius, direction, out RaycastHit hit, distance + _skinWidth, _wallMask, QueryTriggerInteraction.Ignore))
                 {
@@ -321,10 +321,10 @@ namespace JackRussell
         // Debug visualization
         private void OnDrawGizmos()
         {
-            float castRadius = 0.35f;
-            float castDistance = 0.6f;
+            float castRadius = 0.25f;
+            float castDistance = 1f;
             Vector3 castDirection = Vector3.down;
-            Vector3 castOrigin = transform.position + (Vector3.up * 0.6f);
+            Vector3 castOrigin = transform.position + (Vector3.up * 1);
 
             Gizmos.color = _isGrounded ? Color.green : Color.red;
 
