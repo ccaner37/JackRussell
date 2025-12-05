@@ -21,7 +21,8 @@ namespace JackRussell
 
         [Header("Movement")]
         private float _gravity = -9.8f;
-        [SerializeField] private float _rotationSpeed = 8f; // Increased for more responsive rotation
+        [SerializeField] private float _rotationSpeed = 8f;
+        [SerializeField] private float _skinWidth = 0.02f; // Minimum distance to maintain from walls
 
         // Runtime state
         private Vector3 _velocity;
@@ -33,9 +34,7 @@ namespace JackRussell
         private CapsuleCollider _capsule;
         private Vector3 _capsulePoint1, _capsulePoint2;
 
-        // Movement is handled through velocity modifications from states
-
-        // Rotation override (for compatibility with Player.cs)
+        // Rotation override
         private bool _hasRotationOverride;
         private Quaternion _rotationOverrideTarget = Quaternion.identity;
         private float _rotationOverrideTimer;
@@ -67,18 +66,9 @@ namespace JackRussell
         {
             float deltaTime = Time.deltaTime;
 
-            // Update timers
             UpdateTimers(deltaTime);
-
             UpdateGroundDetection();
-
             UpdateRotation(deltaTime);
-
-            if (_isGrounded)
-            {
-                //SnapToGround();
-            }
-
             ApplyMovement(deltaTime);
         }
 
@@ -112,22 +102,18 @@ namespace JackRussell
                 _isGrounded = false;
             }
 
-
             if (Physics.Raycast(_transform.position + Vector3.up * 0.5f, -Vector3.up, out var hit, 1f, _groundMask, QueryTriggerInteraction.Ignore))
             {
                 _groundNormal = hit.normal;
                 _groundPoint = hit.point;
-                _groundDistance = hit.distance - 0.05f; // Adjust for offset
-                //_isGrounded = true;
+                _groundDistance = hit.distance - 0.05f;
             }
             else
             {
                 _groundNormal = Vector3.up;
                 _groundDistance = float.MaxValue;
-                //_isGrounded = false;
             }
         }
-
 
         private void ApplyMovement(float deltaTime)
         {
@@ -135,76 +121,110 @@ namespace JackRussell
             {
                 _velocity.y += _gravity * deltaTime;
                 Vector3 movement = _velocity * deltaTime;
-                movement = HandleCollision(movement);
-                _transform.position += movement;
+                
+                // Separate horizontal and vertical movement for falling
+                Vector3 horizontalMovement = new Vector3(movement.x, 0, movement.z);
+                Vector3 verticalMovement = new Vector3(0, movement.y, 0);
+                
+                // Handle horizontal collision
+                horizontalMovement = HandleCollision(horizontalMovement, false);
+                
+                // Handle vertical collision (for landing)
+                verticalMovement = HandleCollision(verticalMovement, true);
+                
+                // If vertical movement was stopped by ground, zero out vertical velocity
+                if (verticalMovement.y > movement.y * 0.1f && movement.y < 0)
+                {
+                    _velocity.y = 0;
+                }
+                
+                _transform.position += horizontalMovement + verticalMovement;
                 return;
             }
 
-            // Ground movement - follow surface contours with collision detection
-            // Project velocity onto ground plane to maintain speed on slopes
-
+            // Ground movement
             Vector3 slopeMove = Vector3.ProjectOnPlane(_velocity, _groundNormal);
             if (_velocity.sqrMagnitude < 0.001f) return;
             Vector3 intendedMovement = slopeMove * deltaTime;
 
-            // Perform collision detection
-            intendedMovement = HandleCollision(intendedMovement);
+            // Handle collision
+            intendedMovement = HandleCollision(intendedMovement, false);
 
             // Apply movement
             transform.position += intendedMovement;
         }
 
-        private Vector3 HandleCollision(Vector3 movement)
+        private Vector3 HandleCollision(Vector3 movement, bool isVertical)
         {
             if (_capsule == null || movement.sqrMagnitude < 0.0001f) return movement;
 
             Vector3 currentPos = _transform.position;
-            Vector3 point1 = currentPos + _capsulePoint1;
-            Vector3 point2 = currentPos + _capsulePoint2;
             float radius = _capsule.radius;
-
             Vector3 direction = movement.normalized;
             float distance = movement.magnitude;
+            Vector3 remainingMovement = movement;
 
             // Multiple iterations for sliding
             for (int i = 0; i < 3; i++)
             {
-                if (Physics.CapsuleCast(point1, point2, radius, direction, out RaycastHit hit, distance, _wallMask, QueryTriggerInteraction.Ignore))
+                if (distance < 0.001f) break;
+
+                // Update capsule points with current position
+                Vector3 point1 = currentPos + _capsulePoint1;
+                Vector3 point2 = currentPos + _capsulePoint2;
+
+                if (Physics.CapsuleCast(point1, point2, radius, direction, out RaycastHit hit, distance + _skinWidth, _wallMask, QueryTriggerInteraction.Ignore))
                 {
-                    // If too close to the hit, stop movement to prevent tunneling
-                    if (hit.distance < 0.05f)
+                    // Calculate safe movement distance
+                    float safeDistance = Mathf.Max(0, hit.distance - _skinWidth);
+                    
+                    if (safeDistance < 0.001f)
                     {
-                        movement = Vector3.zero;
+                        // Too close to surface, stop movement
+                        remainingMovement = Vector3.zero;
                         break;
                     }
-                    // Move up to the hit point
-                    float allowedDistance = Mathf.Max(0, hit.distance - 0.05f);
-                    movement = direction * allowedDistance;
-                    // Slide along the surface
-                    movement = Vector3.ProjectOnPlane(movement, hit.normal);
+
+                    // Move to safe distance
+                    Vector3 safeMovement = direction * safeDistance;
+                    currentPos += safeMovement;
+                    remainingMovement -= safeMovement;
+
+                    // For vertical movement (falling), don't slide
+                    if (isVertical)
+                    {
+                        break;
+                    }
+
+                    // Calculate slide direction
+                    Vector3 slideDirection = Vector3.ProjectOnPlane(remainingMovement, hit.normal).normalized;
+                    float slideDistance = remainingMovement.magnitude;
+
+                    // Prevent sliding into the surface
+                    if (Vector3.Dot(slideDirection, hit.normal) < -0.01f)
+                    {
+                        break;
+                    }
+
                     // Update for next iteration
-                    direction = movement.normalized;
-                    distance = movement.magnitude;
-                    if (distance < 0.001f) break;
+                    direction = slideDirection;
+                    distance = slideDistance;
+                    remainingMovement = slideDirection * slideDistance;
                 }
                 else
                 {
+                    // No collision, move freely
+                    currentPos += remainingMovement;
+                    remainingMovement = Vector3.zero;
                     break;
                 }
             }
-            return movement;
-        }
 
-        private void SnapToGround()
-        {
-            // Set position directly to the ground surface
-            _transform.position = _groundPoint;
+            return currentPos - _transform.position;
         }
 
         private void UpdateRotation(float deltaTime)
         {
-            // For surface-following, ground alignment takes priority
-            // Only apply rotation overrides for special cases (jumping, actions, etc.)
             if (_hasRotationOverride && _rotationOverrideExclusive)
             {
                 _transform.rotation = Quaternion.Lerp(
@@ -215,12 +235,8 @@ namespace JackRussell
                 return;
             }
 
-            //if (!_isGrounded) return;
-
-            // Primary: Align with ground normal for surface following
             Quaternion targetRotation = CalculateGroundAlignmentRotation();
 
-            // Apply rotation with higher speed for more responsive feel
             _transform.rotation = Quaternion.Lerp(
                 _transform.rotation,
                 targetRotation,
@@ -228,41 +244,32 @@ namespace JackRussell
             );
         }
 
-            private Quaternion CalculateGroundAlignmentRotation()
+        private Quaternion CalculateGroundAlignmentRotation()
+        {
+            Vector3 velocityDirection = _velocity;
+            velocityDirection.y = 0f; 
+
+            Vector3 targetForward = velocityDirection;
+            if (targetForward.sqrMagnitude < 0.01f)
             {
-                // 1. Get the Raw Horizontal Direction (Pure Yaw)
-                Vector3 velocityDirection = _velocity;
-                velocityDirection.y = 0f; 
-
-                // Handle zero velocity / Fallback
-                Vector3 targetForward = velocityDirection;
-                if (targetForward.sqrMagnitude < 0.01f)
-                {
-                    targetForward = _transform.forward;
-                    targetForward.y = 0f;
-                }
-                
-                // Normalize the horizontal direction
-                if (targetForward.sqrMagnitude > 0.01f)
-                {
-                    targetForward.Normalize();
-                }
-                else
-                {
-                    targetForward = Vector3.forward; 
-                }
-
-                // 2. THE FIX: Project the Horizontal Forward onto the Ground Plane
-                // This takes your flat forward vector and tilts it to match the slope
-                Vector3 slopeForward = Vector3.ProjectOnPlane(targetForward, _groundNormal).normalized;
-
-                // 3. Create the rotation
-                // Now both the Forward vector (slopeForward) and Up vector (_groundNormal) are aligned
-                return Quaternion.LookRotation(slopeForward, _groundNormal);
+                targetForward = _transform.forward;
+                targetForward.y = 0f;
+            }
+            
+            if (targetForward.sqrMagnitude > 0.01f)
+            {
+                targetForward.Normalize();
+            }
+            else
+            {
+                targetForward = Vector3.forward; 
             }
 
+            Vector3 slopeForward = Vector3.ProjectOnPlane(targetForward, _groundNormal).normalized;
+            return Quaternion.LookRotation(slopeForward, _groundNormal);
+        }
 
-        // Rotation override API (for compatibility with Player.cs)
+        // Rotation override API
         public void RequestRotationOverride(Quaternion target, float duration, bool exclusive = true)
         {
             _hasRotationOverride = true;
@@ -314,23 +321,29 @@ namespace JackRussell
         // Debug visualization
         private void OnDrawGizmos()
         {
-// Senin koddaki değerlerin aynısı:
-    float castRadius = 0.35f;
-    float castDistance = 0.6f;
-    Vector3 castDirection = Vector3.down;
-    Vector3 castOrigin = transform.position + (Vector3.up * 0.6f);
+            float castRadius = 0.35f;
+            float castDistance = 0.6f;
+            Vector3 castDirection = Vector3.down;
+            Vector3 castOrigin = transform.position + (Vector3.up * 0.6f);
 
-    // Yerdeysek Yeşil, Havadaysak Kırmızı olsun
-    Gizmos.color = _isGrounded ? Color.green : Color.red;
+            Gizmos.color = _isGrounded ? Color.green : Color.red;
 
-    // 1. BAŞLANGIÇ KÜRESİ (Origin)
-    // SphereCast'in başladığı yer
-    Gizmos.DrawWireSphere(castOrigin, castRadius);
+            // Start sphere
+            Gizmos.DrawWireSphere(castOrigin, castRadius);
 
-    // 2. BİTİŞ KÜRESİ (Max Distance)
-    // SphereCast'in ulaşacağı en uzak nokta
-    Vector3 endPosition = castOrigin + (castDirection * castDistance);
-    Gizmos.DrawWireSphere(endPosition, castRadius);
+            // End sphere
+            Vector3 endPosition = castOrigin + (castDirection * castDistance);
+            Gizmos.DrawWireSphere(endPosition, castRadius);
+            
+            // Draw skin width for debugging
+            if (_capsule != null)
+            {
+                Gizmos.color = Color.yellow;
+                Vector3 point1 = transform.position + _capsulePoint1;
+                Vector3 point2 = transform.position + _capsulePoint2;
+                Gizmos.DrawWireSphere(point1, _capsule.radius + _skinWidth);
+                Gizmos.DrawWireSphere(point2, _capsule.radius + _skinWidth);
+            }
         }
     }
 }
