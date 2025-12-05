@@ -46,6 +46,8 @@ namespace JackRussell.States.Action
                 return;
             }
 
+            _player.SetVelocityImmediate(Vector3.zero);
+
             _player.ResetLocomotionState();
             
             // Initialize teleportation
@@ -101,7 +103,8 @@ namespace JackRussell.States.Action
             //Vector3 dashVelocity = direction * _teleportSpeed;
             
             //_player.RequestMovementOverride(dashVelocity, _teleportDuration * 0.5f, true);
-            _player.RotateTowardsDirection(direction, Time.deltaTime, isAir: true, instantaneous: true);
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            _player.SetRotationInstant(targetRotation);
 
             yield return new WaitForSeconds(0.3f); // _teleportDuration * 0.5f
             

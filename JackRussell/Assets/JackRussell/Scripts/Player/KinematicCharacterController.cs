@@ -334,7 +334,7 @@ namespace JackRussell
             _transform.position = position;
         }
 
-        public void MoveRotation(Quaternion rotation)
+        public void SetRotationInstant(Quaternion rotation)
         {
             _transform.rotation = rotation;
         }

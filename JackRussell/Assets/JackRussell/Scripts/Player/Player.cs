@@ -358,6 +358,11 @@ public PostProcessingController PostProcessingController => _postProcessingContr
             }
         }
 
+        public void SetRotationInstant(Quaternion rotation)
+        {
+            _kinematicController.SetRotationInstant(rotation);
+        }
+
         public Quaternion GetCurrentRotation()
         {
             return transform.rotation;
