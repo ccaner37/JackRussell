@@ -114,7 +114,7 @@ namespace JackRussell
         float maxDistance = 0.6f;
         
         // Center ray
-        if (Physics.Raycast(origin, Vector3.down, maxDistance, _groundMask))
+        if (Physics.Raycast(origin, Vector3.down, maxDistance, _groundMask, QueryTriggerInteraction.Ignore))
             return true;
         
         // 4 corner rays around the character
@@ -129,7 +129,7 @@ namespace JackRussell
         
         foreach (var off in offsets)
         {
-            if (Physics.Raycast(origin + off, Vector3.down, maxDistance, _groundMask))
+            if (Physics.Raycast(origin + off, Vector3.down, maxDistance, _groundMask, QueryTriggerInteraction.Ignore))
                 return true;
         }
         
