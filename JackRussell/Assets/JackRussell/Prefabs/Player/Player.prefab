@@ -29571,7 +29571,7 @@ MonoBehaviour:
       m_ColorSpace: -1
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
-    m_ColorMin: {r: 5.8628858e+23, g: 1.7199627e-38, b: 4.2e-44, a: 0}
+    m_ColorMin: {r: -512.2858, g: 6.8e-43, b: -2.6193177e-29, a: 6.81e-43}
     m_ColorMax: {r: 1, g: 1, b: 1, a: 1}
   isBurst: 1
   minNumberOfParticles: 2
@@ -41540,8 +41540,8 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.15
-  m_Height: 1.7
+  m_Radius: 0.25
+  m_Height: 1.5
   m_Direction: 1
   m_Center: {x: 0, y: 0.85, z: 0}
 --- !u!114 &679420080937140670
@@ -41660,7 +41660,11 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   _collisionRadius: 0.4
+  _wallMask:
+    serializedVersion: 2
+    m_Bits: 1
   _rotationSpeed: 12
+  _skinWidth: 0.02
 --- !u!54 &8140817326552113851
 Rigidbody:
   m_ObjectHideFlags: 0
